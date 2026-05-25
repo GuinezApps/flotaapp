@@ -388,3 +388,122 @@ class PerfilUsuario(models.Model):
             return self.nombre
 
         return self.usuario.username
+        
+# ============================================================
+# Auditoría / Bitácora
+# ============================================================
+
+class BitacoraAccion(models.Model):
+    """
+    Registra acciones relevantes realizadas dentro del sistema.
+
+    Su objetivo es dejar trazabilidad de:
+    - quién realizó una acción
+    - cuándo la realizó
+    - sobre qué módulo u objeto
+    - qué cambio se ejecutó
+    """
+
+    ACCIONES = [
+        ('CREAR', 'Crear'),
+        ('EDITAR', 'Editar'),
+        ('ELIMINAR', 'Eliminar'),
+        ('CAMBIO_ESTADO', 'Cambio de estado'),
+        ('BAJA', 'Dar de baja'),
+        ('REACTIVAR', 'Reactivar'),
+        ('IMPORTAR', 'Importar datos'),
+        ('RESET_PASSWORD', 'Resetear contraseña'),
+        ('LOGIN', 'Inicio de sesión'),
+        ('LOGOUT', 'Cierre de sesión'),
+        ('OTRO', 'Otro'),
+    ]
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
+    usuario_texto = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text='Nombre de usuario al momento de la acción.'
+    )
+
+    accion = models.CharField(
+        max_length=50,
+        choices=ACCIONES
+    )
+
+    modulo = models.CharField(
+        max_length=100,
+        help_text='Módulo donde ocurrió la acción. Ej: Vehículos, Usuarios, Importación.'
+    )
+
+    modelo_afectado = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Modelo afectado. Ej: Vehiculo, User, CentroCosto.'
+    )
+
+    objeto_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='ID del objeto afectado.'
+    )
+
+    objeto_repr = models.CharField(
+        max_length=250,
+        blank=True,
+        null=True,
+        help_text='Representación legible del objeto. Ej: QAQA01 - Toyota.'
+    )
+
+    descripcion = models.TextField(
+        help_text='Descripción resumida de la acción realizada.'
+    )
+
+    valor_anterior = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Valor anterior o resumen previo del dato modificado.'
+    )
+
+    valor_nuevo = models.TextField(
+        blank=True,
+        null=True,
+        help_text='Valor nuevo o resumen posterior del dato modificado.'
+    )
+
+    fecha_hora = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    ip_origen = models.GenericIPAddressField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+
+        usuario = self.usuario_texto or 'Sistema'
+
+        return (
+            f'{self.fecha_hora:%Y-%m-%d %H:%M} | '
+            f'{usuario} | '
+            f'{self.get_accion_display()} | '
+            f'{self.modulo}'
+        )
+
+    class Meta:
+
+        ordering = [
+            '-fecha_hora'
+        ]
+
+        verbose_name = 'Bitácora de acción'
+        verbose_name_plural = 'Bitácora de acciones'

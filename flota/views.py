@@ -14,7 +14,7 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
 from .decorators import (editor_required,master_required)
 from .forms import VehiculoForm, CrearUsuarioForm
-
+from .auditoria import registrar_bitacora
 from django.shortcuts import get_object_or_404
 
 
@@ -1083,13 +1083,35 @@ def gestionar_estados(request):
                 id=vehiculo_id
             )
 
+            estado_anterior = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo}"
+            )
+
             aplicar_estado_operacional(
                 vehiculo,
                 nuevo_estado,
                 nuevo_subestado
             )
 
+            estado_nuevo = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo}"
+            )
+
             vehiculo.save()
+
+            registrar_bitacora(
+                request=request,
+                accion='CAMBIO_ESTADO',
+                modulo='Gestión de Estados',
+                modelo_afectado='Vehiculo',
+                objeto_id=vehiculo.id,
+                objeto_repr=vehiculo.patente,
+                descripcion=f'Cambio individual de estado del vehículo {vehiculo.patente}.',
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
 
             messages.success(
                 request,
@@ -1131,13 +1153,38 @@ def gestionar_estados(request):
 
                 for vehiculo in vehiculos_a_cambiar:
 
+                    estado_anterior = (
+                        f"Estado operacional: {vehiculo.estado_operacional} | "
+                        f"Subestado: {vehiculo.subestado_no_operativo}"
+                    )
+
                     aplicar_estado_operacional(
                         vehiculo,
                         nuevo_estado,
                         nuevo_subestado
                     )
 
+                    estado_nuevo = (
+                        f"Estado operacional: {vehiculo.estado_operacional} | "
+                        f"Subestado: {vehiculo.subestado_no_operativo}"
+                    )
+
                     vehiculo.save()
+
+                    registrar_bitacora(
+                        request=request,
+                        accion='CAMBIO_ESTADO',
+                        modulo='Gestión de Estados',
+                        modelo_afectado='Vehiculo',
+                        objeto_id=vehiculo.id,
+                        objeto_repr=vehiculo.patente,
+                        descripcion=(
+                            f'Cambio masivo de estado aplicado al vehículo '
+                            f'{vehiculo.patente}.'
+                        ),
+                        valor_anterior=estado_anterior,
+                        valor_nuevo=estado_nuevo
+                    )
 
                 if cantidad > 0:
 
@@ -1316,16 +1363,40 @@ def editar_vehiculo(request, id):
 
         if form.is_valid():
 
-            form.save()
-            
+            estado_anterior = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo} | "
+                f"Kilometraje: {vehiculo.kilometraje_actual}"
+            )
+
+            vehiculo_actualizado = form.save()
+
+            estado_nuevo = (
+                f"Estado operacional: {vehiculo_actualizado.estado_operacional} | "
+                f"Subestado: {vehiculo_actualizado.subestado_no_operativo} | "
+                f"Kilometraje: {vehiculo_actualizado.kilometraje_actual}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='EDITAR',
+                modulo='Vehículos',
+                modelo_afectado='Vehiculo',
+                objeto_id=vehiculo_actualizado.id,
+                objeto_repr=vehiculo_actualizado.patente,
+                descripcion=f'Edición de vehículo {vehiculo_actualizado.patente}.',
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
+
             messages.success(
                 request,
-                f'Vehículo {vehiculo.patente} actualizado correctamente.'
+                f'Vehículo {vehiculo_actualizado.patente} actualizado correctamente.'
             )
 
             return redirect(
                 'detalle_vehiculo',
-                id=vehiculo.id
+                id=vehiculo_actualizado.id
             )
 
     else:
@@ -1361,12 +1432,43 @@ def dar_baja_vehiculo(request, id):
 
     if request.method == 'POST':
 
+        estado_anterior = (
+            f"Estado administrativo: {vehiculo.estado_administrativo} | "
+            f"Estado operacional: {vehiculo.estado_operacional} | "
+            f"Subestado: {vehiculo.subestado_no_operativo} | "
+            f"Fecha baja: {vehiculo.fecha_baja}"
+        )
+
         vehiculo.estado_administrativo = 'Dado de Baja'
         vehiculo.estado_operacional = 'No operativo'
         vehiculo.subestado_no_operativo = 'Detenido'
         vehiculo.fecha_baja = timezone.now().date()
 
+        estado_nuevo = (
+            f"Estado administrativo: {vehiculo.estado_administrativo} | "
+            f"Estado operacional: {vehiculo.estado_operacional} | "
+            f"Subestado: {vehiculo.subestado_no_operativo} | "
+            f"Fecha baja: {vehiculo.fecha_baja}"
+        )
+
         vehiculo.save()
+
+        registrar_bitacora(
+            request=request,
+            accion='BAJA',
+            modulo='Vehículos',
+            modelo_afectado='Vehiculo',
+            objeto_id=vehiculo.id,
+            objeto_repr=vehiculo.patente,
+            descripcion=f'Vehículo {vehiculo.patente} dado de baja.',
+            valor_anterior=estado_anterior,
+            valor_nuevo=estado_nuevo
+        )
+
+        messages.success(
+            request,
+            f'Vehículo {vehiculo.patente} dado de baja correctamente.'
+        )
 
         return redirect(
             'detalle_vehiculo',
@@ -1380,6 +1482,8 @@ def dar_baja_vehiculo(request, id):
             'vehiculo': vehiculo
         }
     )
+
+
 @login_required
 @editor_required
 def reactivar_vehiculo(request, id):
@@ -1390,23 +1494,42 @@ def reactivar_vehiculo(request, id):
 
     if request.method == 'POST':
 
-        vehiculo.estado_administrativo = (
-            'Vigente'
+        estado_anterior = (
+            f"Estado administrativo: {vehiculo.estado_administrativo} | "
+            f"Estado operacional: {vehiculo.estado_operacional} | "
+            f"Subestado: {vehiculo.subestado_no_operativo} | "
+            f"Fecha baja: {vehiculo.fecha_baja}"
         )
 
-        vehiculo.estado_operacional = (
-            'No informado'
-        )
-
+        vehiculo.estado_administrativo = 'Vigente'
+        vehiculo.estado_operacional = 'No informado'
         vehiculo.subestado_no_operativo = None
-
         vehiculo.fecha_baja = None
+
+        estado_nuevo = (
+            f"Estado administrativo: {vehiculo.estado_administrativo} | "
+            f"Estado operacional: {vehiculo.estado_operacional} | "
+            f"Subestado: {vehiculo.subestado_no_operativo} | "
+            f"Fecha baja: {vehiculo.fecha_baja}"
+        )
 
         vehiculo.save()
 
+        registrar_bitacora(
+            request=request,
+            accion='REACTIVAR',
+            modulo='Vehículos',
+            modelo_afectado='Vehiculo',
+            objeto_id=vehiculo.id,
+            objeto_repr=vehiculo.patente,
+            descripcion=f'Vehículo {vehiculo.patente} reactivado.',
+            valor_anterior=estado_anterior,
+            valor_nuevo=estado_nuevo
+        )
+
         messages.success(
             request,
-            f"{vehiculo.patente} reactivado correctamente."
+            f'{vehiculo.patente} reactivado correctamente.'
         )
 
         return redirect(
@@ -1421,6 +1544,7 @@ def reactivar_vehiculo(request, id):
             'vehiculo': vehiculo
         }
     )
+
 
 @login_required
 @master_required
@@ -1510,6 +1634,8 @@ def crear_usuario(request):
         }
 
     )
+
+
 @login_required
 @master_required
 def configuracion(request):
