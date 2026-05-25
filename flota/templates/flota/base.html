@@ -339,7 +339,7 @@ class="logo-empresa"
 
 <li>
 <a
-href="/"
+href="{% url 'inicio' %}"
 class="{% if request.path == '/' %}activo{% endif %}"
 >
 🏠
@@ -348,7 +348,10 @@ class="{% if request.path == '/' %}activo{% endif %}"
 </li>
 
 <li>
-<a href="/">
+<a
+href="{% url 'dashboard' %}"
+class="{% if '/vehiculos/' in request.path %}activo{% endif %}"
+>
 🚚
 <span class="texto-menu">Vehículos</span>
 </a>

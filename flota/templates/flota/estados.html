@@ -37,7 +37,7 @@ Gestión de Estados
 
 .grid-filtros{
     display:grid;
-    grid-template-columns:2fr 1fr 1fr auto auto;
+    grid-template-columns:2fr 1fr 1fr 1fr auto auto;
     gap:12px;
     align-items:end;
 }
@@ -56,7 +56,9 @@ Gestión de Estados
 .campo-filtro input,
 .campo-filtro select,
 .estado-select,
-.estado-masivo-select{
+.subestado-select,
+.estado-masivo-select,
+.subestado-masivo-select{
     padding:10px;
     border:1px solid #cbd5e1;
     border-radius:8px;
@@ -91,9 +93,11 @@ Gestión de Estados
     display:flex;
     align-items:center;
     gap:10px;
+    flex-wrap:wrap;
 }
 
-.estado-masivo-select{
+.estado-masivo-select,
+.subestado-masivo-select{
     min-width:190px;
 }
 
@@ -143,8 +147,17 @@ Gestión de Estados
     text-align:center;
 }
 
-.estado-select{
+.estado-select,
+.subestado-select{
     min-width:180px;
+}
+
+.subestado-wrapper{
+    display:block;
+}
+
+.subestado-wrapper.oculto{
+    display:none;
 }
 
 .btn-guardar{
@@ -159,6 +172,16 @@ Gestión de Estados
 
 .btn-guardar:hover{
     background:#1d4ed8;
+}
+
+.estado-resumen{
+    color:#334155;
+    font-size:13px;
+    margin-top:6px;
+}
+
+.estado-resumen span{
+    color:#64748b;
 }
 
 .paginacion{
@@ -179,7 +202,7 @@ Gestión de Estados
     text-decoration:underline;
 }
 
-@media(max-width:1100px){
+@media(max-width:1200px){
 
     .grid-filtros{
         grid-template-columns:1fr 1fr;
@@ -251,13 +274,41 @@ Gestión de Estados
             <div class="campo-filtro">
                 <label>Estado</label>
 
-                <select name="estado">
+                <select
+                    name="estado"
+                    id="filtroEstado"
+                >
                     <option value="">Todos</option>
 
                     {% for valor,nombre in estados_operacionales %}
                         <option
                             value="{{ valor }}"
                             {% if estado_seleccionado == valor %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div
+                class="campo-filtro subestado-wrapper"
+                id="filtroSubestadoWrapper"
+            >
+                <label>Subestado</label>
+
+                <select
+                    name="subestado"
+                    id="filtroSubestado"
+                >
+                    <option value="">Todos</option>
+
+                    {% for valor,nombre in subestados_no_operativo %}
+                        <option
+                            value="{{ valor }}"
+                            {% if subestado_seleccionado == valor %}
                             selected
                             {% endif %}
                         >
@@ -275,7 +326,7 @@ Gestión de Estados
             </button>
 
             <a
-                href="/estados/"
+                href="{% url 'gestionar_estados' %}"
                 class="link-limpiar"
             >
                 Limpiar filtros
@@ -299,6 +350,7 @@ Gestión de Estados
 
                 <div class="acciones-masivas-info">
                     Selecciona uno o más vehículos y aplica un estado operacional.
+                    Si el estado es <strong>No operativo</strong>, debes indicar el motivo.
                 </div>
             </div>
 
@@ -306,6 +358,7 @@ Gestión de Estados
 
                 <select
                     name="estado_masivo"
+                    id="estadoMasivo"
                     class="estado-masivo-select"
                 >
                     {% for valor,nombre in estados_operacionales %}
@@ -314,6 +367,27 @@ Gestión de Estados
                         </option>
                     {% endfor %}
                 </select>
+
+                <span
+                    id="subestadoMasivoWrapper"
+                    class="subestado-wrapper"
+                >
+                    <select
+                        name="subestado_masivo"
+                        id="subestadoMasivo"
+                        class="subestado-masivo-select"
+                    >
+                        <option value="">
+                            Seleccionar motivo
+                        </option>
+
+                        {% for valor,nombre in subestados_no_operativo %}
+                            <option value="{{ valor }}">
+                                {{ nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </span>
 
                 <button
                     type="submit"
@@ -362,6 +436,7 @@ Gestión de Estados
                     <th>Modelo</th>
                     <th>Centro costo</th>
                     <th>Estado operacional</th>
+                    <th>Motivo no operativo</th>
                     <th>Acción</th>
                 </tr>
             </thead>
@@ -389,6 +464,7 @@ Gestión de Estados
                             <select
                                 name="estado_operacional_{{ vehiculo.id }}"
                                 class="estado-select"
+                                data-vehiculo-id="{{ vehiculo.id }}"
                             >
                                 {% for valor,nombre in estados_operacionales %}
                                     <option
@@ -401,6 +477,50 @@ Gestión de Estados
                                     </option>
                                 {% endfor %}
                             </select>
+
+                            <div class="estado-resumen">
+                                Estado actual:
+                                <span>
+                                    {{ vehiculo.estado_operacional }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div
+                                class="subestado-wrapper"
+                                id="subestadoWrapper_{{ vehiculo.id }}"
+                            >
+                                <select
+                                    name="subestado_no_operativo_{{ vehiculo.id }}"
+                                    class="subestado-select"
+                                    id="subestado_{{ vehiculo.id }}"
+                                >
+                                    <option value="">
+                                        Seleccionar motivo
+                                    </option>
+
+                                    {% for valor,nombre in subestados_no_operativo %}
+                                        <option
+                                            value="{{ valor }}"
+                                            {% if vehiculo.subestado_no_operativo == valor %}
+                                            selected
+                                            {% endif %}
+                                        >
+                                            {{ nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {% if vehiculo.estado_operacional == 'No operativo' and vehiculo.subestado_no_operativo %}
+                                <div class="estado-resumen">
+                                    Motivo actual:
+                                    <span>
+                                        {{ vehiculo.get_subestado_no_operativo_display }}
+                                    </span>
+                                </div>
+                            {% endif %}
                         </td>
 
                         <td>
@@ -424,7 +544,7 @@ Gestión de Estados
                 {% empty %}
 
                     <tr>
-                        <td colspan="7">
+                        <td colspan="8">
                             No hay vehículos para mostrar.
                         </td>
                     </tr>
@@ -477,21 +597,189 @@ Gestión de Estados
 
 <script>
 
-const seleccionarTodos = document.getElementById("seleccionarTodos");
+function actualizarSubestado(
+    estadoSelect,
+    wrapper,
+    subestadoSelect
+){
+
+    if(
+        estadoSelect.value === "No operativo"
+    ){
+
+        wrapper.classList.remove(
+            "oculto"
+        );
+
+        subestadoSelect.disabled = false;
+
+    }else{
+
+        wrapper.classList.add(
+            "oculto"
+        );
+
+        subestadoSelect.value = "";
+        subestadoSelect.disabled = true;
+
+    }
+
+}
+
+
+const seleccionarTodos = document.getElementById(
+    "seleccionarTodos"
+);
 
 if(seleccionarTodos){
 
-    seleccionarTodos.addEventListener("change", function(){
+    seleccionarTodos.addEventListener(
+        "change",
+        function(){
 
-        document.querySelectorAll(".checkVehiculo").forEach(function(checkbox){
+            document.querySelectorAll(
+                ".checkVehiculo"
+            ).forEach(
+                function(checkbox){
 
-            checkbox.checked = seleccionarTodos.checked;
+                    checkbox.checked =
+                    seleccionarTodos.checked;
 
-        });
+                }
+            );
 
-    });
+        }
+    );
 
 }
+
+
+const filtroEstado = document.getElementById(
+    "filtroEstado"
+);
+
+const filtroSubestadoWrapper = document.getElementById(
+    "filtroSubestadoWrapper"
+);
+
+const filtroSubestado = document.getElementById(
+    "filtroSubestado"
+);
+
+if(
+    filtroEstado
+    && filtroSubestadoWrapper
+    && filtroSubestado
+){
+
+    actualizarSubestado(
+        filtroEstado,
+        filtroSubestadoWrapper,
+        filtroSubestado
+    );
+
+    filtroEstado.addEventListener(
+        "change",
+        function(){
+
+            actualizarSubestado(
+                filtroEstado,
+                filtroSubestadoWrapper,
+                filtroSubestado
+            );
+
+        }
+    );
+
+}
+
+
+const estadoMasivo = document.getElementById(
+    "estadoMasivo"
+);
+
+const subestadoMasivoWrapper = document.getElementById(
+    "subestadoMasivoWrapper"
+);
+
+const subestadoMasivo = document.getElementById(
+    "subestadoMasivo"
+);
+
+if(
+    estadoMasivo
+    && subestadoMasivoWrapper
+    && subestadoMasivo
+){
+
+    actualizarSubestado(
+        estadoMasivo,
+        subestadoMasivoWrapper,
+        subestadoMasivo
+    );
+
+    estadoMasivo.addEventListener(
+        "change",
+        function(){
+
+            actualizarSubestado(
+                estadoMasivo,
+                subestadoMasivoWrapper,
+                subestadoMasivo
+            );
+
+        }
+    );
+
+}
+
+
+document.querySelectorAll(
+    ".estado-select"
+).forEach(
+    function(estadoSelect){
+
+        const vehiculoId =
+        estadoSelect.dataset.vehiculoId;
+
+        const wrapper =
+        document.getElementById(
+            "subestadoWrapper_" + vehiculoId
+        );
+
+        const subestadoSelect =
+        document.getElementById(
+            "subestado_" + vehiculoId
+        );
+
+        if(
+            wrapper
+            && subestadoSelect
+        ){
+
+            actualizarSubestado(
+                estadoSelect,
+                wrapper,
+                subestadoSelect
+            );
+
+            estadoSelect.addEventListener(
+                "change",
+                function(){
+
+                    actualizarSubestado(
+                        estadoSelect,
+                        wrapper,
+                        subestadoSelect
+                    );
+
+                }
+            );
+
+        }
+
+    }
+);
 
 </script>
 

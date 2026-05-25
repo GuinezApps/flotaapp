@@ -1,10 +1,26 @@
 {% extends 'flota/base.html' %}
 
 {% block title %}
-Dashboard Flota
+Vehículos
 {% endblock %}
 
 {% block extra_css %}
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.page-header h1{
+    margin-bottom:5px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
 
 .boton-ficha{
     background:#2563eb;
@@ -13,134 +29,7 @@ Dashboard Flota
     border-radius:6px;
     text-decoration:none;
     font-size:14px;
-}
-
-.grafico-card{
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    width:700px;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
-
-    display:flex;
-    align-items:center;
-    gap:40px;
-}
-
-.grafico-canvas{
-    width:300px;
-    position:relative;
-}
-
-.total-centro{
-
-    position:absolute;
-
-    top:41%;
-    left:50%;
-
-    transform:
-    translate(-50%,-50%);
-
-    text-align:center;
-
-    width:100%;
-
-    pointer-events:none;
-}
-
-.paginacion{
-
-    margin-top:20px;
-
-    display:flex;
-
-    justify-content:center;
-
-    gap:15px;
-
-}
-
-.panel-filtros {
-    background: white;
-    padding: 18px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-    margin: 25px 0 18px 0;
-}
-
-.panel-filtros h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-}
-
-.grid-filtros {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-}
-
-.campo-filtro {
-    display: flex;
-    flex-direction: column;
-}
-
-.campo-filtro label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #334155;
-}
-
-.campo-filtro input,
-.campo-filtro select {
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-}
-
-.acciones-dashboard {
-    margin-top: 15px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.barra-acciones{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin:20px 0;
-
-    background:white;
-
-    padding:15px 20px;
-
-    border-radius:12px;
-
-    box-shadow:
-    0 2px 8px rgba(0,0,0,.08);
-
-}
-
-.grupo-botones{
-
-    display:flex;
-
-    gap:10px;
-
-}
-
-.titulo-seccion{
-
-    font-size:18px;
-
-    font-weight:bold;
-
-    color:#334155;
-
+    display:inline-block;
 }
 
 .boton-verde{
@@ -150,523 +39,753 @@ Dashboard Flota
 .boton-azul{
     background:#2563eb;
 }
-.tabla-contenedor{
 
+.panel-filtros{
     background:white;
-
     padding:20px;
-
     border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
 
-    box-shadow:
-    0 2px 8px rgba(0,0,0,.08);
+.panel-filtros h3{
+    margin-top:0;
+    margin-bottom:15px;
+    color:#334155;
+}
 
+.panel-filtros-layout{
+    display:grid;
+    grid-template-columns:minmax(0,2fr) minmax(300px,380px);
+    gap:25px;
+    align-items:stretch;
+}
+
+.filtros-columna{
+    display:flex;
+    flex-direction:column;
+    min-height:100%;
+}
+
+.grid-filtros{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+
+.campo-filtro{
+    display:flex;
+    flex-direction:column;
+}
+
+.campo-filtro label{
+    font-weight:bold;
+    margin-bottom:5px;
+    color:#334155;
+}
+
+.campo-filtro input,
+.campo-filtro select{
+    padding:9px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+}
+
+.acciones-dashboard{
+    margin-top:18px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.resumen-filtros{
+    border-left:1px solid #e5e7eb;
+    padding-left:25px;
+}
+
+.resumen-filtros h3{
+    margin-bottom:4px;
+}
+
+.resumen-subtitulo{
+    color:#64748b;
+    font-size:13px;
+    margin-bottom:14px;
+}
+
+.resumen-contenido{
+    display:flex;
+	flex-direction:column;    
+	align-items:center;
+	gap:18px;
+}
+
+.resumen-grafico{
+    width:140px;
+    height:140px;
+    position:relative;
+}
+
+.resumen-grafico canvas{
+    width:140px !important;
+    height:140px !important;
+}
+
+.resumen-lista{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+	width:100%;
+}
+
+.resumen-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:14px;
+}
+
+.resumen-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.resumen-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.detalle-no-operativo{
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px solid #e5e7eb;
+}
+
+.detalle-no-operativo h4{
+    margin:0 0 10px 0;
+    color:#334155;
+}
+
+.detalle-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+}
+
+.detalle-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+}
+
+.detalle-card-label{
+    color:#64748b;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.detalle-card-numero{
+    color:#1e293b;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.gestion-vehiculos-en-filtros{
+    margin-top:auto;
+    padding-top:24px;
+}
+
+.gestion-vehiculos-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:15px 18px;
+}
+
+.grupo-botones{
+    display:flex;
+    gap:10px;
+}
+
+.titulo-seccion{
+    font-size:18px;
+    font-weight:bold;
+    color:#334155;
+}
+
+.tabla-contenedor{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
     overflow-x:auto;
-
 }
 
-table{
-
+.tabla-vehiculos{
     width:100%;
-
     border-collapse:collapse;
-
 }
 
-thead{
-
+.tabla-vehiculos thead{
     background:#1e293b;
-
     color:white;
-
 }
 
-th{
-
+.tabla-vehiculos th{
     padding:14px;
-
     text-align:left;
 }
 
-td{
-
+.tabla-vehiculos td{
     padding:12px;
-
-    border-bottom:
-    1px solid #e5e7eb;
-
+    border-bottom:1px solid #e5e7eb;
 }
 
-tbody tr{
-
-    transition:.2s;
-}
-
-tbody tr:hover{
-
+.tabla-vehiculos tbody tr:hover{
     background:#f8fafc;
 }
 
-.estado-pill{
-
-    padding:6px 10px;
-
-    border-radius:999px;
-
-    font-size:13px;
-
-    font-weight:bold;
-
-}
-th a{
-
+.tabla-vehiculos th a{
     color:white;
-
     text-decoration:none;
-
     font-weight:bold;
-
 }
 
-th a:visited{
-
+.tabla-vehiculos th a:visited{
     color:white;
-
 }
 
-th a:hover{
-
+.tabla-vehiculos th a:hover{
     color:#60a5fa;
+}
+
+.estado-texto{
+    font-weight:600;
+    color:#334155;
+}
+
+.estado-secundario{
+    display:block;
+    color:#64748b;
+    font-size:13px;
+    margin-top:3px;
+}
+
+.paginacion{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    align-items:center;
+}
+
+.dona-contenedor{
+    position:relative;
+    width:165px;
+    height:165px;
+	flex-shrink:0;
+}
+
+.dona-contenedor canvas{
+    width:165px !important;
+    height:165px !important;
+	display:block;
+}
+
+.total-dona{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+}
+
+.total-dona-numero{
+    font-size:30px;
+    font-weight:bold;
+    color:#1e293b;
+    line-height:1;
+}
+
+.total-dona-label{
+    font-size:12px;
+    color:#64748b;
+    margin-top:4px;
+}
+
+@media(max-width:1200px){
+
+    .panel-filtros-layout{
+        grid-template-columns:1fr;
+    }
+
+    .resumen-filtros{
+        border-left:0;
+        border-top:1px solid #e5e7eb;
+        padding-left:0;
+        padding-top:20px;
+    }
 
 }
 
-th a:active{
+@media(max-width:900px){
 
-    color:#93c5fd;
+    .grid-filtros{
+        grid-template-columns:1fr;
+    }
+
+    .resumen-contenido{
+        grid-template-columns:1fr;
+    }
+
+    .detalle-grid{
+        grid-template-columns:1fr;
+    }
+
+    .gestion-vehiculos-card{
+        flex-direction:column;
+        align-items:flex-start;
+    }
 
 }
+
 {% endblock %}
-
-
 
 {% block content %}
 
-<h1>
-Dashboard Flota Camionetas
-</h1>
+<div class="page-header">
 
-
-<h2>
-Estado de Flota
-</h2>
-
-<div class="grafico-card">
-
-<div class="grafico-canvas">
-
-<canvas id="estadoFlota"></canvas>
-
-<div class="total-centro">
-
-<div>Total</div>
-
-<div
-style="
-font-size:40px;
-font-weight:bold;
-"
->
-
-{{total_vehiculos}}
+    <div>
+        <h1>Vehículos</h1>
+        <p class="subtitulo-pagina">
+            Consulta, filtros y administración de vehículos de la flota.
+        </p>
+    </div>
 
 </div>
 
-<div>
-vehículos
-</div>
-
-</div>
-
-</div>
-
-
-<div>
-
-<h3>
-Estado actual
-</h3>
-
-<p>
-🟩 Operativos:
-{{operativos}}
-({{porcentaje_operativos}}%)
-</p>
-
-<p>
-🟨 En mantención:
-{{en_mantencion}}
-({{porcentaje_mantencion}}%)
-</p>
-
-<p>
-🟥 Fuera servicio:
-{{fuera_servicio}}
-({{porcentaje_fuera}}%)
-</p>
-
-<p>
-⬜ No informado:
-{{no_informados}}
-({{porcentaje_no_informado}}%)
-</p>
-
-</div>
-
-</div>
-
-<br>
-
+{% include 'flota/includes/mensajes.html' %}
 
 <div class="panel-filtros">
 
-    <h3>Filtros de búsqueda</h3>
+    <div class="panel-filtros-layout">
 
-    <form method="get">
+        <div class="filtros-columna">
 
-        <div class="grid-filtros">
+            <h3>Filtros de búsqueda</h3>
 
-            <div class="campo-filtro">
-                <label>Patente</label>
-                <input
-                    type="text"
-                    name="patente"
-                    value="{{ patente_buscada|default:'' }}"
-                    placeholder="Buscar patente..."
-                >
-            </div>
+            <form method="get">
 
-            <div class="campo-filtro">
-                <label>Centro costo</label>
-                <select name="centro_costo">
-                    <option value="">Todos</option>
+                <div class="grid-filtros">
 
-                    {% for cc in centros_costo %}
-                        <option
-                            value="{{ cc.id }}"
-                            {% if centro_costo_id == cc.id|stringformat:"s" %}
-                            selected
+                    <div class="campo-filtro">
+						<label>Patente</label>
+						<input
+							type="text"
+							name="patente"
+							value="{{ patente_buscada|default:'' }}"
+							placeholder="Buscar patente..."
+						>
+					</div>
+
+                    <div class="campo-filtro">
+                        <label>Centro costo</label>
+                        <select name="centro_costo">
+                            <option value="">Todos</option>
+
+                            {% for cc in centros_costo %}
+                                <option
+                                    value="{{ cc.id }}"
+                                    {% if centro_costo_id == cc.id|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ cc }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo-filtro">
+                        <label>Marca</label>
+                        <select name="marca">
+                            <option value="">Todas</option>
+
+                            {% for item in marcas %}
+                                <option
+                                    value="{{ item }}"
+                                    {% if marca_seleccionada == item %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo-filtro">
+                        <label>Modelo</label>
+                        <select name="modelo">
+                            <option value="">Todos</option>
+
+                            {% for item in modelos %}
+                                <option
+                                    value="{{ item }}"
+                                    {% if modelo_seleccionado == item %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo-filtro">
+                        <label>Año</label>
+                        <select name="anio">
+                            <option value="">Todos</option>
+
+                            {% for item in anios %}
+                                <option
+                                    value="{{ item }}"
+                                    {% if anio_seleccionado == item|stringformat:"s" %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ item }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo-filtro">
+                        <label>Estado operacional</label>
+                        <select name="estado">
+                            <option value="">Todos</option>
+
+                            {% for valor,texto in estados %}
+                                <option
+                                    value="{{ valor }}"
+                                    {% if estado_seleccionado == valor %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ texto }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="campo-filtro">
+                        <label>Subestado no operativo</label>
+                        <select name="subestado">
+                            <option value="">Todos</option>
+
+                            {% for valor,texto in subestados_no_operativo %}
+                                <option
+                                    value="{{ valor }}"
+                                    {% if subestado_seleccionado == valor %}
+                                    selected
+                                    {% endif %}
+                                >
+                                    {{ texto }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="acciones-dashboard">
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            name="mostrar_bajas"
+                            value="1"
+                            {% if mostrar_bajas %}
+                            checked
                             {% endif %}
                         >
-                            {{ cc }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+                        Mostrar dados de baja
+                    </label>
 
-            <div class="campo-filtro">
-                <label>Marca</label>
-                <select name="marca">
-                    <option value="">Todas</option>
+                    <button
+                        type="submit"
+                        class="boton-primario"
+                    >
+                        Filtrar
+                    </button>
 
-                    {% for item in marcas %}
-                        <option
-                            value="{{ item }}"
-                            {% if marca_seleccionada == item %}
-                            selected
-                            {% endif %}
+                    <a href="{% url 'dashboard' %}">
+                        Limpiar filtros
+                    </a>
+
+                </div>
+
+            </form>
+
+            <div class="gestion-vehiculos-en-filtros">
+
+                <div class="gestion-vehiculos-card">
+
+                    <div class="titulo-seccion">
+                        Gestión de vehículos
+                    </div>
+
+                    <div class="grupo-botones">
+
+                        {% if puede_editar %}
+
+                        <a
+                        href="{% url 'crear_vehiculo' %}"
+                        class="boton-ficha boton-verde"
                         >
-                            {{ item }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+                            ➕ Nuevo vehículo
+                        </a>
 
-            <div class="campo-filtro">
-                <label>Modelo</label>
-                <select name="modelo">
-                    <option value="">Todos</option>
+                        {% endif %}
 
-                    {% for item in modelos %}
-                        <option
-                            value="{{ item }}"
-                            {% if modelo_seleccionado == item %}
-                            selected
-                            {% endif %}
+                        <a
+                        href="/exportar-excel/?{{ query_string }}"
+                        class="boton-ficha boton-azul"
                         >
-                            {{ item }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+                            📥 Exportar Excel
+                        </a>
 
-            <div class="campo-filtro">
-                <label>Año</label>
-                <select name="anio">
-                    <option value="">Todos</option>
+                    </div>
 
-                    {% for item in anios %}
-                        <option
-                            value="{{ item }}"
-                            {% if anio_seleccionado == item|stringformat:"s" %}
-                            selected
-                            {% endif %}
-                        >
-                            {{ item }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+                </div>
 
-            <div class="campo-filtro">
-                <label>Estado</label>
-                <select name="estado">
-                    <option value="">Todos</option>
-
-                    {% for valor,texto in estados %}
-                        <option
-                            value="{{ valor }}"
-                            {% if estado_seleccionado == valor %}
-                            selected
-                            {% endif %}
-                        >
-                            {{ texto }}
-                        </option>
-                    {% endfor %}
-                </select>
             </div>
 
         </div>
 
-        <div class="acciones-dashboard">
+        <div class="resumen-filtros">
 
-            <label>
-                <input
-                    type="checkbox"
-                    name="mostrar_bajas"
-                    value="1"
-                    {% if mostrar_bajas %}
-                    checked
+            <h3>Resumen del listado</h3>
+
+            <div class="resumen-subtitulo">
+                Los datos reflejan los filtros aplicados actualmente.
+            </div>
+
+            <div class="resumen-contenido">
+
+				<div class="dona-contenedor">
+
+					<canvas id="graficoResumenVehiculos"></canvas>
+
+					<div class="total-dona">
+
+						<div class="total-dona-numero">
+							{{ total_vehiculos }}
+						</div>
+
+						<div class="total-dona-label">
+							vehículos
+						</div>
+
+					</div>
+
+				</div>
+
+                <div class="resumen-lista">
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">Operativos</span>
+                        <span class="resumen-valor">
+                            {{ operativos|default:0 }}
+                            ({{ porcentaje_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No operativos</span>
+                        <span class="resumen-valor">
+                            {{ no_operativos|default:0 }}
+                            ({{ porcentaje_no_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No informados</span>
+                        <span class="resumen-valor">
+                            {{ no_informados|default:0 }}
+                            ({{ porcentaje_no_informado|default:0 }}%)
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="detalle-no-operativo">
+
+                <h4>Detalle no operativo</h4>
+
+                <div class="detalle-grid">
+
+                    <div class="detalle-card">
+                        <div class="detalle-card-label">Mantención</div>
+                        <div class="detalle-card-numero">{{ en_mantencion|default:0 }}</div>
+                    </div>
+
+                    <div class="detalle-card">
+                        <div class="detalle-card-label">Reparación</div>
+                        <div class="detalle-card-numero">{{ en_reparacion|default:0 }}</div>
+                    </div>
+
+                    <div class="detalle-card">
+                        <div class="detalle-card-label">Detenido</div>
+                        <div class="detalle-card-numero">{{ detenidos|default:0 }}</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="tabla-contenedor">
+
+    <h2>Listado de vehículos</h2>
+
+    <p>
+        Mostrando
+        {{ vehiculos.start_index }}–{{ vehiculos.end_index }}
+        de
+        {{ vehiculos.paginator.count }}
+        vehículos
+    </p>
+
+    <table class="tabla-vehiculos">
+
+        <thead>
+
+            <tr>
+                <th>Patente</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Año</th>
+                <th>Estado</th>
+                <th>Centro costo</th>
+
+                <th>
+                    <a href="?orden={% if orden_actual == 'kilometraje_actual' %}-kilometraje_actual{% else %}kilometraje_actual{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
+                        Kilometraje
+
+                        {% if orden_actual == 'kilometraje_actual' %}
+                        ↑
+                        {% elif orden_actual == '-kilometraje_actual' %}
+                        ↓
+                        {% endif %}
+                    </a>
+                </th>
+
+                <th>Ficha</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for vehiculo in vehiculos %}
+
+            <tr>
+                <td>{{ vehiculo.patente }}</td>
+                <td>{{ vehiculo.marca }}</td>
+                <td>{{ vehiculo.modelo }}</td>
+                <td>{{ vehiculo.anio }}</td>
+
+                <td>
+                    <span class="estado-texto">
+                        {{ vehiculo.estado_operacional }}
+                    </span>
+
+                    {% if vehiculo.estado_operacional == 'No operativo' and vehiculo.subestado_no_operativo %}
+                        <span class="estado-secundario">
+                            {{ vehiculo.get_subestado_no_operativo_display }}
+                        </span>
                     {% endif %}
-                >
-                Mostrar dados de baja
-            </label>
+                </td>
 
-            <button
-                type="submit"
-                class="boton-primario"
-            >
-                Filtrar
-            </button>
+                <td>{{ vehiculo.centro_costo }}</td>
+                <td>{{ vehiculo.kilometraje_actual }}</td>
 
-            <a href="/">
-                Limpiar filtros
+                <td>
+                    <a
+                    href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                    class="boton-ficha"
+                    >
+                        Ver ficha
+                    </a>
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="8">
+                    No hay vehículos registrados.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="paginacion">
+
+        {% if vehiculos.has_previous %}
+
+            <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                ⏮ Primera
             </a>
 
-        </div>
+            <a href="?page={{ vehiculos.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                ◀ Anterior
+            </a>
 
-    </form>
+        {% endif %}
 
-</div>
+        <strong>
+            Página {{ vehiculos.number }} de {{ vehiculos.paginator.num_pages }}
+        </strong>
 
+        {% if vehiculos.has_next %}
 
-<div class="barra-acciones">
+            <a href="?page={{ vehiculos.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Siguiente ▶
+            </a>
 
-<div class="titulo-seccion">
+            <a href="?page={{ vehiculos.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Última ⏭
+            </a>
 
-Gestión de vehículos
+        {% endif %}
 
-</div>
-
-<div class="grupo-botones">
-
-{% if puede_editar %}
-
-<a
-href="{% url 'crear_vehiculo' %}"
-class="boton-ficha boton-verde"
->
-
-➕ Nuevo vehículo
-
-</a>
-
-{% endif %}
-
-<a
-href="/exportar-excel/?{{query_string}}"
-class="boton-ficha boton-azul"
->
-
-📥 Exportar Excel
-
-</a>
-
-</div>
-
-</div>
-
-
-<h2>
-Listado de vehículos
-</h2>
-
-<p>
-
-Mostrando
-{{vehiculos.start_index}}
-–
-{{vehiculos.end_index}}
-
-de
-
-{{vehiculos.paginator.count}}
-vehículos
-
-</p>
-
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>Patente</th>
-
-<th>Marca</th>
-
-<th>Modelo</th>
-
-<th>Año</th>
-
-<th>Estado</th>
-
-<th>Centro costo</th>
-
-<th>
-
-<a href="?orden={% if orden_actual == 'kilometraje_actual' %}-kilometraje_actual{% else %}kilometraje_actual{% endif %}{% if query_string %}&{{ query_string }}{% endif %}">
-
-Kilometraje
-
-{% if orden_actual == 'kilometraje_actual' %}
-↑
-{% elif orden_actual == '-kilometraje_actual' %}
-↓
-{% endif %}
-
-</a>
-
-</th>
-
-<th>
-Ficha
-</th>
-
-</tr>
-
-</thead>
-
-
-<tbody>
-
-{% for vehiculo in vehiculos %}
-
-<tr>
-
-<td>{{vehiculo.patente}}</td>
-
-<td>{{vehiculo.marca}}</td>
-
-<td>{{vehiculo.modelo}}</td>
-
-<td>{{vehiculo.anio}}</td>
-
-<td>{{vehiculo.estado_operacional}}</td>
-
-<td>{{vehiculo.centro_costo}}</td>
-
-<td>{{vehiculo.kilometraje_actual}}</td>
-
-<td>
-
-<a
-href="{% url 'detalle_vehiculo' vehiculo.id %}"
-class="boton-ficha"
->
-
-Ver ficha
-
-</a>
-
-</td>
-
-</tr>
-
-{% empty %}
-
-<tr>
-
-<td colspan="8">
-
-No hay vehículos registrados
-
-</td>
-
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-
-
-<div class="paginacion">
-
-{% if vehiculos.has_previous %}
-
-<a href="?page=1{% if query_string %}&{{query_string}}{% endif %}">
-⏮ Primera
-</a>
-
-<a href="?page={{vehiculos.previous_page_number}}{% if query_string %}&{{query_string}}{% endif %}">
-◀ Anterior
-</a>
-
-{% endif %}
-
-
-<strong>
-
-Página
-{{vehiculos.number}}
-
-de
-
-{{vehiculos.paginator.num_pages}}
-
-</strong>
-
-
-{% if vehiculos.has_next %}
-
-<a href="?page={{vehiculos.next_page_number}}{% if query_string %}&{{query_string}}{% endif %}">
-Siguiente ▶
-</a>
-
-<a href="?page={{vehiculos.paginator.num_pages}}{% if query_string %}&{{query_string}}{% endif %}">
-Última ⏭
-</a>
-
-{% endif %}
+    </div>
 
 </div>
 
 {% endblock %}
-
-
 
 {% block extra_js %}
 
@@ -674,67 +793,57 @@ Siguiente ▶
 
 <script>
 
-const ctx =
+const resumenVehiculos =
 document.getElementById(
-'estadoFlota'
+    'graficoResumenVehiculos'
 );
 
-new Chart(
-ctx,
-{
+if(resumenVehiculos){
 
-type:'doughnut',
+    new Chart(
+        resumenVehiculos,
+        {
+            type:'doughnut',
 
-data:{
+            data:{
+                labels:[
+                    'Operativos',
+                    'No operativos',
+                    'No informados'
+                ],
 
-labels:[
-'Operativos',
-'En mantención',
-'Fuera servicio',
-'No informado'
-],
+                datasets:[{
+                    data:[
+                        {{ operativos|default:0 }},
+                        {{ no_operativos|default:0 }},
+                        {{ no_informados|default:0 }}
+                    ],
 
-datasets:[{
+                    backgroundColor:[
+                        '#22c55e',
+                        '#ef4444',
+                        '#9ca3af'
+                    ],
 
-data:[
+                    borderWidth:2
+                }]
+            },
 
-{{operativos}},
-{{en_mantencion}},
-{{fuera_servicio}},
-{{no_informados}}
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                cutout:'68%',
 
-],
-
-backgroundColor:[
-
-'#22c55e',
-'#f59e0b',
-'#ef4444',
-'#9ca3af'
-
-]
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-
-legend:{
-position:'bottom'
-}
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                }
+            }
+        }
+    );
 
 }
-
-}
-
-}
-
-);
 
 </script>
 

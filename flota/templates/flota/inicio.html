@@ -1,0 +1,206 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Inicio
+{% endblock %}
+
+{% block extra_css %}
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.kpi-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.kpi-label{
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:8px;
+}
+
+.kpi-numero{
+    font-size:34px;
+    font-weight:bold;
+    color:#1e293b;
+}
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:20px;
+    align-items:start;
+}
+
+.dashboard-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.detalle-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.detalle-lista{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:15px;
+}
+
+.detalle-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #e5e7eb;
+    padding-bottom:10px;
+}
+
+.detalle-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.detalle-numero{
+    font-weight:bold;
+    color:#1e293b;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Inicio</h1>
+
+<p>
+    Resumen general de la flota vigente.
+</p>
+
+<div class="kpi-grid">
+
+    <div class="kpi-card">
+        <div class="kpi-label">Total vehículos vigentes</div>
+        <div class="kpi-numero">{{ total_vehiculos }}</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">Operativos</div>
+        <div class="kpi-numero">{{ operativos }}</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">No operativos</div>
+        <div class="kpi-numero">{{ no_operativos }}</div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-label">No informados</div>
+        <div class="kpi-numero">{{ no_informados }}</div>
+    </div>
+
+</div>
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-card">
+
+        <h3>Estado general de flota</h3>
+
+        <canvas id="graficoInicio"></canvas>
+
+    </div>
+
+    <div class="detalle-card">
+
+        <h3>Detalle no operativos</h3>
+
+        <div class="detalle-lista">
+
+            <div class="detalle-item">
+                <span class="detalle-label">En mantención</span>
+                <span class="detalle-numero">{{ en_mantencion }}</span>
+            </div>
+
+            <div class="detalle-item">
+                <span class="detalle-label">En reparación</span>
+                <span class="detalle-numero">{{ en_reparacion }}</span>
+            </div>
+
+            <div class="detalle-item">
+                <span class="detalle-label">Detenidos</span>
+                <span class="detalle-numero">{{ detenidos }}</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctxInicio =
+document.getElementById(
+    'graficoInicio'
+);
+
+new Chart(
+    ctxInicio,
+    {
+        type:'doughnut',
+
+        data:{
+            labels:[
+                'Operativos',
+                'No operativos',
+                'No informados'
+            ],
+
+            datasets:[{
+                data:[
+                    {{ operativos }},
+                    {{ no_operativos }},
+                    {{ no_informados }}
+                ],
+
+                backgroundColor:[
+                    '#22c55e',
+                    '#ef4444',
+                    '#9ca3af'
+                ]
+            }]
+        },
+
+        options:{
+            responsive:true,
+
+            plugins:{
+                legend:{
+                    position:'bottom'
+                }
+            }
+        }
+    }
+);
+
+</script>
+
+{% endblock %}

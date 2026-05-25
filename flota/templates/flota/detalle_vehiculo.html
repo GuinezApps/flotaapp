@@ -35,6 +35,7 @@ Ficha {{ vehiculo.patente }}
     border-bottom: 1px solid #ddd;
     padding-bottom: 20px;
     margin-bottom: 25px;
+    gap: 20px;
 }
 
 .patente {
@@ -52,6 +53,7 @@ Ficha {{ vehiculo.patente }}
     border-radius: 999px;
     font-weight: bold;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .badge-operativo {
@@ -59,12 +61,7 @@ Ficha {{ vehiculo.patente }}
     color: #166534;
 }
 
-.badge-mantencion {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.badge-fuera {
+.badge-no-operativo {
     background: #fee2e2;
     color: #991b1b;
 }
@@ -72,6 +69,13 @@ Ficha {{ vehiculo.patente }}
 .badge-no {
     background: #e5e7eb;
     color: #374151;
+}
+
+.estado-subtexto {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 14px;
+    text-align: right;
 }
 
 .grid-secciones {
@@ -117,68 +121,64 @@ Ficha {{ vehiculo.patente }}
 
 <div class="contenedor-ficha">
 
-    <a href="/" class="volver">← Volver al dashboard</a>
-	{% if puede_editar %}
+    <a href="{% url 'dashboard' %}" class="volver">
+        ← Volver a vehículos
+    </a>
 
-    {% if vehiculo.estado_administrativo == 'Dado de Baja' %}
+    {% if puede_editar %}
 
-        <span
-        style="
-        padding:10px;
-        background:#fee2e2;
-        border-radius:6px;
-        margin-left:10px;
-        "
-        >
+        {% if vehiculo.estado_administrativo == 'Dado de Baja' %}
 
-        🚫 Vehículo dado de baja
+            <span
+            style="
+            padding:10px;
+            background:#fee2e2;
+            border-radius:6px;
+            margin-left:10px;
+            "
+            >
+                🚫 Vehículo dado de baja
+            </span>
 
-        </span>
+            <a
+            href="{% url 'reactivar_vehiculo' vehiculo.id %}"
+            class="volver"
+            style="
+            margin-left:10px;
+            background:#16a34a;
+            "
+            >
+                ♻ Reactivar
+            </a>
 
-        <a
-        href="{% url 'reactivar_vehiculo' vehiculo.id %}"
-        class="volver"
-        style="
-        margin-left:10px;
-        background:#16a34a;
-        "
-        >
+        {% else %}
 
-        ♻ Reactivar
+            <a
+            href="{% url 'editar_vehiculo' vehiculo.id %}"
+            class="volver"
+            style="
+            margin-left:10px;
+            background:#2563eb;
+            "
+            >
+                ✏ Editar vehículo
+            </a>
 
-        </a>
+            <a
+            href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
+            class="volver"
+            style="
+            margin-left:10px;
+            background:#dc2626;
+            "
+            >
+                🛑 Dar de baja
+            </a>
 
-    {% else %}
-
-        <a
-        href="{% url 'editar_vehiculo' vehiculo.id %}"
-        class="volver"
-        style="
-        margin-left:10px;
-        background:#2563eb;
-        "
-        >
-
-        ✏ Editar vehículo
-
-        </a>
-
-        <a
-        href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
-        class="volver"
-        style="
-        margin-left:10px;
-        background:#dc2626;
-        "
-        >
-
-        🛑 Dar de baja
-
-        </a>
+        {% endif %}
 
     {% endif %}
 
-{% endif %}
     <div class="ficha-tarjeta">
 
         <div class="encabezado">
@@ -199,13 +199,17 @@ Ficha {{ vehiculo.patente }}
 
             <div>
                 {% if vehiculo.estado_operacional == 'Operativo' %}
-                    <span class="badge badge-operativo">🟢 Operativo</span>
-                {% elif vehiculo.estado_operacional == 'En Mantencion' %}
-                    <span class="badge badge-mantencion">🟡 En Mantención</span>
-                {% elif vehiculo.estado_operacional == 'FueraServicio' %}
-                    <span class="badge badge-fuera">🔴 Fuera de Servicio</span>
+                    <span class="badge badge-operativo">Operativo</span>
+                {% elif vehiculo.estado_operacional == 'No operativo' %}
+                    <span class="badge badge-no-operativo">No operativo</span>
+
+                    {% if vehiculo.subestado_no_operativo %}
+                        <div class="estado-subtexto">
+                            {{ vehiculo.get_subestado_no_operativo_display }}
+                        </div>
+                    {% endif %}
                 {% else %}
-                    <span class="badge badge-no">⚪ No informado</span>
+                    <span class="badge badge-no">No informado</span>
                 {% endif %}
             </div>
 
@@ -267,12 +271,23 @@ Ficha {{ vehiculo.patente }}
                 </div>
 
                 <div class="campo">
+                    <span class="label">Motivo no operativo:</span>
+                    <span class="valor">
+                        {% if vehiculo.estado_operacional == 'No operativo' and vehiculo.subestado_no_operativo %}
+                            {{ vehiculo.get_subestado_no_operativo_display }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="campo">
                     <span class="label">Estado administrativo:</span>
                     <span class="valor">{{ vehiculo.estado_administrativo|default:"-" }}</span>
                 </div>
 
                 <div class="campo">
-                    <span class="label">Estado mantención:</span>
+                    <span class="label">Estado mantención fuente externa:</span>
                     <span class="valor">{{ vehiculo.estado_mantencion|default:"-" }}</span>
                 </div>
 

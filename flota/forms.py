@@ -5,10 +5,21 @@ from django.core.exceptions import ValidationError
 
 import re
 
-from .models import Vehiculo, PerfilUsuario, CentroCosto
+from .models import Vehiculo, CentroCosto
 
+
+# ============================================================
+# Formulario de vehículos
+# ============================================================
 
 class VehiculoForm(forms.ModelForm):
+    """
+    Formulario principal para crear y editar vehículos.
+
+    Incluye una validación importante para la nueva lógica de estados:
+    - Si el vehículo está No operativo, debe tener un subestado.
+    - Si el vehículo está Operativo o No informado, el subestado se limpia.
+    """
 
     class Meta:
 
@@ -40,12 +51,59 @@ class VehiculoForm(forms.ModelForm):
                 attrs={
                     'rows': 4
                 }
-            )
+            ),
 
         }
 
+    def clean(self):
+        """
+        Valida coherencia entre estado operacional y subestado.
+
+        Reglas:
+        - No operativo requiere subestado.
+        - Operativo y No informado no deben conservar subestado.
+        """
+
+        cleaned_data = super().clean()
+
+        estado_operacional = cleaned_data.get(
+            'estado_operacional'
+        )
+
+        subestado_no_operativo = cleaned_data.get(
+            'subestado_no_operativo'
+        )
+
+        if (
+            estado_operacional == 'No operativo'
+            and not subestado_no_operativo
+        ):
+
+            self.add_error(
+                'subestado_no_operativo',
+                'Debe indicar el motivo cuando el vehículo está No operativo.'
+            )
+
+        if estado_operacional != 'No operativo':
+
+            cleaned_data[
+                'subestado_no_operativo'
+            ] = None
+
+        return cleaned_data
+
+
+# ============================================================
+# Formulario de creación de usuarios
+# ============================================================
 
 class CrearUsuarioForm(UserCreationForm):
+    """
+    Formulario usado por el rol Master para crear usuarios.
+
+    Crea el usuario base de Django y captura datos adicionales
+    que luego se guardan en PerfilUsuario desde la vista.
+    """
 
     rol = forms.ModelChoiceField(
         queryset=Group.objects.filter(
@@ -65,9 +123,9 @@ class CrearUsuarioForm(UserCreationForm):
     )
 
     rut = forms.CharField(
-    required=True,
-    label='RUT',
-    help_text='Formato: 12345678-9'
+        required=True,
+        label='RUT',
+        help_text='Formato: 12345678-9'
     )
 
     nombre = forms.CharField(
@@ -117,8 +175,10 @@ class CrearUsuarioForm(UserCreationForm):
             'rol'
         ]
 
-
     def clean_username(self):
+        """
+        Evita crear usuarios con username duplicado.
+        """
 
         username = self.cleaned_data.get(
             'username'
@@ -137,8 +197,10 @@ class CrearUsuarioForm(UserCreationForm):
 
         return username
 
-
     def clean_email(self):
+        """
+        Evita crear usuarios con correo duplicado.
+        """
 
         email = self.cleaned_data.get(
             'email'
@@ -157,8 +219,14 @@ class CrearUsuarioForm(UserCreationForm):
 
         return email
 
-
     def clean_rut(self):
+        """
+        Valida formato de RUT chileno.
+
+        Formato aceptado:
+        12345678-9
+        12345678-K
+        """
 
         rut = self.cleaned_data.get(
             'rut'
@@ -169,7 +237,7 @@ class CrearUsuarioForm(UserCreationForm):
 
         rut = rut.strip().upper()
 
-        patron = r'^\d{7,8}-[\dkK]$'
+        patron = r'^\d{7,8}-[\dK]$'
 
         if not re.match(
             patron,
@@ -182,8 +250,19 @@ class CrearUsuarioForm(UserCreationForm):
 
         return rut
 
-
     def clean_telefono(self):
+        """
+        Normaliza teléfonos chilenos móviles.
+
+        Acepta:
+        - 974539081
+        - 56974539081
+        - +56974539081
+        - +56 9 7453 9081
+
+        Guarda:
+        +56974539081
+        """
 
         telefono = self.cleaned_data.get(
             'telefono'
@@ -192,7 +271,8 @@ class CrearUsuarioForm(UserCreationForm):
         if not telefono:
             return telefono
 
-        # eliminar espacios y guiones
+        telefono = telefono.strip()
+
         telefono = telefono.replace(
             ' ',
             ''
@@ -201,17 +281,17 @@ class CrearUsuarioForm(UserCreationForm):
             ''
         )
 
-        # si escribe solo el número
-        if telefono.startswith('9'):
+        if telefono.startswith(
+            '9'
+        ):
 
             telefono = '+56' + telefono
 
-        # si escribe 569...
-        elif telefono.startswith('569'):
+        elif telefono.startswith(
+            '569'
+        ):
 
             telefono = '+' + telefono
-
-        import re
 
         patron = r'^\+569\d{8}$'
 

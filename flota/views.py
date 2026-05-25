@@ -150,14 +150,154 @@ def obtener_estado_administrativo(fecha_baja):
 
     return 'Vigente'
 
+def normalizar_estado_operacional(estado):
+    """
+    Convierte estados antiguos o externos al nuevo esquema operacional.
+    """
+
+    conversiones = {
+        'Operativo': ('Operativo', None),
+        'En Mantencion': ('No operativo', 'Mantencion'),
+        'En Mantención': ('No operativo', 'Mantencion'),
+        'FueraServicio': ('No operativo', 'Detenido'),
+        'Fuera de Servicio': ('No operativo', 'Detenido'),
+        'No operativo': ('No operativo', None),
+        'No informado': ('No informado', None),
+    }
+
+    return conversiones.get(
+        estado,
+        ('No informado', None)
+    )
+
+
+def aplicar_estado_operacional(
+    vehiculo,
+    estado,
+    subestado=None
+):
+    """
+    Aplica la regla central de estado operacional.
+
+    Si el vehículo no está en estado 'No operativo',
+    el subestado se limpia automáticamente.
+    """
+
+    vehiculo.estado_operacional = estado
+
+    if estado == 'No operativo':
+        vehiculo.subestado_no_operativo = subestado
+    else:
+        vehiculo.subestado_no_operativo = None
+
+
+def obtener_metricas_estado(queryset):
+    """
+    Calcula métricas operacionales principales y subcategorías.
+    Se usa tanto en Inicio como en Vehículos.
+    """
+
+    total_vehiculos = queryset.count()
+
+    operativos = queryset.filter(
+        estado_operacional='Operativo'
+    ).count()
+
+    no_operativos = queryset.filter(
+        estado_operacional='No operativo'
+    ).count()
+
+    no_informados = queryset.filter(
+        estado_operacional='No informado'
+    ).count()
+
+    en_mantencion = queryset.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Mantencion'
+    ).count()
+
+    en_reparacion = queryset.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Reparacion'
+    ).count()
+
+    detenidos = queryset.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Detenido'
+    ).count()
+
+    porcentaje_operativos = round(
+        (operativos / total_vehiculos) * 100,
+        1
+    ) if total_vehiculos else 0
+
+    porcentaje_no_operativos = round(
+        (no_operativos / total_vehiculos) * 100,
+        1
+    ) if total_vehiculos else 0
+
+    porcentaje_no_informado = round(
+        (no_informados / total_vehiculos) * 100,
+        1
+    ) if total_vehiculos else 0
+
+    return {
+        'total_vehiculos': total_vehiculos,
+        'operativos': operativos,
+        'no_operativos': no_operativos,
+        'no_informados': no_informados,
+        'en_mantencion': en_mantencion,
+        'en_reparacion': en_reparacion,
+        'detenidos': detenidos,
+        'porcentaje_operativos': porcentaje_operativos,
+        'porcentaje_no_operativos': porcentaje_no_operativos,
+        'porcentaje_no_informado': porcentaje_no_informado,
+
+        # Compatibilidad temporal con templates antiguos.
+        'fuera_servicio': no_operativos,
+        'porcentaje_fuera': porcentaje_no_operativos,
+        'porcentaje_mantencion': round(
+            (en_mantencion / total_vehiculos) * 100,
+            1
+        ) if total_vehiculos else 0,
+    }
+@login_required
+def inicio(request):
+    """
+    Vista ejecutiva inicial.
+
+    Muestra métricas generales de la flota vigente.
+    """
+
+    vehiculos_base = Vehiculo.objects.exclude(
+        estado_administrativo='Dado de Baja'
+    )
+
+    metricas = obtener_metricas_estado(
+        vehiculos_base
+    )
+
+    return render(
+        request,
+        'flota/inicio.html',
+        metricas
+    )
+
 @login_required
 def dashboard(request):
+    """
+    Vista del módulo Vehículos.
+
+    Contiene listado, filtros, paginación, exportación
+    y métricas asociadas a los vehículos filtrados.
+    """
 
     centro_costo_id = request.GET.get('centro_costo')
     marca = request.GET.get('marca')
     modelo = request.GET.get('modelo')
     anio = request.GET.get('anio')
     estado = request.GET.get('estado')
+    subestado = request.GET.get('subestado')
     patente = request.GET.get('patente')
     orden = request.GET.get('orden', 'patente')
 
@@ -200,6 +340,11 @@ def dashboard(request):
     if estado:
         vehiculos_filtrados = vehiculos_filtrados.filter(
             estado_operacional=estado
+        )
+
+    if subestado:
+        vehiculos_filtrados = vehiculos_filtrados.filter(
+            subestado_no_operativo=subestado
         )
 
     if patente:
@@ -247,23 +392,9 @@ def dashboard(request):
 
     estados = Vehiculo.ESTADOS_OPERACIONALES
 
-    total_vehiculos = vehiculos_filtrados.count()
-
-    operativos = vehiculos_filtrados.filter(
-        estado_operacional='Operativo'
-    ).count()
-
-    en_mantencion = vehiculos_filtrados.filter(
-        estado_operacional='En Mantencion'
-    ).count()
-
-    fuera_servicio = vehiculos_filtrados.filter(
-        estado_operacional='FueraServicio'
-    ).count()
-
-    no_informados = vehiculos_filtrados.filter(
-        estado_operacional='No informado'
-    ).count()
+    metricas = obtener_metricas_estado(
+        vehiculos_filtrados
+    )
 
     ordenes_permitidos = [
         'patente',
@@ -306,115 +437,63 @@ def dashboard(request):
 
     query_string = query_params.urlencode()
 
-    porcentaje_operativos = round(
-        (operativos / total_vehiculos) * 100,
-        1
-    ) if total_vehiculos else 0
-
-    porcentaje_mantencion = round(
-        (en_mantencion / total_vehiculos) * 100,
-        1
-    ) if total_vehiculos else 0
-
-    porcentaje_fuera = round(
-        (fuera_servicio / total_vehiculos) * 100,
-        1
-    ) if total_vehiculos else 0
-
-    porcentaje_no_informado = round(
-        (no_informados / total_vehiculos) * 100,
-        1
-    ) if total_vehiculos else 0
-
     contexto = {
+        'vehiculos': vehiculos,
 
-    'vehiculos': vehiculos,
+        'centros_costo':
+        CentroCosto.objects.order_by(
+            'codigo'
+        ),
 
-    'centros_costo':
-    CentroCosto.objects.order_by(
-        'codigo'
-    ),
+        'marcas': marcas,
+        'modelos': modelos,
+        'anios': anios,
+        'estados': estados,
 
-    'marcas': marcas,
-    'modelos': modelos,
-    'anios': anios,
-    'estados': estados,
+        'subestados_no_operativo':
+        Vehiculo.SUBESTADOS_NO_OPERATIVO,
 
-    'centro_costo_id':
-    centro_costo_id,
+        'centro_costo_id':
+        centro_costo_id,
 
-    'marca_seleccionada':
-    marca,
+        'marca_seleccionada':
+        marca,
 
-    'modelo_seleccionado':
-    modelo,
+        'modelo_seleccionado':
+        modelo,
 
-    'anio_seleccionado':
-    anio,
+        'anio_seleccionado':
+        anio,
 
-    'estado_seleccionado':
-    estado,
+        'estado_seleccionado':
+        estado,
 
-    'patente_buscada':
-    patente,
+        'subestado_seleccionado':
+        subestado,
 
-    'mostrar_bajas':
-    mostrar_bajas,
+        'patente_buscada':
+        patente,
 
-    'puede_editar': (
-        request.user.groups.filter(
-            name='Editor'
-        ).exists()
-        or
-        request.user.groups.filter(
-            name='Master'
-        ).exists()
-    ),
+        'mostrar_bajas':
+        mostrar_bajas,
 
-    'puede_importar':
-    request.user.groups.filter(
-        name='Master'
-    ).exists(),
+        'orden_actual':
+        orden,
 
-    'total_vehiculos':
-    total_vehiculos,
-    'operativos':
-    operativos,
+        'query_string':
+        query_string,
+    }
 
-    'en_mantencion':
-    en_mantencion,
-
-    'fuera_servicio':
-    fuera_servicio,
-
-    'no_informados':
-    no_informados,
-
-    'porcentaje_operativos':
-    porcentaje_operativos,
-
-    'porcentaje_mantencion':
-    porcentaje_mantencion,
-
-    'porcentaje_fuera':
-    porcentaje_fuera,
-
-    'porcentaje_no_informado':
-    porcentaje_no_informado,
-
-    'orden_actual':
-    orden,
-
-    'query_string':
-    query_string,
-
-}
+    contexto.update(
+        metricas
+    )
 
     return render(
         request,
         'flota/dashboard.html',
         contexto
     )
+
 
 def exportar_vehiculos_excel(request):
     vehiculos = Vehiculo.objects.select_related('centro_costo').all()
@@ -424,6 +503,7 @@ def exportar_vehiculos_excel(request):
     modelo = request.GET.get('modelo')
     anio = request.GET.get('anio')
     estado = request.GET.get('estado')
+    subestado = request.GET.get('subestado')
     patente = request.GET.get('patente')
 
     if centro_costo_id:
@@ -451,6 +531,11 @@ def exportar_vehiculos_excel(request):
             estado_operacional=estado
         )
 
+    if subestado:
+        vehiculos = vehiculos.filter(
+            subestado_no_operativo=subestado
+        )
+
     if patente:
         vehiculos = vehiculos.filter(
             patente__icontains=patente
@@ -468,6 +553,7 @@ def exportar_vehiculos_excel(request):
         "Tipo Vehículo",
         "Centro de costo",
         "Estado Operacional",
+        "Subestado No Operativo",
         "Estado Administrativo",
         "Estado Mantención",
         "Kilometraje actual",
@@ -489,6 +575,9 @@ def exportar_vehiculos_excel(request):
             vehiculo.tipo_vehiculo,
             str(vehiculo.centro_costo) if vehiculo.centro_costo else "",
             vehiculo.estado_operacional,
+            vehiculo.get_subestado_no_operativo_display()
+            if vehiculo.subestado_no_operativo
+            else "",
             vehiculo.estado_administrativo,
             vehiculo.estado_mantencion,
             vehiculo.kilometraje_actual,
@@ -891,6 +980,12 @@ def confirmar_importacion(request):
             ),
         }
 
+        if estado_administrativo == 'Dado de Baja':
+            valores['estado_operacional'] = 'No operativo'
+            valores['subestado_no_operativo'] = 'Detenido'
+        else:
+            valores['subestado_no_operativo'] = None
+
         if not vehiculo:
             Vehiculo.objects.create(
                 patente=patente,
@@ -932,11 +1027,18 @@ def confirmar_importacion(request):
 
         <br>
 
-        <a href="/">Volver al dashboard</a>
+        <a href="/vehiculos/">Volver a vehículos</a>
         """
     )
 @login_required
+@editor_required
 def gestionar_estados(request):
+    """
+    Permite actualizar el estado operacional de vehículos.
+
+    Soporta cambio individual y cambio masivo.
+    Si el estado no es 'No operativo', el subestado se limpia.
+    """
 
     if request.method == 'POST':
 
@@ -953,18 +1055,37 @@ def gestionar_estados(request):
                 f'estado_operacional_{vehiculo_id}'
             )
 
+            nuevo_subestado = request.POST.get(
+                f'subestado_no_operativo_{vehiculo_id}'
+            )
+
+            if nuevo_estado == 'No operativo' and not nuevo_subestado:
+
+                messages.error(
+                    request,
+                    "Debe seleccionar un motivo para el estado No operativo."
+                )
+
+                return redirect(
+                    'gestionar_estados'
+                )
+
             vehiculo = Vehiculo.objects.get(
                 id=vehiculo_id
             )
 
-            vehiculo.estado_operacional = (
-                nuevo_estado
+            aplicar_estado_operacional(
+                vehiculo,
+                nuevo_estado,
+                nuevo_subestado
             )
+
+            vehiculo.save()
+
             messages.success(
                 request,
                 f"Estado de {vehiculo.patente} actualizado correctamente."
             )
-            vehiculo.save()
 
         elif accion == "masivo":
 
@@ -976,19 +1097,38 @@ def gestionar_estados(request):
                 'estado_masivo'
             )
 
+            nuevo_subestado = request.POST.get(
+                'subestado_masivo'
+            )
+
             if ids and nuevo_estado:
+
+                if nuevo_estado == 'No operativo' and not nuevo_subestado:
+
+                    messages.error(
+                        request,
+                        "Debe seleccionar un motivo para aplicar el estado No operativo."
+                    )
+
+                    return redirect(
+                        'gestionar_estados'
+                    )
 
                 vehiculos_a_cambiar = Vehiculo.objects.filter(
                     id__in=ids
-                ).exclude(
-                    estado_operacional=nuevo_estado
                 )
 
                 cantidad = vehiculos_a_cambiar.count()
 
-                vehiculos_a_cambiar.update(
-                    estado_operacional=nuevo_estado
-                )
+                for vehiculo in vehiculos_a_cambiar:
+
+                    aplicar_estado_operacional(
+                        vehiculo,
+                        nuevo_estado,
+                        nuevo_subestado
+                    )
+
+                    vehiculo.save()
 
                 if cantidad > 0:
 
@@ -1001,9 +1141,8 @@ def gestionar_estados(request):
 
                     messages.info(
                         request,
-                        "No hubo cambios: los vehículos seleccionados ya tenían ese estado."
+                        "No se seleccionaron vehículos para actualizar."
                     )
-        
 
     patente = request.GET.get(
         'patente'
@@ -1017,8 +1156,12 @@ def gestionar_estados(request):
         'estado'
     )
 
+    subestado = request.GET.get(
+        'subestado'
+    )
+
     vehiculos = Vehiculo.objects.select_related(
-    'centro_costo'
+        'centro_costo'
     ).exclude(
         estado_administrativo='Dado de Baja'
     )
@@ -1040,9 +1183,25 @@ def gestionar_estados(request):
         vehiculos = vehiculos.filter(
             estado_operacional=estado
         )
-    paginator = Paginator(vehiculos, 25)
-    page_number = request.GET.get('page')
-    vehiculos_pagina = paginator.get_page(page_number)
+
+    if subestado:
+
+        vehiculos = vehiculos.filter(
+            subestado_no_operativo=subestado
+        )
+
+    paginator = Paginator(
+        vehiculos,
+        25
+    )
+
+    page_number = request.GET.get(
+        'page'
+    )
+
+    vehiculos_pagina = paginator.get_page(
+        page_number
+    )
 
     query_params = request.GET.copy()
 
@@ -1050,16 +1209,21 @@ def gestionar_estados(request):
         query_params.pop('page')
 
     query_string = query_params.urlencode()
-    contexto = {
 
+    contexto = {
         'vehiculos': vehiculos_pagina,
         'query_string': query_string,
 
         'centros_costo':
-        CentroCosto.objects.all(),
+        CentroCosto.objects.order_by(
+            'codigo'
+        ),
 
         'estados_operacionales':
         Vehiculo.ESTADOS_OPERACIONALES,
+
+        'subestados_no_operativo':
+        Vehiculo.SUBESTADOS_NO_OPERATIVO,
 
         'patente_buscada': patente,
 
@@ -1068,6 +1232,9 @@ def gestionar_estados(request):
 
         'estado_seleccionado':
         estado,
+
+        'subestado_seleccionado':
+        subestado,
     }
 
     return render(
@@ -1075,6 +1242,7 @@ def gestionar_estados(request):
         'flota/estados.html',
         contexto
     )
+
 @login_required
 def detalle_vehiculo(request, id):
 
@@ -1110,7 +1278,7 @@ def crear_vehiculo(request):
 
             form.save()
 
-            return redirect('/')
+            return redirect('dashboard')
 
     else:
 
@@ -1182,7 +1350,8 @@ def dar_baja_vehiculo(request, id):
     if request.method == 'POST':
 
         vehiculo.estado_administrativo = 'Dado de Baja'
-        vehiculo.estado_operacional = 'FueraServicio'
+        vehiculo.estado_operacional = 'No operativo'
+        vehiculo.subestado_no_operativo = 'Detenido'
         vehiculo.fecha_baja = timezone.now().date()
 
         vehiculo.save()
@@ -1216,6 +1385,8 @@ def reactivar_vehiculo(request, id):
         vehiculo.estado_operacional = (
             'No informado'
         )
+
+        vehiculo.subestado_no_operativo = None
 
         vehiculo.fecha_baja = None
 
