@@ -124,6 +124,7 @@ Ficha {{ vehiculo.patente }}
     <a href="{% url 'dashboard' %}" class="volver">
         ← Volver a vehículos
     </a>
+	{% include 'flota/includes/mensajes.html' %}
 
     {% if puede_editar %}
 

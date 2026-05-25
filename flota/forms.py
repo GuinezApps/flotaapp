@@ -13,14 +13,7 @@ from .models import Vehiculo, CentroCosto
 # ============================================================
 
 class VehiculoForm(forms.ModelForm):
-    """
-    Formulario principal para crear y editar vehículos.
-
-    Incluye una validación importante para la nueva lógica de estados:
-    - Si el vehículo está No operativo, debe tener un subestado.
-    - Si el vehículo está Operativo o No informado, el subestado se limpia.
-    """
-
+    
     class Meta:
 
         model = Vehiculo
@@ -54,6 +47,23 @@ class VehiculoForm(forms.ModelForm):
             ),
 
         }
+        
+        labels = {
+            'anio': 'Año',
+        }
+        
+    def clean_patente(self):
+
+        patente = self.cleaned_data.get(
+            'patente'
+        )
+
+        if not patente:
+            return patente
+
+        patente = patente.strip().upper()
+
+        return patente
 
     def clean(self):
         """

@@ -78,10 +78,10 @@ Gestión de Estados
 }
 
 .acciones-masivas{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
     gap:18px;
+    align-items:end;
 }
 
 .acciones-masivas-info{
@@ -90,16 +90,18 @@ Gestión de Estados
 }
 
 .acciones-masivas-control{
-    display:flex;
-    align-items:center;
+    display:grid;
+    grid-template-columns:190px 190px auto;
     gap:10px;
-    flex-wrap:wrap;
+    align-items:end;
 }
 
 .estado-masivo-select,
 .subestado-masivo-select{
-    min-width:190px;
+    width:100%;
+    min-width:0;
 }
+
 
 .tabla-header{
     display:flex;
@@ -209,8 +211,17 @@ Gestión de Estados
     }
 
     .acciones-masivas{
-        flex-direction:column;
-        align-items:flex-start;
+        grid-template-columns:1fr;
+        align-items:start;
+    }
+
+    .acciones-masivas-control{
+        grid-template-columns:1fr 1fr auto;
+        width:100%;
+    }
+
+	.acciones-masivas-control .boton-primario{
+        width:100%;
     }
 
 }

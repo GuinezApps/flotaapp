@@ -176,12 +176,6 @@ def aplicar_estado_operacional(
     estado,
     subestado=None
 ):
-    """
-    Aplica la regla central de estado operacional.
-
-    Si el vehículo no está en estado 'No operativo',
-    el subestado se limpia automáticamente.
-    """
 
     vehiculo.estado_operacional = estado
 
@@ -192,10 +186,6 @@ def aplicar_estado_operacional(
 
 
 def obtener_metricas_estado(queryset):
-    """
-    Calcula métricas operacionales principales y subcategorías.
-    Se usa tanto en Inicio como en Vehículos.
-    """
 
     total_vehiculos = queryset.count()
 
@@ -225,6 +215,21 @@ def obtener_metricas_estado(queryset):
         estado_operacional='No operativo',
         subestado_no_operativo='Detenido'
     ).count()
+    
+    porcentaje_mantencion_no_operativo = round(
+    (en_mantencion / no_operativos) * 100,
+    1
+    ) if no_operativos else 0
+
+    porcentaje_reparacion_no_operativo = round(
+        (en_reparacion / no_operativos) * 100,
+        1
+    ) if no_operativos else 0
+
+    porcentaje_detenidos_no_operativo = round(
+        (detenidos / no_operativos) * 100,
+        1
+    ) if no_operativos else 0
 
     porcentaje_operativos = round(
         (operativos / total_vehiculos) * 100,
@@ -249,9 +254,13 @@ def obtener_metricas_estado(queryset):
         'en_mantencion': en_mantencion,
         'en_reparacion': en_reparacion,
         'detenidos': detenidos,
+        'porcentaje_mantencion_no_operativo': porcentaje_mantencion_no_operativo,
+        'porcentaje_reparacion_no_operativo': porcentaje_reparacion_no_operativo,
+        'porcentaje_detenidos_no_operativo': porcentaje_detenidos_no_operativo,
         'porcentaje_operativos': porcentaje_operativos,
         'porcentaje_no_operativos': porcentaje_no_operativos,
         'porcentaje_no_informado': porcentaje_no_informado,
+       
 
         # Compatibilidad temporal con templates antiguos.
         'fuera_servicio': no_operativos,
@@ -298,7 +307,7 @@ def dashboard(request):
     anio = request.GET.get('anio')
     estado = request.GET.get('estado')
     subestado = request.GET.get('subestado')
-    patente = request.GET.get('patente')
+    patente = request.GET.get('patente','').strip().upper()
     orden = request.GET.get('orden', 'patente')
 
     mostrar_bajas = request.GET.get(
@@ -504,7 +513,7 @@ def exportar_vehiculos_excel(request):
     anio = request.GET.get('anio')
     estado = request.GET.get('estado')
     subestado = request.GET.get('subestado')
-    patente = request.GET.get('patente')
+    patente = request.GET.get('patente','').strip().upper()
 
     if centro_costo_id:
         vehiculos = vehiculos.filter(
@@ -1144,9 +1153,7 @@ def gestionar_estados(request):
                         "No se seleccionaron vehículos para actualizar."
                     )
 
-    patente = request.GET.get(
-        'patente'
-    )
+    patente = request.GET.get('patente','').strip().upper()
 
     centro_costo_id = request.GET.get(
         'centro_costo'
@@ -1310,6 +1317,11 @@ def editar_vehiculo(request, id):
         if form.is_valid():
 
             form.save()
+            
+            messages.success(
+                request,
+                f'Vehículo {vehiculo.patente} actualizado correctamente.'
+            )
 
             return redirect(
                 'detalle_vehiculo',

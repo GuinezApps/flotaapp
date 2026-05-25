@@ -6,143 +6,354 @@ Inicio
 
 {% block extra_css %}
 
-.kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:18px;
-    margin-bottom:25px;
+.page-header{
+    margin-bottom:22px;
 }
 
-.kpi-card{
-    background:white;
-    padding:22px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+.page-header h1{
+    margin-bottom:5px;
 }
 
-.kpi-label{
+.subtitulo-pagina{
     color:#64748b;
-    font-size:14px;
-    margin-bottom:8px;
-}
-
-.kpi-numero{
-    font-size:34px;
-    font-weight:bold;
-    color:#1e293b;
+    margin:0;
 }
 
 .dashboard-grid{
     display:grid;
-    grid-template-columns:1.2fr .8fr;
+    grid-template-columns:repeat(3,1fr);
     gap:20px;
     align-items:start;
 }
 
+.dashboard-card-link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+}
+
 .dashboard-card{
     background:white;
-    padding:25px;
+    padding:22px;
     border-radius:12px;
     box-shadow:0 2px 8px rgba(0,0,0,.08);
+    transition:.2s;
+    min-height:360px;
 }
 
-.detalle-card{
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+.dashboard-card-link:hover .dashboard-card{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
 }
 
-.detalle-lista{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    margin-top:15px;
-}
-
-.detalle-item{
+.card-header{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #e5e7eb;
-    padding-bottom:10px;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:16px;
 }
 
-.detalle-label{
+.card-title{
+    margin:0;
+    color:#1e293b;
+    font-size:20px;
+}
+
+.card-subtitle{
+    color:#64748b;
+    font-size:14px;
+    margin-top:4px;
+}
+
+.card-action{
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.estado-card-contenido{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+}
+
+.dona-contenedor{
+    position:relative;
+    width:180px;
+    height:180px;
+    flex-shrink:0;
+}
+
+.dona-contenedor canvas{
+    width:180px !important;
+    height:180px !important;
+    display:block;
+}
+
+.total-dona{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+}
+
+.total-dona-numero{
+    font-size:32px;
+    font-weight:bold;
+    color:#1e293b;
+    line-height:1;
+}
+
+.total-dona-label{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.resumen-lista{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.resumen-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:14px;
+}
+
+.resumen-label{
     color:#334155;
     font-weight:600;
 }
 
-.detalle-numero{
-    font-weight:bold;
+.resumen-valor{
     color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.detalle-no-operativo{
+    width:100%;
+    margin-top:4px;
+    padding-top:14px;
+    border-top:1px solid #e5e7eb;
+}
+
+.detalle-no-operativo h4{
+    margin:0 0 10px 0;
+    color:#334155;
+    font-size:15px;
+}
+
+.detalle-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.detalle-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+}
+
+.detalle-card-label{
+    color:#64748b;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.detalle-card-numero{
+    color:#1e293b;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.dashboard-placeholder{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    min-height:180px;
+    border:1px dashed #cbd5e1;
+}
+
+.placeholder-title{
+    color:#334155;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.placeholder-text{
+    color:#64748b;
+    font-size:14px;
+}
+
+@media(max-width:1200px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:800px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
 }
 
 {% endblock %}
 
 {% block content %}
 
-<h1>Inicio</h1>
+<div class="page-header">
 
-<p>
-    Resumen general de la flota vigente.
-</p>
+    <h1>Inicio</h1>
 
-<div class="kpi-grid">
-
-    <div class="kpi-card">
-        <div class="kpi-label">Total vehículos vigentes</div>
-        <div class="kpi-numero">{{ total_vehiculos }}</div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">Operativos</div>
-        <div class="kpi-numero">{{ operativos }}</div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">No operativos</div>
-        <div class="kpi-numero">{{ no_operativos }}</div>
-    </div>
-
-    <div class="kpi-card">
-        <div class="kpi-label">No informados</div>
-        <div class="kpi-numero">{{ no_informados }}</div>
-    </div>
+    <p class="subtitulo-pagina">
+        Resumen general e indicadores principales de la flota.
+    </p>
 
 </div>
 
 <div class="dashboard-grid">
 
-    <div class="dashboard-card">
+    <a
+    href="{% url 'dashboard' %}"
+    class="dashboard-card-link"
+    >
 
-        <h3>Estado general de flota</h3>
+        <div class="dashboard-card">
 
-        <canvas id="graficoInicio"></canvas>
+            <div class="card-header">
+
+                <div>
+                    <h3 class="card-title">
+                        Estado general de flota
+                    </h3>
+
+                    <div class="card-subtitle">
+                        Vehículos vigentes según estado operacional.
+                    </div>
+                </div>
+
+                <div class="card-action">
+                    Ver vehículos →
+                </div>
+
+            </div>
+
+            <div class="estado-card-contenido">
+
+                <div class="dona-contenedor">
+
+                    <canvas id="graficoInicio"></canvas>
+
+                    <div class="total-dona">
+
+                        <div class="total-dona-numero">
+                            {{ total_vehiculos }}
+                        </div>
+
+                        <div class="total-dona-label">
+                            vehículos
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen-lista">
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">Operativos</span>
+                        <span class="resumen-valor">
+                            {{ operativos|default:0 }}
+                            ({{ porcentaje_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No operativos</span>
+                        <span class="resumen-valor">
+                            {{ no_operativos|default:0 }}
+                            ({{ porcentaje_no_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No informados</span>
+                        <span class="resumen-valor">
+                            {{ no_informados|default:0 }}
+                            ({{ porcentaje_no_informado|default:0 }}%)
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="detalle-no-operativo">
+
+                    <h4>Detalle no operativo</h4>
+
+                    <div class="detalle-grid">
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Mantención</div>
+                            <div class="detalle-card-numero">{{ en_mantencion|default:0 }}</div>
+                        </div>
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Reparación</div>
+                            <div class="detalle-card-numero">{{ en_reparacion|default:0 }}</div>
+                        </div>
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Detenido</div>
+                            <div class="detalle-card-numero">{{ detenidos|default:0 }}</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </a>
+
+    <div class="dashboard-placeholder">
+
+        <div class="placeholder-title">
+            Próximo indicador
+        </div>
+
+        <div class="placeholder-text">
+            Espacio reservado para futuros indicadores solicitados por gerencia.
+        </div>
 
     </div>
 
-    <div class="detalle-card">
+    <div class="dashboard-placeholder">
 
-        <h3>Detalle no operativos</h3>
+        <div class="placeholder-title">
+            Próximo indicador
+        </div>
 
-        <div class="detalle-lista">
-
-            <div class="detalle-item">
-                <span class="detalle-label">En mantención</span>
-                <span class="detalle-numero">{{ en_mantencion }}</span>
-            </div>
-
-            <div class="detalle-item">
-                <span class="detalle-label">En reparación</span>
-                <span class="detalle-numero">{{ en_reparacion }}</span>
-            </div>
-
-            <div class="detalle-item">
-                <span class="detalle-label">Detenidos</span>
-                <span class="detalle-numero">{{ detenidos }}</span>
-            </div>
-
+        <div class="placeholder-text">
+            Aquí se puede agregar costos, mantenciones, vencimientos o alertas.
         </div>
 
     </div>
@@ -162,44 +373,52 @@ document.getElementById(
     'graficoInicio'
 );
 
-new Chart(
-    ctxInicio,
-    {
-        type:'doughnut',
+if(ctxInicio){
 
-        data:{
-            labels:[
-                'Operativos',
-                'No operativos',
-                'No informados'
-            ],
+    new Chart(
+        ctxInicio,
+        {
+            type:'doughnut',
 
-            datasets:[{
-                data:[
-                    {{ operativos }},
-                    {{ no_operativos }},
-                    {{ no_informados }}
+            data:{
+                labels:[
+                    'Operativos',
+                    'No operativos',
+                    'No informados'
                 ],
 
-                backgroundColor:[
-                    '#22c55e',
-                    '#ef4444',
-                    '#9ca3af'
-                ]
-            }]
-        },
+                datasets:[{
+                    data:[
+                        {{ operativos|default:0 }},
+                        {{ no_operativos|default:0 }},
+                        {{ no_informados|default:0 }}
+                    ],
 
-        options:{
-            responsive:true,
+                    backgroundColor:[
+                        '#22c55e',
+                        '#ef4444',
+                        '#9ca3af'
+                    ],
 
-            plugins:{
-                legend:{
-                    position:'bottom'
+                    borderWidth:2
+                }]
+            },
+
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                cutout:'68%',
+
+                plugins:{
+                    legend:{
+                        display:false
+                    }
                 }
             }
         }
-    }
-);
+    );
+
+}
 
 </script>
 

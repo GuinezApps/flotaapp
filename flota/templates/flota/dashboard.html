@@ -194,6 +194,13 @@ Vehículos
     font-size:18px;
 }
 
+.detalle-card-porcentaje{
+    color:#64748b;
+    font-size:12px;
+    margin-top:2px;
+    font-weight:600;
+}
+
 .gestion-vehiculos-en-filtros{
     margin-top:auto;
     padding-top:24px;
@@ -321,6 +328,8 @@ Vehículos
     color:#64748b;
     margin-top:4px;
 }
+
+
 
 @media(max-width:1200px){
 
@@ -636,24 +645,44 @@ Vehículos
 
                 <div class="detalle-grid">
 
-                    <div class="detalle-card">
-                        <div class="detalle-card-label">Mantención</div>
-                        <div class="detalle-card-numero">{{ en_mantencion|default:0 }}</div>
-                    </div>
+					<div class="detalle-card">
+						<div class="detalle-card-label">Mantención</div>
 
-                    <div class="detalle-card">
-                        <div class="detalle-card-label">Reparación</div>
-                        <div class="detalle-card-numero">{{ en_reparacion|default:0 }}</div>
-                    </div>
+					<div class="detalle-card-numero">
+						{{ en_mantencion|default:0 }}
+					</div>
 
-                    <div class="detalle-card">
-                        <div class="detalle-card-label">Detenido</div>
-                        <div class="detalle-card-numero">{{ detenidos|default:0 }}</div>
-                    </div>
+					<div class="detalle-card-porcentaje">
+						{{ porcentaje_mantencion_no_operativo|default:0 }}%
+					</div>
+					</div>
 
-                </div>
+					<div class="detalle-card">
+							<div class="detalle-card-label">Reparación</div>
 
-            </div>
+						<div class="detalle-card-numero">
+							{{ en_reparacion|default:0 }}
+						</div>
+
+						<div class="detalle-card-porcentaje">
+						{{ porcentaje_reparacion_no_operativo|default:0 }}%
+						</div>
+					</div>
+
+					<div class="detalle-card">
+						<div class="detalle-card-label">Detenido</div>
+
+						<div class="detalle-card-numero">
+							{{ detenidos|default:0 }}
+						</div>
+
+						<div class="detalle-card-porcentaje">
+							{{ porcentaje_detenidos_no_operativo|default:0 }}%
+						</div>
+					</div>
+
+
+				</div>
 
         </div>
 
