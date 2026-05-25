@@ -1,0 +1,176 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Nuevo usuario
+{% endblock %}
+
+{% block extra_css %}
+
+.form-card {
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.form-grid {
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.form-field label {
+    font-weight:bold;
+    color:#334155;
+    margin-bottom:6px;
+    display:block;
+}
+
+.form-field input,
+.form-field select {
+    width:100%;
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    box-sizing:border-box;
+}
+
+.errorlist {
+    color:#991b1b;
+    background:#fee2e2;
+    padding:8px;
+    border-radius:6px;
+    list-style:none;
+    margin:6px 0 0 0;
+}
+
+.requerido {
+    color:#dc2626;
+}
+
+.ayuda {
+    font-size:13px;
+    color:#64748b;
+    margin-top:5px;
+}
+
+.form-actions {
+    margin-top:25px;
+    display:flex;
+    gap:10px;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Nuevo usuario</h1>
+
+<p>
+    Complete los datos del usuario que tendrá acceso al sistema.
+</p>
+
+<div class="form-card">
+
+    {% if form.non_field_errors %}
+        <div class="errorlist">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                <label>Usuario <span class="requerido">*</span></label>
+                {{ form.username }}
+                {{ form.username.errors }}
+                <div class="ayuda">Nombre de acceso al sistema.</div>
+            </div>
+
+            <div class="form-field">
+                <label>Correo <span class="requerido">*</span></label>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>Contraseña <span class="requerido">*</span></label>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>Confirmar contraseña <span class="requerido">*</span></label>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>RUT <span class="requerido">*</span></label>
+                {{ form.rut }}
+                {{ form.rut.errors }}
+                <div class="ayuda">{{ form.rut.help_text }}</div>
+            </div>
+
+            <div class="form-field">
+                <label>Nombre completo <span class="requerido">*</span></label>
+                {{ form.nombre }}
+                {{ form.nombre.errors }}
+            </div>
+
+            <div class="form-field">
+				<label>Teléfono <span class="requerido">*</span></label>
+				{{ form.telefono }}
+				{{ form.telefono.errors }}
+				<div class="ayuda">
+					{{ form.telefono.help_text }}
+				</div>
+			</div>
+
+            <div class="form-field">
+                <label>Cargo <span class="requerido">*</span></label>
+                {{ form.cargo }}
+                {{ form.cargo.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>Centro de costo <span class="requerido">*</span></label>
+                {{ form.centro_costo }}
+                {{ form.centro_costo.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>Sucursal <span class="requerido">*</span></label>
+                {{ form.sucursal }}
+                {{ form.sucursal.errors }}
+            </div>
+
+            <div class="form-field">
+                <label>Permisos <span class="requerido">*</span></label>
+                {{ form.rol }}
+                {{ form.rol.errors }}
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button type="submit" class="boton-primario">
+                Crear usuario
+            </button>
+
+            <a href="{% url 'usuarios' %}" class="boton-primario" style="background:#64748b;">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

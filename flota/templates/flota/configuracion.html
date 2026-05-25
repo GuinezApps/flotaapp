@@ -1,0 +1,75 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Configuración
+{% endblock %}
+
+{% block extra_css %}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.config-card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1e293b;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    transition: .2s;
+}
+
+.config-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+
+.config-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.config-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.config-meta {
+    color: #64748b;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Configuración</h1>
+
+<p>
+    Administración general del sistema.
+</p>
+
+<div class="config-grid">
+
+    <a href="{% url 'usuarios' %}" class="config-card">
+
+        <div class="config-icon">
+            👤
+        </div>
+
+        <div class="config-title">
+            Usuarios
+        </div>
+
+        <div class="config-meta">
+            {{ total_usuarios }} usuarios registrados
+        </div>
+
+    </a>
+
+</div>
+
+{% endblock %}

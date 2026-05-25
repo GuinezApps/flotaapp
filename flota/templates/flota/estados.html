@@ -1,0 +1,498 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Gestión de Estados
+{% endblock %}
+
+{% block extra_css %}
+
+.estado-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+}
+
+.estado-header h1{
+    margin-bottom:6px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.estado-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+.estado-card h3{
+    margin:0 0 16px 0;
+    color:#334155;
+}
+
+.grid-filtros{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr auto auto;
+    gap:12px;
+    align-items:end;
+}
+
+.campo-filtro{
+    display:flex;
+    flex-direction:column;
+}
+
+.campo-filtro label{
+    font-weight:bold;
+    color:#334155;
+    margin-bottom:6px;
+}
+
+.campo-filtro input,
+.campo-filtro select,
+.estado-select,
+.estado-masivo-select{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    box-sizing:border-box;
+    background:white;
+}
+
+.link-limpiar{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:bold;
+    padding:10px 0;
+}
+
+.link-limpiar:hover{
+    text-decoration:underline;
+}
+
+.acciones-masivas{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+}
+
+.acciones-masivas-info{
+    color:#64748b;
+    margin-top:4px;
+}
+
+.acciones-masivas-control{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.estado-masivo-select{
+    min-width:190px;
+}
+
+.tabla-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.tabla-header h3{
+    margin:0;
+    color:#334155;
+}
+
+.contador-registros{
+    color:#64748b;
+    font-size:14px;
+}
+
+.tabla-estados{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-estados thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-estados th{
+    padding:14px;
+    text-align:left;
+}
+
+.tabla-estados td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.tabla-estados tbody tr:hover{
+    background:#f8fafc;
+}
+
+.col-check{
+    width:45px;
+    text-align:center;
+}
+
+.estado-select{
+    min-width:180px;
+}
+
+.btn-guardar{
+    background:#2563eb;
+    color:white;
+    padding:7px 12px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-guardar:hover{
+    background:#1d4ed8;
+}
+
+.paginacion{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    align-items:center;
+}
+
+.paginacion a{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.paginacion a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:1100px){
+
+    .grid-filtros{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .acciones-masivas{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="estado-header">
+
+    <div>
+        <h1>Gestión de Estados Operacionales</h1>
+
+        <p class="subtitulo-pagina">
+            Actualiza el estado real de la flota de forma individual o masiva.
+        </p>
+    </div>
+
+</div>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="estado-card">
+
+    <h3>Filtros de búsqueda</h3>
+
+    <form method="get">
+
+        <div class="grid-filtros">
+
+            <div class="campo-filtro">
+                <label>Patente</label>
+
+                <input
+                    type="text"
+                    name="patente"
+                    value="{{ patente_buscada|default:'' }}"
+                    placeholder="Buscar patente..."
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label>Centro de costo</label>
+
+                <select name="centro_costo">
+                    <option value="">Todos</option>
+
+                    {% for cc in centros_costo %}
+                        <option
+                            value="{{ cc.id }}"
+                            {% if centro_costo_id == cc.id|stringformat:"s" %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ cc.codigo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo-filtro">
+                <label>Estado</label>
+
+                <select name="estado">
+                    <option value="">Todos</option>
+
+                    {% for valor,nombre in estados_operacionales %}
+                        <option
+                            value="{{ valor }}"
+                            {% if estado_seleccionado == valor %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                class="boton-primario"
+            >
+                Filtrar
+            </button>
+
+            <a
+                href="/estados/"
+                class="link-limpiar"
+            >
+                Limpiar filtros
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="estado-card">
+
+        <div class="acciones-masivas">
+
+            <div>
+                <h3>Cambio masivo</h3>
+
+                <div class="acciones-masivas-info">
+                    Selecciona uno o más vehículos y aplica un estado operacional.
+                </div>
+            </div>
+
+            <div class="acciones-masivas-control">
+
+                <select
+                    name="estado_masivo"
+                    class="estado-masivo-select"
+                >
+                    {% for valor,nombre in estados_operacionales %}
+                        <option value="{{ valor }}">
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button
+                    type="submit"
+                    name="accion"
+                    value="masivo"
+                    class="boton-primario"
+                >
+                    Aplicar a seleccionados
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="estado-card">
+
+        <div class="tabla-header">
+
+            <h3>Listado de vehículos</h3>
+
+            <div class="contador-registros">
+                Mostrando
+                {{ vehiculos.start_index }}–{{ vehiculos.end_index }}
+                de
+                {{ vehiculos.paginator.count }}
+                vehículos
+            </div>
+
+        </div>
+
+        <table class="tabla-estados">
+
+            <thead>
+                <tr>
+                    <th class="col-check">
+                        <input
+                            type="checkbox"
+                            id="seleccionarTodos"
+                        >
+                    </th>
+
+                    <th>Patente</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Centro costo</th>
+                    <th>Estado operacional</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for vehiculo in vehiculos %}
+
+                    <tr>
+                        <td class="col-check">
+                            <input
+                                type="checkbox"
+                                name="vehiculos"
+                                value="{{ vehiculo.id }}"
+                                class="checkVehiculo"
+                            >
+                        </td>
+
+                        <td>{{ vehiculo.patente }}</td>
+                        <td>{{ vehiculo.marca }}</td>
+                        <td>{{ vehiculo.modelo }}</td>
+                        <td>{{ vehiculo.centro_costo }}</td>
+
+                        <td>
+                            <select
+                                name="estado_operacional_{{ vehiculo.id }}"
+                                class="estado-select"
+                            >
+                                {% for valor,nombre in estados_operacionales %}
+                                    <option
+                                        value="{{ valor }}"
+                                        {% if vehiculo.estado_operacional == valor %}
+                                        selected
+                                        {% endif %}
+                                    >
+                                        {{ nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+
+                        <td>
+                            <input
+                                type="hidden"
+                                name="vehiculo_id_{{ vehiculo.id }}"
+                                value="{{ vehiculo.id }}"
+                            >
+
+                            <button
+                                type="submit"
+                                name="accion"
+                                value="individual_{{ vehiculo.id }}"
+                                class="btn-guardar"
+                            >
+                                Guardar
+                            </button>
+                        </td>
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="7">
+                            No hay vehículos para mostrar.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+        <div class="paginacion">
+
+            {% if vehiculos.has_previous %}
+
+                <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                    ⏮ Primera
+                </a>
+
+                <a href="?page={{ vehiculos.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    ◀ Anterior
+                </a>
+
+            {% endif %}
+
+            <strong>
+                Página {{ vehiculos.number }} de {{ vehiculos.paginator.num_pages }}
+            </strong>
+
+            {% if vehiculos.has_next %}
+
+                <a href="?page={{ vehiculos.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    Siguiente ▶
+                </a>
+
+                <a href="?page={{ vehiculos.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    Última ⏭
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+const seleccionarTodos = document.getElementById("seleccionarTodos");
+
+if(seleccionarTodos){
+
+    seleccionarTodos.addEventListener("change", function(){
+
+        document.querySelectorAll(".checkVehiculo").forEach(function(checkbox){
+
+            checkbox.checked = seleccionarTodos.checked;
+
+        });
+
+    });
+
+}
+
+</script>
+
+{% endblock %}

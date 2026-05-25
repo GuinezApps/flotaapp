@@ -1,0 +1,53 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Dar de baja {{ vehiculo.patente }}
+{% endblock %}
+
+{% block content %}
+
+<h1>Dar de baja vehículo</h1>
+
+<div class="tarjeta">
+
+    <p>
+        Está a punto de dar de baja el vehículo:
+    </p>
+
+    <h2>
+        {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+    </h2>
+
+    <p>
+        Esta acción no eliminará el registro, pero lo marcará como
+        <strong>Dado de Baja</strong> y <strong>Fuera de Servicio</strong>.
+    </p>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            style="
+            background:#dc2626;
+            color:white;
+            padding:10px 16px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight:bold;
+            "
+        >
+            Confirmar baja
+        </button>
+
+        <a href="{% url 'detalle_vehiculo' vehiculo.id %}" style="margin-left:10px;">
+            Cancelar
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

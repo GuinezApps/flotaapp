@@ -1,0 +1,90 @@
+{% extends 'flota/base.html' %}
+
+{% block content %}
+
+<h1>
+Reactivar vehículo
+</h1>
+
+<div class="tarjeta">
+
+<p>
+
+Se reactivará:
+
+</p>
+
+<h2>
+
+{{vehiculo.patente}}
+
+-
+
+{{vehiculo.marca}}
+
+{{vehiculo.modelo}}
+
+</h2>
+
+<p>
+
+El vehículo volverá a:
+
+</p>
+
+<ul>
+
+<li>
+Estado administrativo:
+Vigente
+</li>
+
+<li>
+Estado operacional:
+No informado
+</li>
+
+<li>
+Fecha baja:
+vacía
+</li>
+
+</ul>
+
+<form method="post">
+
+{% csrf_token %}
+
+<button
+type="submit"
+style="
+background:#16a34a;
+color:white;
+padding:10px 16px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+"
+>
+
+♻ Reactivar
+
+</button>
+
+<a
+href="{% url 'detalle_vehiculo' vehiculo.id %}"
+style="
+margin-left:15px;
+"
+>
+
+Cancelar
+
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

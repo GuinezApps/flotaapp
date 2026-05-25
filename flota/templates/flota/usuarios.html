@@ -1,0 +1,298 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Usuarios
+{% endblock %}
+
+{% block extra_css %}
+
+.usuarios-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin-top:4px;
+}
+
+.usuarios-card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.usuarios-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:18px;
+}
+
+.usuarios-toolbar h3{
+    margin:0;
+    color:#334155;
+    white-space:nowrap;
+}
+
+.filtro-usuarios{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin:0;
+}
+
+.filtro-usuarios input{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    width:380px;
+}
+
+.filtro-usuarios button,
+.filtro-usuarios a{
+    white-space:nowrap;
+}
+
+.tabla-usuarios{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-usuarios thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-usuarios th{
+    padding:14px;
+    text-align:left;
+}
+
+.tabla-usuarios td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.tabla-usuarios tbody tr:hover{
+    background:#f8fafc;
+}
+
+.rol-texto{
+    font-weight:600;
+    color:#334155;
+}
+
+.acciones-usuario{
+    display:flex;
+    gap:8px;
+}
+
+.btn-editar{
+    background:#2563eb;
+    color:white;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+}
+
+.btn-reset{
+    background:#475569;
+    color:white;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+}
+
+.btn-eliminar{
+    background:#dc2626;
+    color:white;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="usuarios-header">
+
+    <div>
+        <h1>Usuarios</h1>
+
+        <p class="subtitulo-pagina">
+            Administración de usuarios del sistema
+        </p>
+    </div>
+
+    <a
+    href="{% url 'crear_usuario' %}"
+    class="boton-primario"
+    >
+        ➕ Nuevo usuario
+    </a>
+
+</div>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="usuarios-card">
+
+    <div class="usuarios-toolbar">
+
+        <h3>Listado de usuarios</h3>
+
+        <form
+        method="get"
+        class="filtro-usuarios"
+        >
+
+            <input
+            type="text"
+            name="q"
+            value="{{ busqueda }}"
+            placeholder="Buscar por usuario, nombre, RUT, correo o permiso..."
+            >
+
+            <button
+            type="submit"
+            class="boton-primario"
+            >
+                Buscar
+            </button>
+
+            <a
+            href="{% url 'usuarios' %}"
+            class="boton-primario"
+            style="background:#64748b;"
+            >
+                Limpiar
+            </a>
+
+        </form>
+
+    </div>
+
+    <table class="tabla-usuarios">
+
+        <thead>
+
+            <tr>
+                <th>Rut</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Cargo</th>
+                <th>Teléfono</th>
+                <th>Centro costo</th>
+                <th>Permisos</th>
+                <th>Acciones</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for usuario in usuarios %}
+
+            <tr>
+
+                <td>
+                    {{ usuario.perfil.rut|default:"-" }}
+                </td>
+
+                <td>
+                    {{ usuario.perfil.nombre|default:usuario.username }}
+                </td>
+
+                <td>
+                    {{ usuario.email|default:"-" }}
+                </td>
+
+                <td>
+                    {{ usuario.perfil.cargo|default:"-" }}
+                </td>
+
+                <td>
+                    {{ usuario.perfil.telefono|default:"-" }}
+                </td>
+
+                <td>
+                    {% if usuario.perfil.centro_costo %}
+                        {{ usuario.perfil.centro_costo.codigo }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>
+
+                    {% for grupo in usuario.groups.all %}
+
+                        <span class="rol-texto">
+                            {{ grupo.name }}
+                        </span>
+
+                    {% empty %}
+
+                        -
+
+                    {% endfor %}
+
+                </td>
+
+                <td>
+
+                    <div class="acciones-usuario">
+
+                        <a
+                        href="{% url 'editar_usuario' usuario.id %}"
+                        class="btn-editar"
+                        >
+                            ✏ Editar
+                        </a>
+
+                        <a
+                        href="{% url 'resetear_password_usuario' usuario.id %}"
+                        class="btn-reset"
+                        >
+                            🔒 Contraseña
+                        </a>
+
+                        <a
+                        href="{% url 'eliminar_usuario' usuario.id %}"
+                        class="btn-eliminar"
+                        >
+                            🗑 Eliminar
+                        </a>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="8">
+                    No hay usuarios registrados.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

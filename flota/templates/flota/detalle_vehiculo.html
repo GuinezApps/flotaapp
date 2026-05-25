@@ -1,0 +1,391 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Ficha {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.contenedor-ficha {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.volver {
+    display: inline-block;
+    margin-bottom: 20px;
+    background: #1e293b;
+    color: white;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.ficha-tarjeta {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.patente {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.subtitulo {
+    color: #475569;
+    margin-top: 5px;
+}
+
+.badge {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.badge-operativo {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-mantencion {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-fuera {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-no {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.grid-secciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.seccion {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    background: #f8fafc;
+}
+
+.seccion h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.campo {
+    margin-bottom: 10px;
+}
+
+.label {
+    font-weight: bold;
+    color: #334155;
+}
+
+.valor {
+    color: #111827;
+}
+
+.observaciones {
+    margin-top: 25px;
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="contenedor-ficha">
+
+    <a href="/" class="volver">← Volver al dashboard</a>
+	{% if puede_editar %}
+
+    {% if vehiculo.estado_administrativo == 'Dado de Baja' %}
+
+        <span
+        style="
+        padding:10px;
+        background:#fee2e2;
+        border-radius:6px;
+        margin-left:10px;
+        "
+        >
+
+        🚫 Vehículo dado de baja
+
+        </span>
+
+        <a
+        href="{% url 'reactivar_vehiculo' vehiculo.id %}"
+        class="volver"
+        style="
+        margin-left:10px;
+        background:#16a34a;
+        "
+        >
+
+        ♻ Reactivar
+
+        </a>
+
+    {% else %}
+
+        <a
+        href="{% url 'editar_vehiculo' vehiculo.id %}"
+        class="volver"
+        style="
+        margin-left:10px;
+        background:#2563eb;
+        "
+        >
+
+        ✏ Editar vehículo
+
+        </a>
+
+        <a
+        href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
+        class="volver"
+        style="
+        margin-left:10px;
+        background:#dc2626;
+        "
+        >
+
+        🛑 Dar de baja
+
+        </a>
+
+    {% endif %}
+
+{% endif %}
+    <div class="ficha-tarjeta">
+
+        <div class="encabezado">
+
+            <div>
+                <div class="patente">
+                    {{ vehiculo.patente }}
+                </div>
+
+                <div class="subtitulo">
+                    {{ vehiculo.marca }} {{ vehiculo.modelo }} · {{ vehiculo.anio }}
+                </div>
+
+                <div class="subtitulo">
+                    {{ vehiculo.tipo_vehiculo }} · {{ vehiculo.color }}
+                </div>
+            </div>
+
+            <div>
+                {% if vehiculo.estado_operacional == 'Operativo' %}
+                    <span class="badge badge-operativo">🟢 Operativo</span>
+                {% elif vehiculo.estado_operacional == 'En Mantencion' %}
+                    <span class="badge badge-mantencion">🟡 En Mantención</span>
+                {% elif vehiculo.estado_operacional == 'FueraServicio' %}
+                    <span class="badge badge-fuera">🔴 Fuera de Servicio</span>
+                {% else %}
+                    <span class="badge badge-no">⚪ No informado</span>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="grid-secciones">
+
+            <div class="seccion">
+                <h3>Información técnica</h3>
+
+                <div class="campo">
+                    <span class="label">Marca:</span>
+                    <span class="valor">{{ vehiculo.marca|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Modelo:</span>
+                    <span class="valor">{{ vehiculo.modelo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Año:</span>
+                    <span class="valor">{{ vehiculo.anio|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Combustible:</span>
+                    <span class="valor">{{ vehiculo.combustible|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Tracción:</span>
+                    <span class="valor">{{ vehiculo.traccion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">N° motor:</span>
+                    <span class="valor">{{ vehiculo.numero_motor|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">VIN / Chasis:</span>
+                    <span class="valor">{{ vehiculo.numero_chasis_vin|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Asientos:</span>
+                    <span class="valor">{{ vehiculo.numero_asientos|default:"-" }}</span>
+                </div>
+            </div>
+
+
+            <div class="seccion">
+                <h3>Estado y operación</h3>
+
+                <div class="campo">
+                    <span class="label">Estado operacional:</span>
+                    <span class="valor">{{ vehiculo.estado_operacional|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Estado administrativo:</span>
+                    <span class="valor">{{ vehiculo.estado_administrativo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Estado mantención:</span>
+                    <span class="valor">{{ vehiculo.estado_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Kilometraje actual:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_actual|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Última mantención:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_ultima_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Próxima mantención:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_proxima_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Km restantes:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_restante|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Alerta mantención:</span>
+                    <span class="valor">{{ vehiculo.alerta_mantencion|default:"-" }}</span>
+                </div>
+            </div>
+
+
+            <div class="seccion">
+                <h3>Contrato y arriendo</h3>
+
+                <div class="campo">
+                    <span class="label">Empresa arrendadora:</span>
+                    <span class="valor">{{ vehiculo.empresa_arrendadora|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Razón social:</span>
+                    <span class="valor">{{ vehiculo.razon_social|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">RUT empresa:</span>
+                    <span class="valor">{{ vehiculo.rut_empresa|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Tarifa mensual:</span>
+                    <span class="valor">{{ vehiculo.tarifa_mensual|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Inicio contrato:</span>
+                    <span class="valor">{{ vehiculo.fecha_inicio_contrato|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Término contrato:</span>
+                    <span class="valor">{{ vehiculo.fecha_termino_contrato|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Período meses:</span>
+                    <span class="valor">{{ vehiculo.periodo_meses|default:"-" }}</span>
+                </div>
+            </div>
+
+
+            <div class="seccion">
+                <h3>Ubicación y asignación</h3>
+
+                <div class="campo">
+                    <span class="label">Centro de costo:</span>
+                    <span class="valor">{{ vehiculo.centro_costo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Gerencia:</span>
+                    <span class="valor">{{ vehiculo.gerencia|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Faena:</span>
+                    <span class="valor">{{ vehiculo.faena|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Ciudad:</span>
+                    <span class="valor">{{ vehiculo.ciudad|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Sucursal:</span>
+                    <span class="valor">{{ vehiculo.sucursal|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Fecha baja:</span>
+                    <span class="valor">{{ vehiculo.fecha_baja|default:"-" }}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="seccion observaciones">
+            <h3>Observaciones</h3>
+            <p>{{ vehiculo.observaciones|default:"Sin observaciones registradas." }}</p>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

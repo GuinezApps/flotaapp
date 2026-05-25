@@ -1,0 +1,44 @@
+{% extends 'flota/base.html' %}
+
+{% block content %}
+
+<h1>Eliminar usuario</h1>
+
+<div class="tarjeta">
+
+<p>
+
+¿Seguro que deseas eliminar:
+
+<strong>
+
+{{ usuario.username }}
+
+</strong>?
+
+</p>
+
+<form method="post">
+
+{% csrf_token %}
+
+<button
+class="boton-peligro"
+type="submit"
+>
+
+Eliminar
+
+</button>
+
+<a href="{% url 'usuarios' %}">
+
+Cancelar
+
+</a>
+
+</form>
+
+</div>
+
+{% endblock %}

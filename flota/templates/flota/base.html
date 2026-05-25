@@ -1,0 +1,511 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+
+<title>
+{% block title %}Flota{% endblock %}
+</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+}
+
+.layout{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:250px;
+    background:#1e293b;
+    color:white;
+    padding:20px;
+    transition:width .25s ease;
+    overflow:hidden;
+}
+
+.sidebar.oculto{
+    width:60px;
+}
+
+.sidebar ul{
+    list-style:none;
+    padding:0;
+}
+
+.sidebar li{
+    margin-bottom:10px;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:12px;
+    border-radius:8px;
+    white-space:nowrap;
+    transition:.2s ease;
+}
+
+.sidebar a:hover{
+    background:#334155;
+    transform:translateX(5px);
+}
+
+.sidebar a.activo{
+    background:#334155;
+    border-left:4px solid #3b82f6;
+    font-weight:bold;
+}
+
+.sidebar.oculto .texto-menu{
+    display:none;
+}
+
+.sidebar.oculto a{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:12px 0;
+}
+
+.sidebar.oculto li{
+    display:flex;
+    justify-content:center;
+}
+
+.sidebar.oculto hr{
+    margin:20px 0;
+}
+
+.boton-toggle{
+    background:#334155;
+    color:white;
+    border:none;
+    width:42px;
+    height:42px;
+    border-radius:8px;
+    cursor:pointer;
+    margin:0 auto 25px auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+
+.boton-toggle:hover{
+    background:#475569;
+}
+
+.logo-sidebar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:35px;
+    padding-bottom:20px;
+    border-bottom:1px solid #334155;
+}
+
+.logo-empresa{
+    width:90px;
+    height:auto;
+    padding:0;
+    background:transparent;
+    border-radius:0;
+    box-shadow:none;
+}
+
+.logo-texto{
+    display:flex;
+    flex-direction:column;
+}
+
+.titulo-sidebar{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.subtitulo-sidebar{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.sidebar.oculto .logo-texto{
+    display:none;
+}
+
+.sidebar.oculto .logo-sidebar{
+    justify-content:center;
+}
+
+.sidebar.oculto .logo-empresa{
+    width:42px;
+}
+
+.contenido{
+    flex:1;
+    padding:30px;
+    overflow-x:auto;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    background:white;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:8px;
+}
+
+tbody tr:hover{
+    background:#f5f5f5;
+}
+
+.tarjeta{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+.boton-primario{
+    background:#2563eb;
+    color:white;
+    padding:8px 14px;
+    border-radius:6px;
+    text-decoration:none;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    display:inline-block;
+}
+
+.usuario-sidebar{
+    margin-top:30px;
+    padding-top:18px;
+    border-top:1px solid #334155;
+    font-size:13px;
+}
+
+.usuario-nombre{
+    color:#94a3b8;
+    margin-bottom:4px;
+}
+
+.usuario-username{
+    font-weight:bold;
+    margin-bottom:12px;
+    color:white;
+}
+
+.boton-logout{
+    width:100%;
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:8px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-logout:hover{
+    background:#b91c1c;
+}
+
+.sidebar.oculto .usuario-sidebar{
+    display:none;
+}
+
+.mensajes{
+
+    margin-bottom:20px;
+
+    max-width:1000px;
+
+}
+
+.mensaje{
+
+    padding:14px 18px;
+
+    border-radius:10px;
+
+    margin-bottom:12px;
+
+    font-weight:600;
+
+    box-shadow:
+    0 2px 10px rgba(
+        0,
+        0,
+        0,
+        .08
+    );
+
+    animation:
+    aparecer .25s ease;
+
+}
+
+.mensaje-success{
+
+    background:#dcfce7;
+
+    color:#166534;
+
+    border-left:
+    6px solid #22c55e;
+
+}
+
+.mensaje-error{
+
+    background:#fee2e2;
+
+    color:#991b1b;
+
+    border-left:
+    6px solid #ef4444;
+
+}
+
+.mensaje-info{
+
+    background:#dbeafe;
+
+    color:#1e40af;
+
+    border-left:
+    6px solid #3b82f6;
+
+}
+
+@keyframes aparecer{
+
+from{
+opacity:0;
+transform:translateY(-8px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+{% block extra_css %}
+{% endblock %}
+
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+
+<button class="boton-toggle" onclick="toggleSidebar()">
+☰
+</button>
+
+<div class="logo-sidebar">
+
+<img
+src="{% static 'img/logo_guinez.png' %}"
+class="logo-empresa"
+>
+
+<div class="logo-texto">
+    <div class="titulo-sidebar">Flota</div>
+    <div class="subtitulo-sidebar">Guíñez Ingeniería</div>
+</div>
+
+</div>
+
+<ul>
+
+<li>
+<a
+href="/"
+class="{% if request.path == '/' %}activo{% endif %}"
+>
+🏠
+<span class="texto-menu">Inicio</span>
+</a>
+</li>
+
+<li>
+<a href="/">
+🚚
+<span class="texto-menu">Vehículos</span>
+</a>
+</li>
+
+{% if puede_editar %}
+<li>
+<a
+href="/estados/"
+class="{% if '/estados/' in request.path %}activo{% endif %}"
+>
+🚗
+<span class="texto-menu">Gestión estados</span>
+</a>
+</li>
+{% endif %}
+
+{% if puede_importar %}
+<li>
+<a
+href="{% url 'importar_datos' %}"
+class="{% if '/importar/' in request.path %}activo{% endif %}"
+>
+📥
+<span class="texto-menu">Importar datos</span>
+</a>
+</li>
+{% endif %}
+
+<hr style="border-color:#334155;margin:25px 0;">
+
+<li>
+<a href="#">
+📊
+<span class="texto-menu">Reportes</span>
+</a>
+</li>
+
+<li>
+<a href="#">
+🔧
+<span class="texto-menu">Mantenciones</span>
+</a>
+</li>
+
+<li>
+<a href="#">
+💰
+<span class="texto-menu">Costos</span>
+</a>
+</li>
+
+<li>
+<a href="#">
+⚠
+<span class="texto-menu">Alertas</span>
+</a>
+</li>
+
+{% if puede_gestionar_usuarios %}
+<hr style="border-color:#334155;margin:25px 0;">
+
+<li>
+<a
+href="{% url 'configuracion' %}"
+class="{% if '/configuracion/' in request.path %}activo{% endif %}"
+>
+⚙
+<span class="texto-menu">Configuración</span>
+</a>
+</li>
+{% endif %}
+
+</ul>
+
+<div class="usuario-sidebar">
+
+    <div class="usuario-nombre">
+        Conectado como
+    </div>
+
+    <div class="usuario-username">
+        {{ request.user.username }}
+    </div>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+
+        <button type="submit" class="boton-logout">
+            Cerrar sesión
+        </button>
+    </form>
+
+</div>
+
+</aside>
+
+<main class="contenido">
+
+{% block content %}
+{% endblock %}
+
+</main>
+
+
+</div>
+
+<script>
+
+const sidebar = document.getElementById("sidebar");
+
+if(localStorage.getItem("sidebarEstado") === "cerrado"){
+    sidebar.classList.add("oculto");
+}
+
+function toggleSidebar(){
+
+    sidebar.classList.toggle("oculto");
+
+    if(sidebar.classList.contains("oculto")){
+        localStorage.setItem("sidebarEstado","cerrado");
+    }else{
+        localStorage.setItem("sidebarEstado","abierto");
+    }
+}
+
+</script>
+
+<script>
+
+setTimeout(
+function(){
+
+    let mensajes = document.querySelectorAll('.mensaje');
+
+    mensajes.forEach(
+        m => {
+            m.style.transition = 'opacity .4s';
+            m.style.opacity = 0;
+
+            setTimeout(
+                () => {
+                    m.remove();
+                },
+                400
+            );
+        }
+    );
+
+},
+4000
+);
+
+</script>
+
+{% block extra_js %}
+{% endblock %}
+
+</body>
+</html>
