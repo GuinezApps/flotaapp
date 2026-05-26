@@ -10,6 +10,7 @@ Configuración
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 18px;
+    margin-top: 20px;
 }
 
 .config-card {
@@ -20,6 +21,8 @@ Configuración
     color: #1e293b;
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
     transition: .2s;
+    min-height: 130px;
+    display: block;
 }
 
 .config-card:hover {
@@ -36,10 +39,21 @@ Configuración
     font-size: 20px;
     font-weight: bold;
     margin-bottom: 8px;
+    color: #1e293b;
 }
 
 .config-meta {
     color: #64748b;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+@media(max-width:900px){
+
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+
 }
 
 {% endblock %}
@@ -54,7 +68,10 @@ Configuración
 
 <div class="config-grid">
 
-    <a href="{% url 'usuarios' %}" class="config-card">
+    <a
+    href="{% url 'usuarios' %}"
+    class="config-card"
+    >
 
         <div class="config-icon">
             👤
@@ -66,6 +83,25 @@ Configuración
 
         <div class="config-meta">
             {{ total_usuarios }} usuarios registrados
+        </div>
+
+    </a>
+
+    <a
+    href="{% url 'bitacora' %}"
+    class="config-card"
+    >
+
+        <div class="config-icon">
+            📋
+        </div>
+
+        <div class="config-title">
+            Bitácora de acciones
+        </div>
+
+        <div class="config-meta">
+            Revisar historial de cambios realizados por usuarios del sistema.
         </div>
 
     </a>

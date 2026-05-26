@@ -19,4 +19,5 @@ urlpatterns = [
     path('configuracion/usuarios/<int:id>/editar/',views.editar_usuario,name='editar_usuario'),
     path('configuracion/usuarios/<int:id>/eliminar/',views.eliminar_usuario,name='eliminar_usuario'),
     path('configuracion/usuarios/<int:id>/resetear-password/',views.resetear_password_usuario,name='resetear_password_usuario'),
+    path('configuracion/bitacora/',views.bitacora,name='bitacora'),
 ]

@@ -7,7 +7,7 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Vehiculo, PerfilUsuario, CentroCosto
+from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
@@ -1659,7 +1659,110 @@ def configuracion(request):
             'total_usuarios': total_usuarios
         }
     )
+@login_required
+@master_required
+def bitacora(request):
 
+    busqueda = request.GET.get(
+        'q',
+        ''
+    ).strip()
+
+    accion = request.GET.get(
+        'accion',
+        ''
+    )
+
+    modulo = request.GET.get(
+        'modulo',
+        ''
+    )
+
+    registros = BitacoraAccion.objects.all()
+
+    if busqueda:
+
+        registros = registros.filter(
+
+            Q(
+                usuario_texto__icontains=busqueda
+            ) |
+
+            Q(
+                descripcion__icontains=busqueda
+            ) |
+
+            Q(
+                objeto_repr__icontains=busqueda
+            ) |
+
+            Q(
+                valor_anterior__icontains=busqueda
+            ) |
+
+            Q(
+                valor_nuevo__icontains=busqueda
+            )
+
+        )
+
+    if accion:
+
+        registros = registros.filter(
+            accion=accion
+        )
+
+    if modulo:
+
+        registros = registros.filter(
+            modulo=modulo
+        )
+
+    modulos = BitacoraAccion.objects.values_list(
+        'modulo',
+        flat=True
+    ).exclude(
+        modulo__isnull=True
+    ).distinct().order_by(
+        'modulo'
+    )
+
+    paginator = Paginator(
+        registros,
+        25
+    )
+
+    page_number = request.GET.get(
+        'page'
+    )
+
+    registros_pagina = paginator.get_page(
+        page_number
+    )
+
+    query_params = request.GET.copy()
+
+    if 'page' in query_params:
+        query_params.pop(
+            'page'
+        )
+
+    query_string = query_params.urlencode()
+
+    return render(
+        request,
+        'flota/bitacora.html',
+        {
+            'registros': registros_pagina,
+            'busqueda': busqueda,
+            'accion_seleccionada': accion,
+            'modulo_seleccionado': modulo,
+            'acciones': BitacoraAccion.ACCIONES,
+            'modulos': modulos,
+            'query_string': query_string,
+        }
+    )
+    
 @login_required
 @master_required
 def usuarios(request):
@@ -2010,4 +2113,5 @@ def resetear_password_usuario(request, id):
             'usuario_obj': usuario
         }
     )
+
 

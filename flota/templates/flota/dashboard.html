@@ -87,6 +87,10 @@ Vehículos
 
 .campo-filtro input,
 .campo-filtro select{
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
     padding:9px;
     border:1px solid #cbd5e1;
     border-radius:8px;
@@ -334,8 +338,15 @@ Vehículos
 @media(max-width:1200px){
 
     .panel-filtros-layout{
-        grid-template-columns:1fr;
-    }
+		display:grid;
+		grid-template-columns:minmax(0,1fr) minmax(340px,390px);
+		gap:25px;
+		align-items:start;
+	}
+
+.panel-filtros-layout > div{
+    min-width:0;
+}
 
     .resumen-filtros{
         border-left:0;
@@ -349,8 +360,10 @@ Vehículos
 @media(max-width:900px){
 
     .grid-filtros{
-        grid-template-columns:1fr;
-    }
+		display:grid;
+		grid-template-columns:repeat(3,minmax(0,1fr));
+		gap:15px;
+	}
 
     .resumen-contenido{
         grid-template-columns:1fr;
