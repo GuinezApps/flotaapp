@@ -34,15 +34,26 @@ class Vehiculo(models.Model):
         ('Vigente', 'Vigente'),
         ('Dado de Baja', 'Dado de Baja'),
     ]
+
     ESTADOS_OPERACIONALES = [
         ('Operativo', 'Operativo'),
         ('No operativo', 'No operativo'),
         ('No informado', 'No informado'),
     ]
+
     SUBESTADOS_NO_OPERATIVO = [
         ('Mantencion', 'En mantención'),
         ('Reparacion', 'En reparación'),
         ('Detenido', 'Detenido'),
+    ]
+
+    MOTIVOS_BAJA = [
+        ('Termino contrato', 'Término de contrato'),
+        ('Venta', 'Venta'),
+        ('Siniestro', 'Siniestro'),
+        ('Reemplazo', 'Reemplazo'),
+        ('Fuera de servicio definitivo', 'Fuera de servicio definitivo'),
+        ('Otro', 'Otro'),
     ]
 
     # --------------------------------------------------------
@@ -249,6 +260,17 @@ class Vehiculo(models.Model):
     # --------------------------------------------------------
 
     fecha_baja = models.DateField(
+        blank=True,
+        null=True
+    )
+    motivo_baja = models.CharField(
+    max_length=100,
+    choices=MOTIVOS_BAJA,
+    blank=True,
+    null=True
+    )
+
+    observacion_baja = models.TextField(
         blank=True,
         null=True
     )
@@ -507,3 +529,79 @@ class BitacoraAccion(models.Model):
 
         verbose_name = 'Bitácora de acción'
         verbose_name_plural = 'Bitácora de acciones'
+        
+# ============================================================
+# Historial de bajas de vehículos
+# ============================================================
+
+class HistorialBajaVehiculo(models.Model):
+
+    vehiculo = models.ForeignKey(
+        Vehiculo,
+        on_delete=models.CASCADE,
+        related_name='historial_bajas'
+    )
+
+    fecha_baja = models.DateField()
+
+    motivo_baja = models.CharField(
+        max_length=100,
+        choices=Vehiculo.MOTIVOS_BAJA
+    )
+
+    observacion_baja = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    usuario_baja = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='bajas_registradas'
+    )
+
+    fecha_reactivacion = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    usuario_reactivacion = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='reactivaciones_registradas'
+    )
+
+    observacion_reactivacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    creado_en = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    actualizado_en = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"{self.vehiculo.patente} | "
+            f"{self.fecha_baja} | "
+            f"{self.get_motivo_baja_display()}"
+        )
+
+    class Meta:
+
+        ordering = [
+            '-fecha_baja',
+            '-creado_en'
+        ]
+
+        verbose_name = 'Historial de baja de vehículo'
+        verbose_name_plural = 'Historial de bajas de vehículos'

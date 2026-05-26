@@ -4,47 +4,222 @@
 Dar de baja {{ vehiculo.patente }}
 {% endblock %}
 
+{% block extra_css %}
+
+.baja-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    max-width:760px;
+}
+
+.alerta-baja{
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    padding:14px 16px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.vehiculo-resumen{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin:18px 0;
+}
+
+.vehiculo-resumen h2{
+    margin:0 0 6px 0;
+    color:#1e293b;
+}
+
+.vehiculo-meta{
+    color:#64748b;
+    margin:0;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-top:20px;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-field label{
+    font-weight:bold;
+    margin-bottom:6px;
+    color:#334155;
+}
+
+.form-field select,
+.form-field textarea{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+}
+
+.form-field textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.acciones-baja{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:22px;
+}
+
+.boton-peligro{
+    background:#dc2626;
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-peligro:hover{
+    background:#b91c1c;
+}
+
+.link-cancelar{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.link-cancelar:hover{
+    text-decoration:underline;
+}
+
+{% endblock %}
+
 {% block content %}
 
 <h1>Dar de baja vehículo</h1>
 
-<div class="tarjeta">
+<div class="baja-card">
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <div class="alerta-baja">
+        Esta acción no eliminará el registro, pero marcará el vehículo como
+        <strong>Dado de Baja</strong>, con estado operacional
+        <strong>No operativo</strong> y motivo operacional
+        <strong>Detenido</strong>.
+    </div>
 
     <p>
-        Está a punto de dar de baja el vehículo:
+        Está a punto de dar de baja el siguiente vehículo:
     </p>
 
-    <h2>
-        {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
-    </h2>
+    <div class="vehiculo-resumen">
 
-    <p>
-        Esta acción no eliminará el registro, pero lo marcará como
-        <strong>Dado de Baja</strong> y <strong>Fuera de Servicio</strong>.
-    </p>
+        <h2>
+            {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+        </h2>
+
+        <p class="vehiculo-meta">
+            Centro de costo:
+            {{ vehiculo.centro_costo|default:"-" }}
+        </p>
+
+    </div>
 
     <form method="post">
 
         {% csrf_token %}
 
-        <button
-            type="submit"
-            style="
-            background:#dc2626;
-            color:white;
-            padding:10px 16px;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
-            font-weight:bold;
-            "
-        >
-            Confirmar baja
-        </button>
+        <div class="form-grid">
 
-        <a href="{% url 'detalle_vehiculo' vehiculo.id %}" style="margin-left:10px;">
-            Cancelar
-        </a>
+            <div class="form-field">
+
+                <label for="motivo_baja">
+                    Motivo de baja
+                </label>
+
+                <select
+                    name="motivo_baja"
+                    id="motivo_baja"
+                    required
+                >
+                    <option value="">
+                        Selecciona un motivo
+                    </option>
+
+                    {% for valor,texto in motivos_baja %}
+                        <option
+                            value="{{ valor }}"
+                            {% if motivo_baja == valor %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ texto }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <div class="texto-ayuda">
+                    Este motivo quedará registrado en la ficha del vehículo y en la bitácora.
+                </div>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="observacion_baja">
+                    Observación de baja
+                </label>
+
+                <textarea
+                    name="observacion_baja"
+                    id="observacion_baja"
+                    placeholder="Ejemplo: Vehículo dado de baja por término de contrato, reemplazo de unidad, siniestro, instrucción administrativa, etc."
+                >{{ observacion_baja|default:'' }}</textarea>
+
+                <div class="texto-ayuda">
+                    Campo opcional, recomendado para dejar contexto administrativo.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="acciones-baja">
+
+            <button
+                type="submit"
+                class="boton-peligro"
+            >
+                Confirmar baja
+            </button>
+
+            <a
+                href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                class="link-cancelar"
+            >
+                Cancelar
+            </a>
+
+        </div>
 
     </form>
 

@@ -7,7 +7,7 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion
+from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion, HistorialBajaVehiculo
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
@@ -1296,7 +1296,6 @@ def gestionar_estados(request):
         'flota/estados.html',
         contexto
     )
-
 @login_required
 def detalle_vehiculo(request, id):
 
@@ -1306,8 +1305,14 @@ def detalle_vehiculo(request, id):
         id=id
     )
 
+    historial_bajas = vehiculo.historial_bajas.select_related(
+        'usuario_baja',
+        'usuario_reactivacion'
+    ).all()
+
     contexto = {
         'vehiculo': vehiculo,
+        'historial_bajas': historial_bajas,
         'puede_editar': (
             request.user.groups.filter(name='Editor').exists()
             or request.user.groups.filter(name='Master').exists()
@@ -1432,26 +1437,68 @@ def dar_baja_vehiculo(request, id):
 
     if request.method == 'POST':
 
+        motivo_baja = request.POST.get(
+            'motivo_baja'
+        )
+
+        observacion_baja = request.POST.get(
+            'observacion_baja',
+            ''
+        ).strip()
+
+        if not motivo_baja:
+
+            messages.error(
+                request,
+                'Debes seleccionar un motivo de baja.'
+            )
+
+            return render(
+                request,
+                'flota/confirmar_baja.html',
+                {
+                    'vehiculo': vehiculo,
+                    'motivos_baja': Vehiculo.MOTIVOS_BAJA,
+                    'observacion_baja': observacion_baja,
+                }
+            )
+
         estado_anterior = (
             f"Estado administrativo: {vehiculo.estado_administrativo} | "
             f"Estado operacional: {vehiculo.estado_operacional} | "
             f"Subestado: {vehiculo.subestado_no_operativo} | "
-            f"Fecha baja: {vehiculo.fecha_baja}"
+            f"Fecha baja: {vehiculo.fecha_baja} | "
+            f"Motivo baja: {vehiculo.motivo_baja} | "
+            f"Observación baja: {vehiculo.observacion_baja}"
         )
+
+        fecha_baja = timezone.now().date()
 
         vehiculo.estado_administrativo = 'Dado de Baja'
         vehiculo.estado_operacional = 'No operativo'
         vehiculo.subestado_no_operativo = 'Detenido'
-        vehiculo.fecha_baja = timezone.now().date()
+        vehiculo.fecha_baja = fecha_baja
+        vehiculo.motivo_baja = motivo_baja
+        vehiculo.observacion_baja = observacion_baja
+
+        vehiculo.save()
+
+        HistorialBajaVehiculo.objects.create(
+            vehiculo=vehiculo,
+            fecha_baja=fecha_baja,
+            motivo_baja=motivo_baja,
+            observacion_baja=observacion_baja,
+            usuario_baja=request.user
+        )
 
         estado_nuevo = (
             f"Estado administrativo: {vehiculo.estado_administrativo} | "
             f"Estado operacional: {vehiculo.estado_operacional} | "
             f"Subestado: {vehiculo.subestado_no_operativo} | "
-            f"Fecha baja: {vehiculo.fecha_baja}"
+            f"Fecha baja: {vehiculo.fecha_baja} | "
+            f"Motivo baja: {vehiculo.motivo_baja} | "
+            f"Observación baja: {vehiculo.observacion_baja}"
         )
-
-        vehiculo.save()
 
         registrar_bitacora(
             request=request,
@@ -1460,7 +1507,10 @@ def dar_baja_vehiculo(request, id):
             modelo_afectado='Vehiculo',
             objeto_id=vehiculo.id,
             objeto_repr=vehiculo.patente,
-            descripcion=f'Vehículo {vehiculo.patente} dado de baja.',
+            descripcion=(
+                f'Vehículo {vehiculo.patente} dado de baja. '
+                f'Motivo: {vehiculo.get_motivo_baja_display()}.'
+            ),
             valor_anterior=estado_anterior,
             valor_nuevo=estado_nuevo
         )
@@ -1479,7 +1529,8 @@ def dar_baja_vehiculo(request, id):
         request,
         'flota/confirmar_baja.html',
         {
-            'vehiculo': vehiculo
+            'vehiculo': vehiculo,
+            'motivos_baja': Vehiculo.MOTIVOS_BAJA,
         }
     )
 
@@ -1498,22 +1549,38 @@ def reactivar_vehiculo(request, id):
             f"Estado administrativo: {vehiculo.estado_administrativo} | "
             f"Estado operacional: {vehiculo.estado_operacional} | "
             f"Subestado: {vehiculo.subestado_no_operativo} | "
-            f"Fecha baja: {vehiculo.fecha_baja}"
+            f"Fecha baja: {vehiculo.fecha_baja} | "
+            f"Motivo baja: {vehiculo.motivo_baja} | "
+            f"Observación baja: {vehiculo.observacion_baja}"
         )
+
+        historial_abierto = vehiculo.historial_bajas.filter(
+            fecha_reactivacion__isnull=True
+        ).first()
+
+        if historial_abierto:
+
+            historial_abierto.fecha_reactivacion = timezone.now().date()
+            historial_abierto.usuario_reactivacion = request.user
+            historial_abierto.save()
 
         vehiculo.estado_administrativo = 'Vigente'
         vehiculo.estado_operacional = 'No informado'
         vehiculo.subestado_no_operativo = None
         vehiculo.fecha_baja = None
+        vehiculo.motivo_baja = None
+        vehiculo.observacion_baja = None
+
+        vehiculo.save()
 
         estado_nuevo = (
             f"Estado administrativo: {vehiculo.estado_administrativo} | "
             f"Estado operacional: {vehiculo.estado_operacional} | "
             f"Subestado: {vehiculo.subestado_no_operativo} | "
-            f"Fecha baja: {vehiculo.fecha_baja}"
+            f"Fecha baja: {vehiculo.fecha_baja} | "
+            f"Motivo baja: {vehiculo.motivo_baja} | "
+            f"Observación baja: {vehiculo.observacion_baja}"
         )
-
-        vehiculo.save()
 
         registrar_bitacora(
             request=request,
