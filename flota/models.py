@@ -416,15 +416,6 @@ class PerfilUsuario(models.Model):
 # ============================================================
 
 class BitacoraAccion(models.Model):
-    """
-    Registra acciones relevantes realizadas dentro del sistema.
-
-    Su objetivo es dejar trazabilidad de:
-    - quién realizó una acción
-    - cuándo la realizó
-    - sobre qué módulo u objeto
-    - qué cambio se ejecutó
-    """
 
     ACCIONES = [
         ('CREAR', 'Crear'),
@@ -438,6 +429,7 @@ class BitacoraAccion(models.Model):
         ('LOGIN', 'Inicio de sesión'),
         ('LOGOUT', 'Cierre de sesión'),
         ('OTRO', 'Otro'),
+        ('TRANSFERENCIA', 'Transferencia'),
     ]
 
     usuario = models.ForeignKey(
@@ -605,3 +597,75 @@ class HistorialBajaVehiculo(models.Model):
 
         verbose_name = 'Historial de baja de vehículo'
         verbose_name_plural = 'Historial de bajas de vehículos'
+        
+ # ============================================================
+# Historial de transferencias de vehículos
+# ============================================================
+
+class HistorialTransferenciaVehiculo(models.Model):
+    """
+    Registra cada transferencia de un vehículo entre centros de costo.
+
+    El vehículo mantiene su centro de costo actual en el modelo Vehiculo.
+    Este historial conserva todos los movimientos anteriores.
+    """
+
+    vehiculo = models.ForeignKey(
+        Vehiculo,
+        on_delete=models.CASCADE,
+        related_name='historial_transferencias'
+    )
+
+    centro_costo_origen = models.ForeignKey(
+        CentroCosto,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='transferencias_origen'
+    )
+
+    centro_costo_destino = models.ForeignKey(
+        CentroCosto,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='transferencias_destino'
+    )
+
+    fecha_transferencia = models.DateField()
+
+    usuario_transferencia = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='transferencias_vehiculos'
+    )
+
+    observacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    creado_en = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"{self.vehiculo.patente} | "
+            f"{self.centro_costo_origen} → "
+            f"{self.centro_costo_destino} | "
+            f"{self.fecha_transferencia}"
+        )
+
+    class Meta:
+
+        ordering = [
+            '-fecha_transferencia',
+            '-creado_en'
+        ]
+
+        verbose_name = 'Historial de transferencia de vehículo'
+        verbose_name_plural = 'Historial de transferencias de vehículos'

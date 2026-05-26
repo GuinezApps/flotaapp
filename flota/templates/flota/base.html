@@ -66,6 +66,94 @@ body{
     font-weight:bold;
 }
 
+.menu-padre{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    background:transparent;
+    color:white;
+    border:none;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    font:inherit;
+    text-align:left;
+    white-space:nowrap;
+    transition:.2s ease;
+}
+
+.menu-padre:hover{
+    background:#334155;
+    transform:translateX(5px);
+}
+
+.menu-padre.activo{
+    background:#334155;
+    border-left:4px solid #3b82f6;
+    font-weight:bold;
+}
+
+.menu-padre-contenido{
+    display:flex;
+    align-items:center;
+    gap:0;
+}
+
+.menu-flecha{
+    font-size:12px;
+    color:#cbd5e1;
+    transition:transform .2s ease;
+}
+
+.menu-grupo.abierto .menu-flecha{
+    transform:rotate(180deg);
+}
+
+.submenu{
+    display:none;
+    margin-top:6px;
+    margin-left:18px;
+    padding-left:10px;
+    border-left:1px solid #475569;
+}
+
+.menu-grupo.abierto .submenu{
+    display:block;
+}
+
+.submenu a{
+    padding:9px 12px;
+    font-size:14px;
+    color:#cbd5e1;
+}
+
+.submenu a:hover{
+    color:white;
+}
+
+.submenu a.activo{
+    color:white;
+    background:#334155;
+    border-left:4px solid #3b82f6;
+}
+
+.sidebar.oculto .menu-padre{
+    justify-content:center;
+    padding:12px 0;
+}
+
+.sidebar.oculto .menu-padre .texto-menu,
+.sidebar.oculto .menu-flecha,
+.sidebar.oculto .submenu{
+    display:none;
+}
+
+.sidebar.oculto .menu-padre-contenido{
+    justify-content:center;
+}
+
 .sidebar.oculto .texto-menu{
     display:none;
 }
@@ -350,7 +438,7 @@ class="{% if request.path == '/' %}activo{% endif %}"
 <li>
 <a
 href="{% url 'dashboard' %}"
-class="{% if '/vehiculos/' in request.path %}activo{% endif %}"
+class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'detalle_vehiculo' or request.resolver_match.url_name == 'crear_vehiculo' or request.resolver_match.url_name == 'editar_vehiculo' or request.resolver_match.url_name == 'dar_baja_vehiculo' or request.resolver_match.url_name == 'reactivar_vehiculo' or request.resolver_match.url_name == 'transferir_vehiculo' %}activo{% endif %}"
 >
 🚚
 <span class="texto-menu">Vehículos</span>
@@ -358,26 +446,42 @@ class="{% if '/vehiculos/' in request.path %}activo{% endif %}"
 </li>
 
 {% if puede_editar %}
-<li>
-<a
-href="/estados/"
-class="{% if '/estados/' in request.path %}activo{% endif %}"
->
-🚗
-<span class="texto-menu">Gestión estados</span>
-</a>
-</li>
-{% endif %}
+<li class="menu-grupo {% if request.resolver_match.url_name == 'gestionar_estados' or request.resolver_match.url_name == 'transferencias_cc' %}abierto{% endif %}">
 
-{% if puede_importar %}
-<li>
-<a
-href="{% url 'importar_datos' %}"
-class="{% if '/importar/' in request.path %}activo{% endif %}"
+<button
+type="button"
+class="menu-padre {% if request.resolver_match.url_name == 'gestionar_estados' or request.resolver_match.url_name == 'transferencias_cc' %}activo{% endif %}"
+onclick="toggleSubmenu('submenu-operaciones-vehiculos')"
 >
-📥
-<span class="texto-menu">Importar datos</span>
-</a>
+    <span class="menu-padre-contenido">
+        🛠️
+        <span class="texto-menu">Operaciones vehículos</span>
+    </span>
+
+    <span class="menu-flecha texto-menu">
+        ▼
+    </span>
+</button>
+
+<div
+id="submenu-operaciones-vehiculos"
+class="submenu"
+>
+    <a
+    href="{% url 'gestionar_estados' %}"
+    class="{% if request.resolver_match.url_name == 'gestionar_estados' %}activo{% endif %}"
+    >
+        <span class="texto-menu">Gestión de estados</span>
+    </a>
+
+    <a
+    href="{% url 'transferencias_cc' %}"
+    class="{% if request.resolver_match.url_name == 'transferencias_cc' %}activo{% endif %}"
+    >
+        <span class="texto-menu">Modificación de CCs</span>
+    </a>
+</div>
+
 </li>
 {% endif %}
 
@@ -476,6 +580,22 @@ function toggleSidebar(){
     }else{
         localStorage.setItem("sidebarEstado","abierto");
     }
+}
+
+function toggleSubmenu(id){
+
+    const submenu = document.getElementById(id);
+
+    if(!submenu){
+        return;
+    }
+
+    const grupo = submenu.closest('.menu-grupo');
+
+    if(grupo){
+        grupo.classList.toggle('abierto');
+    }
+
 }
 
 </script>

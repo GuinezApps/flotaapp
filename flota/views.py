@@ -7,7 +7,7 @@ from django.utils import timezone
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from django.contrib.auth.models import User, Group
-from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion, HistorialBajaVehiculo
+from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion, HistorialBajaVehiculo, HistorialTransferenciaVehiculo
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
@@ -16,7 +16,7 @@ from .decorators import (editor_required,master_required)
 from .forms import VehiculoForm, CrearUsuarioForm
 from .auditoria import registrar_bitacora
 from django.shortcuts import get_object_or_404
-
+from django.db.models.functions import Upper, Trim
 
 
 EXCEL_MAP = {
@@ -73,6 +73,31 @@ def limpiar_texto(valor):
 
     if texto == "" or texto == "-":
         return None
+
+    return texto
+
+
+def normalizar_marca_filtro(valor):
+    if not valor:
+        return ''
+
+    texto = str(valor)
+
+    texto = texto.replace(
+        '\xa0',
+        ' '
+    )
+
+    texto = texto.replace(
+        '\u200b',
+        ''
+    )
+
+    texto = texto.strip().upper()
+
+    texto = ' '.join(
+        texto.split()
+    )
 
     return texto
 
@@ -521,8 +546,15 @@ def exportar_vehiculos_excel(request):
         )
 
     if marca:
-        vehiculos = vehiculos.filter(
-            marca=marca
+
+        vehiculos = vehiculos.annotate(
+            marca_limpia=Upper(
+                Trim(
+                    'marca'
+                )
+            )
+        ).filter(
+            marca_limpia=marca
         )
 
     if modelo:
@@ -1310,9 +1342,16 @@ def detalle_vehiculo(request, id):
         'usuario_reactivacion'
     ).all()
 
+    historial_transferencias = vehiculo.historial_transferencias.select_related(
+        'centro_costo_origen',
+        'centro_costo_destino',
+        'usuario_transferencia'
+    ).all()
+
     contexto = {
         'vehiculo': vehiculo,
         'historial_bajas': historial_bajas,
+        'historial_transferencias': historial_transferencias,
         'puede_editar': (
             request.user.groups.filter(name='Editor').exists()
             or request.user.groups.filter(name='Master').exists()
@@ -1612,6 +1651,371 @@ def reactivar_vehiculo(request, id):
         }
     )
 
+@login_required
+@editor_required
+def transferencias_cc(request):
+
+    patente = request.GET.get(
+        'patente',
+        ''
+    ).strip().upper()
+
+    centro_costo_id = request.GET.get(
+        'centro_costo',
+        ''
+    )
+
+    marca = request.GET.get(
+        'marca',
+        ''
+    ).strip().upper()
+
+    vehiculos = Vehiculo.objects.select_related(
+        'centro_costo'
+    ).exclude(
+        estado_administrativo='Dado de Baja'
+    ).order_by(
+        'patente'
+    )
+
+    if patente:
+
+        vehiculos = vehiculos.filter(
+            patente__icontains=patente
+        )
+
+    if centro_costo_id:
+
+        vehiculos = vehiculos.filter(
+            centro_costo_id=centro_costo_id
+        )
+
+    if marca:
+
+        ids_marca = []
+
+        for vehiculo in vehiculos.values(
+            'id',
+            'marca'
+        ):
+
+            if normalizar_marca_filtro(
+                vehiculo['marca']
+            ) == marca:
+
+                ids_marca.append(
+                    vehiculo['id']
+                )
+
+        vehiculos = vehiculos.filter(
+            id__in=ids_marca
+        )
+
+    if request.method == 'POST':
+
+        ids = request.POST.getlist(
+            'vehiculos'
+        )
+
+        centro_destino_id = request.POST.get(
+            'centro_costo_destino'
+        )
+
+        observacion = request.POST.get(
+            'observacion',
+            ''
+        ).strip()
+
+        if not ids:
+
+            messages.error(
+                request,
+                'Debes seleccionar al menos un vehículo.'
+            )
+
+            return redirect(
+                'transferencias_cc'
+            )
+
+        if not centro_destino_id:
+
+            messages.error(
+                request,
+                'Debes seleccionar un centro de costo destino.'
+            )
+
+            return redirect(
+                'transferencias_cc'
+            )
+
+        centro_destino = CentroCosto.objects.get(
+            id=centro_destino_id
+        )
+
+        vehiculos_a_transferir = Vehiculo.objects.select_related(
+            'centro_costo'
+        ).filter(
+            id__in=ids
+        ).exclude(
+            estado_administrativo='Dado de Baja'
+        )
+
+        transferidos = 0
+        omitidos_mismo_cc = 0
+
+        for vehiculo in vehiculos_a_transferir:
+
+            centro_origen = vehiculo.centro_costo
+
+            if (
+                centro_origen
+                and centro_origen.id == centro_destino.id
+            ):
+
+                omitidos_mismo_cc += 1
+                continue
+
+            estado_anterior = (
+                f"Centro costo anterior: {centro_origen}"
+            )
+
+            vehiculo.centro_costo = centro_destino
+            vehiculo.save()
+
+            HistorialTransferenciaVehiculo.objects.create(
+                vehiculo=vehiculo,
+                centro_costo_origen=centro_origen,
+                centro_costo_destino=centro_destino,
+                fecha_transferencia=timezone.now().date(),
+                usuario_transferencia=request.user,
+                observacion=observacion
+            )
+
+            estado_nuevo = (
+                f"Centro costo nuevo: {centro_destino} | "
+                f"Observación: {observacion}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='TRANSFERENCIA',
+                modulo='Vehículos',
+                modelo_afectado='Vehiculo',
+                objeto_id=vehiculo.id,
+                objeto_repr=vehiculo.patente,
+                descripcion=(
+                    f'Transferencia masiva de vehículo {vehiculo.patente} '
+                    f'de {centro_origen} a {centro_destino}.'
+                ),
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
+
+            transferidos += 1
+
+        if transferidos > 0:
+
+            messages.success(
+                request,
+                f'{transferidos} vehículos transferidos correctamente.'
+            )
+
+        if omitidos_mismo_cc > 0:
+
+            messages.info(
+                request,
+                f'{omitidos_mismo_cc} vehículos fueron omitidos porque ya pertenecían al centro de costo destino.'
+            )
+
+        return redirect(
+            'transferencias_cc'
+        )
+
+    centros_costo = CentroCosto.objects.order_by(
+        'codigo'
+    )
+
+    marcas_crudas = Vehiculo.objects.exclude(
+        estado_administrativo='Dado de Baja'
+    ).exclude(
+        marca__isnull=True
+    ).exclude(
+        marca=''
+    ).values_list(
+        'marca',
+        flat=True
+    )
+
+    marcas = sorted(
+        {
+            normalizar_marca_filtro(
+                marca
+            )
+            for marca in marcas_crudas
+            if normalizar_marca_filtro(
+                marca
+            )
+        }
+    )
+
+    paginator = Paginator(
+        vehiculos,
+        25
+    )
+
+    page_number = request.GET.get(
+        'page'
+    )
+
+    vehiculos_pagina = paginator.get_page(
+        page_number
+    )
+
+    query_params = request.GET.copy()
+
+    if 'page' in query_params:
+
+        query_params.pop(
+            'page'
+        )
+
+    query_string = query_params.urlencode()
+
+    return render(
+        request,
+        'flota/transferencias_cc.html',
+        {
+            'vehiculos': vehiculos_pagina,
+            'centros_costo': centros_costo,
+            'marcas': marcas,
+            'patente_buscada': patente,
+            'centro_costo_id': centro_costo_id,
+            'marca_seleccionada': marca,
+            'query_string': query_string,
+        }
+    )
+
+@login_required
+@editor_required
+def transferir_vehiculo(request, id):
+
+    vehiculo = Vehiculo.objects.select_related(
+        'centro_costo'
+    ).get(
+        id=id
+    )
+
+    centros_costo = CentroCosto.objects.order_by(
+        'codigo'
+    )
+
+    if request.method == 'POST':
+
+        centro_destino_id = request.POST.get(
+            'centro_costo_destino'
+        )
+
+        observacion = request.POST.get(
+            'observacion',
+            ''
+        ).strip()
+
+        if not centro_destino_id:
+
+            messages.error(
+                request,
+                'Debes seleccionar un centro de costo destino.'
+            )
+
+            return render(
+                request,
+                'flota/transferir_vehiculo.html',
+                {
+                    'vehiculo': vehiculo,
+                    'centros_costo': centros_costo,
+                    'observacion': observacion,
+                }
+            )
+
+        centro_origen = vehiculo.centro_costo
+
+        centro_destino = CentroCosto.objects.get(
+            id=centro_destino_id
+        )
+
+        if centro_origen and centro_origen.id == centro_destino.id:
+
+            messages.error(
+                request,
+                'El centro de costo destino debe ser distinto al actual.'
+            )
+
+            return render(
+                request,
+                'flota/transferir_vehiculo.html',
+                {
+                    'vehiculo': vehiculo,
+                    'centros_costo': centros_costo,
+                    'observacion': observacion,
+                    'centro_destino_id': centro_destino_id,
+                }
+            )
+
+        estado_anterior = (
+            f"Centro costo anterior: {centro_origen}"
+        )
+
+        vehiculo.centro_costo = centro_destino
+        vehiculo.save()
+
+        HistorialTransferenciaVehiculo.objects.create(
+            vehiculo=vehiculo,
+            centro_costo_origen=centro_origen,
+            centro_costo_destino=centro_destino,
+            fecha_transferencia=timezone.now().date(),
+            usuario_transferencia=request.user,
+            observacion=observacion
+        )
+
+        estado_nuevo = (
+            f"Centro costo nuevo: {centro_destino} | "
+            f"Observación: {observacion}"
+        )
+
+        registrar_bitacora(
+            request=request,
+            accion='TRANSFERENCIA',
+            modulo='Vehículos',
+            modelo_afectado='Vehiculo',
+            objeto_id=vehiculo.id,
+            objeto_repr=vehiculo.patente,
+            descripcion=(
+                f'Vehículo {vehiculo.patente} transferido de '
+                f'{centro_origen} a {centro_destino}.'
+            ),
+            valor_anterior=estado_anterior,
+            valor_nuevo=estado_nuevo
+        )
+
+        messages.success(
+            request,
+            f'Vehículo {vehiculo.patente} transferido correctamente.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    return render(
+        request,
+        'flota/transferir_vehiculo.html',
+        {
+            'vehiculo': vehiculo,
+            'centros_costo': centros_costo,
+        }
+    )
+    
 
 @login_required
 @master_required

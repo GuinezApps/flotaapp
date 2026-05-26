@@ -20,4 +20,6 @@ urlpatterns = [
     path('configuracion/usuarios/<int:id>/eliminar/',views.eliminar_usuario,name='eliminar_usuario'),
     path('configuracion/usuarios/<int:id>/resetear-password/',views.resetear_password_usuario,name='resetear_password_usuario'),
     path('configuracion/bitacora/',views.bitacora,name='bitacora'),
+    path('vehiculos/<int:id>/transferir/',views.transferir_vehiculo,name='transferir_vehiculo'),
+    path('vehiculos/transferencias-cc/',views.transferencias_cc,name='transferencias_cc'),
 ]
