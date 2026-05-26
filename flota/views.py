@@ -1605,12 +1605,28 @@ def crear_usuario(request):
                 ],
             )
 
+            registrar_bitacora(
+                request=request,
+                accion='CREAR',
+                modulo='Usuarios',
+                modelo_afectado='User',
+                objeto_id=usuario.id,
+                objeto_repr=usuario.username,
+                descripcion=f'Usuario {usuario.username} creado.',
+                valor_anterior=None,
+                valor_nuevo=(
+                    f"Usuario: {usuario.username} | "
+                    f"Correo: {usuario.email} | "
+                    f"Rol: {rol.name} | "
+                    f"Nombre: {form.cleaned_data['nombre']} | "
+                    f"RUT: {form.cleaned_data['rut']} | "
+                    f"Centro costo: {form.cleaned_data['centro_costo']}"
+                )
+            )
+
             messages.success(
-
                 request,
-
                 f'Usuario {usuario.username} creado correctamente.'
-
             )
 
             return redirect(
@@ -1622,17 +1638,11 @@ def crear_usuario(request):
         form = CrearUsuarioForm()
 
     return render(
-
         request,
-
         'flota/crear_usuario.html',
-
         {
-
             'form': form
-
         }
-
     )
 
 
@@ -1719,6 +1729,25 @@ def editar_usuario(request, id):
 
     if request.method == 'POST':
 
+        grupos_anteriores = ", ".join(
+            usuario.groups.values_list(
+                'name',
+                flat=True
+            )
+        )
+
+        estado_anterior = (
+            f"Usuario: {usuario.username} | "
+            f"Correo: {usuario.email} | "
+            f"Nombre: {perfil.nombre} | "
+            f"RUT: {perfil.rut} | "
+            f"Teléfono: {perfil.telefono} | "
+            f"Cargo: {perfil.cargo} | "
+            f"Centro costo: {perfil.centro_costo} | "
+            f"Sucursal: {perfil.sucursal} | "
+            f"Roles: {grupos_anteriores}"
+        )
+
         usuario.email = request.POST.get(
             'email'
         )
@@ -1751,10 +1780,8 @@ def editar_usuario(request, id):
 
         if centro_id:
 
-            perfil.centro_costo = (
-                CentroCosto.objects.get(
-                    id=centro_id
-                )
+            perfil.centro_costo = CentroCosto.objects.get(
+                id=centro_id
             )
 
         else:
@@ -1775,6 +1802,37 @@ def editar_usuario(request, id):
 
         usuario.groups.add(
             grupo
+        )
+
+        grupos_nuevos = ", ".join(
+            usuario.groups.values_list(
+                'name',
+                flat=True
+            )
+        )
+
+        estado_nuevo = (
+            f"Usuario: {usuario.username} | "
+            f"Correo: {usuario.email} | "
+            f"Nombre: {perfil.nombre} | "
+            f"RUT: {perfil.rut} | "
+            f"Teléfono: {perfil.telefono} | "
+            f"Cargo: {perfil.cargo} | "
+            f"Centro costo: {perfil.centro_costo} | "
+            f"Sucursal: {perfil.sucursal} | "
+            f"Roles: {grupos_nuevos}"
+        )
+
+        registrar_bitacora(
+            request=request,
+            accion='EDITAR',
+            modulo='Usuarios',
+            modelo_afectado='User',
+            objeto_id=usuario.id,
+            objeto_repr=usuario.username,
+            descripcion=f'Usuario {usuario.username} actualizado.',
+            valor_anterior=estado_anterior,
+            valor_nuevo=estado_nuevo
         )
 
         messages.success(
@@ -1851,7 +1909,31 @@ def eliminar_usuario(
                 'usuarios'
             )
 
+        estado_anterior = (
+            f"Usuario: {usuario.username} | "
+            f"Correo: {usuario.email} | "
+            f"Nombre: {getattr(usuario.perfil, 'nombre', None)} | "
+            f"RUT: {getattr(usuario.perfil, 'rut', None)} | "
+            f"Centro costo: {getattr(usuario.perfil, 'centro_costo', None)} | "
+            f"Roles: {', '.join(usuario.groups.values_list('name', flat=True))}"
+        )
+
+        usuario_id = usuario.id
+        usuario_username = usuario.username
+
         usuario.delete()
+
+        registrar_bitacora(
+            request=request,
+            accion='ELIMINAR',
+            modulo='Usuarios',
+            modelo_afectado='User',
+            objeto_id=usuario_id,
+            objeto_repr=usuario_username,
+            descripcion=f'Usuario {usuario_username} eliminado.',
+            valor_anterior=estado_anterior,
+            valor_nuevo=None
+        )
 
         messages.success(
             request,
@@ -1866,7 +1948,7 @@ def eliminar_usuario(
         request,
         'flota/confirmar_eliminar_usuario.html',
         {
-            'usuario':usuario
+            'usuario': usuario
         }
     )
 
@@ -1889,6 +1971,21 @@ def resetear_password_usuario(request, id):
         if form.is_valid():
 
             form.save()
+
+            registrar_bitacora(
+                request=request,
+                accion='RESET_PASSWORD',
+                modulo='Usuarios',
+                modelo_afectado='User',
+                objeto_id=usuario.id,
+                objeto_repr=usuario.username,
+                descripcion=(
+                    f'Contraseña del usuario {usuario.username} '
+                    f'reseteada por administrador.'
+                ),
+                valor_anterior=None,
+                valor_nuevo='Contraseña actualizada. No se registra el valor por seguridad.'
+            )
 
             messages.success(
                 request,
@@ -1913,3 +2010,4 @@ def resetear_password_usuario(request, id):
             'usuario_obj': usuario
         }
     )
+
