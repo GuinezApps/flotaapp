@@ -669,3 +669,133 @@ class HistorialTransferenciaVehiculo(models.Model):
 
         verbose_name = 'Historial de transferencia de vehículo'
         verbose_name_plural = 'Historial de transferencias de vehículos'
+        
+# ============================================================
+# Mantenciones de vehículos
+# ============================================================
+
+class MantencionVehiculo(models.Model):
+    """
+    Registra mantenciones asociadas a un vehículo.
+
+    Permite manejar mantenciones programadas por fecha,
+    mantenciones por kilometraje y mantenciones por siniestro.
+    """
+
+    TIPOS_MANTENCION = [
+        ('PROGRAMADA', 'Programada'),
+        ('KILOMETRAJE', 'Por kilometraje'),
+        ('SINIESTRO', 'Por siniestro'),
+    ]
+
+    ESTADOS_MANTENCION = [
+        ('PENDIENTE', 'Pendiente'),
+        ('EN_CURSO', 'En curso'),
+        ('CERRADA', 'Cerrada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    vehiculo = models.ForeignKey(
+        Vehiculo,
+        on_delete=models.CASCADE,
+        related_name='mantenciones'
+    )
+
+    tipo_mantencion = models.CharField(
+        max_length=30,
+        choices=TIPOS_MANTENCION
+    )
+
+    estado = models.CharField(
+        max_length=30,
+        choices=ESTADOS_MANTENCION,
+        default='PENDIENTE'
+    )
+
+    fecha_programada = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    kilometraje_programado = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
+
+    fecha_ingreso = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    kilometraje_ingreso = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
+
+    fecha_cierre = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    kilometraje_cierre = models.PositiveIntegerField(
+        blank=True,
+        null=True
+    )
+
+    motivo = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True
+    )
+
+    observacion = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    observacion_cierre = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    usuario_registro = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='mantenciones_registradas'
+    )
+
+    usuario_cierre = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='mantenciones_cerradas'
+    )
+
+    creado_en = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    actualizado_en = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+
+        return (
+            f"{self.vehiculo.patente} | "
+            f"{self.get_tipo_mantencion_display()} | "
+            f"{self.get_estado_display()}"
+        )
+
+    class Meta:
+
+        ordering = [
+            '-fecha_programada',
+            '-creado_en'
+        ]
+
+        verbose_name = 'Mantención de vehículo'
+        verbose_name_plural = 'Mantenciones de vehículos'

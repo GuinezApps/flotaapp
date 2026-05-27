@@ -2,10 +2,7 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-
-import re
-
-from .models import Vehiculo, CentroCosto
+from .models import Vehiculo, CentroCosto, MantencionVehiculo
 
 
 # ============================================================
@@ -315,3 +312,109 @@ class CrearUsuarioForm(UserCreationForm):
             )
 
         return telefono
+        
+class MantencionVehiculoForm(forms.ModelForm):
+
+    class Meta:
+
+        model = MantencionVehiculo
+
+        fields = [
+            'tipo_mantencion',
+            'estado',
+            'fecha_programada',
+            'kilometraje_programado',
+            'fecha_ingreso',
+            'kilometraje_ingreso',
+            'motivo',
+            'observacion',
+        ]
+
+        widgets = {
+            'tipo_mantencion': forms.Select(
+                attrs={
+                    'class': 'form-control'
+                }
+            ),
+
+            'estado': forms.Select(
+                attrs={
+                    'class': 'form-control'
+                }
+            ),
+
+            'fecha_programada': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control'
+                }
+            ),
+
+            'kilometraje_programado': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ejemplo: 90000'
+                }
+            ),
+
+            'fecha_ingreso': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control'
+                }
+            ),
+
+            'kilometraje_ingreso': forms.NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Kilometraje al ingresar a mantención'
+                }
+            ),
+
+            'motivo': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ejemplo: mantención preventiva, cambio de aceite, siniestro, revisión programada...'
+                }
+            ),
+
+            'observacion': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 4,
+                    'placeholder': 'Observación o detalle de la mantención...'
+                }
+            ),
+        }
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        tipo_mantencion = cleaned_data.get(
+            'tipo_mantencion'
+        )
+
+        fecha_programada = cleaned_data.get(
+            'fecha_programada'
+        )
+
+        kilometraje_programado = cleaned_data.get(
+            'kilometraje_programado'
+        )
+
+        if tipo_mantencion == 'PROGRAMADA' and not fecha_programada:
+
+            self.add_error(
+                'fecha_programada',
+                'Debes indicar una fecha programada para este tipo de mantención.'
+            )
+
+        if tipo_mantencion == 'KILOMETRAJE' and not kilometraje_programado:
+
+            self.add_error(
+                'kilometraje_programado',
+                'Debes indicar el kilometraje programado para este tipo de mantención.'
+            )
+
+        return cleaned_data

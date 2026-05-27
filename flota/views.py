@@ -1,23 +1,41 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.utils import timezone
-from openpyxl import Workbook
-from openpyxl import load_workbook
-from django.contrib.auth.models import User, Group
-from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion, HistorialBajaVehiculo, HistorialTransferenciaVehiculo
 from django.db.models import Q
+from django.db.models.functions import Upper, Trim
 from django.contrib import messages
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
-from .decorators import (editor_required,master_required)
-from .forms import VehiculoForm, CrearUsuarioForm
-from .auditoria import registrar_bitacora
-from django.shortcuts import get_object_or_404
-from django.db.models.functions import Upper, Trim
 
+from openpyxl import Workbook
+from openpyxl import load_workbook
+
+from .models import (
+    Vehiculo,
+    PerfilUsuario,
+    CentroCosto,
+    BitacoraAccion,
+    HistorialBajaVehiculo,
+    HistorialTransferenciaVehiculo,
+    MantencionVehiculo,
+)
+
+from .forms import (
+    VehiculoForm,
+    CrearUsuarioForm,
+    MantencionVehiculoForm,
+)
+
+from .decorators import (
+    editor_required,
+    master_required,
+)
+
+from .auditoria import registrar_bitacora
 
 EXCEL_MAP = {
     'Numero Interno De Faena': 'numero_interno_faena',
@@ -208,6 +226,18 @@ def aplicar_estado_operacional(
         vehiculo.subestado_no_operativo = subestado
     else:
         vehiculo.subestado_no_operativo = None
+        
+def obtener_kilometraje_programado_mantencion(vehiculo):
+
+    if vehiculo.kilometraje_proxima_mantencion:
+
+        return vehiculo.kilometraje_proxima_mantencion
+
+    if vehiculo.kilometraje_ultima_mantencion:
+
+        return vehiculo.kilometraje_ultima_mantencion + 10000
+
+    return None
 
 
 def obtener_metricas_estado(queryset):
@@ -1348,10 +1378,16 @@ def detalle_vehiculo(request, id):
         'usuario_transferencia'
     ).all()
 
+    historial_mantenciones = vehiculo.mantenciones.select_related(
+        'usuario_registro',
+        'usuario_cierre'
+    ).all()
+
     contexto = {
         'vehiculo': vehiculo,
         'historial_bajas': historial_bajas,
         'historial_transferencias': historial_transferencias,
+        'historial_mantenciones': historial_mantenciones,
         'puede_editar': (
             request.user.groups.filter(name='Editor').exists()
             or request.user.groups.filter(name='Master').exists()
@@ -2586,3 +2622,198 @@ def resetear_password_usuario(request, id):
     )
 
 
+@login_required
+@editor_required
+def registrar_mantencion_vehiculo(request, id):
+
+    vehiculo = Vehiculo.objects.get(
+        id=id
+    )
+
+    kilometraje_programado_sugerido = obtener_kilometraje_programado_mantencion(
+        vehiculo
+    )
+
+    if request.method == 'POST':
+
+        datos_post = request.POST.copy()
+
+        if (
+            datos_post.get('tipo_mantencion') == 'KILOMETRAJE'
+            and not datos_post.get('kilometraje_programado')
+            and kilometraje_programado_sugerido
+        ):
+
+            datos_post['kilometraje_programado'] = str(
+                kilometraje_programado_sugerido
+            )
+
+        form = MantencionVehiculoForm(
+            datos_post
+        )
+
+        if form.is_valid():
+
+            mantencion = form.save(
+                commit=False
+            )
+
+            mantencion.vehiculo = vehiculo
+            mantencion.usuario_registro = request.user
+
+            if (
+                mantencion.estado == 'EN_CURSO'
+                and not mantencion.fecha_ingreso
+            ):
+
+                mantencion.fecha_ingreso = timezone.now().date()
+
+            if (
+                mantencion.estado == 'EN_CURSO'
+                and not mantencion.kilometraje_ingreso
+                and vehiculo.kilometraje_actual
+            ):
+
+                mantencion.kilometraje_ingreso = vehiculo.kilometraje_actual
+
+            mantencion.save()
+
+            estado_vehiculo_anterior = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo}"
+            )
+
+            vehiculo_actualizado_por_mantencion = False
+
+            if mantencion.estado == 'EN_CURSO':
+
+                vehiculo.estado_operacional = 'No operativo'
+
+                if mantencion.tipo_mantencion in [
+                    'PROGRAMADA',
+                    'KILOMETRAJE',
+                ]:
+
+                    vehiculo.subestado_no_operativo = 'Mantencion'
+
+                elif mantencion.tipo_mantencion == 'SINIESTRO':
+
+                    vehiculo.subestado_no_operativo = 'Reparacion'
+
+                vehiculo.save()
+
+                vehiculo_actualizado_por_mantencion = True
+
+                estado_vehiculo_nuevo = (
+                    f"Estado operacional: {vehiculo.estado_operacional} | "
+                    f"Subestado: {vehiculo.subestado_no_operativo}"
+                )
+
+                registrar_bitacora(
+                    request=request,
+                    accion='CAMBIO_ESTADO',
+                    modulo='Vehículos',
+                    modelo_afectado='Vehiculo',
+                    objeto_id=vehiculo.id,
+                    objeto_repr=vehiculo.patente,
+                    descripcion=(
+                        f'Vehículo {vehiculo.patente} actualizado automáticamente '
+                        f'por inicio de mantención.'
+                    ),
+                    valor_anterior=estado_vehiculo_anterior,
+                    valor_nuevo=estado_vehiculo_nuevo
+                )
+
+            registrar_bitacora(
+                request=request,
+                accion='CREAR',
+                modulo='Mantenciones',
+                modelo_afectado='MantencionVehiculo',
+                objeto_id=mantencion.id,
+                objeto_repr=(
+                    f'{vehiculo.patente} - '
+                    f'{mantencion.get_tipo_mantencion_display()}'
+                ),
+                descripcion=(
+                    f'Registro de mantención para vehículo {vehiculo.patente}. '
+                    f'Tipo: {mantencion.get_tipo_mantencion_display()}. '
+                    f'Estado: {mantencion.get_estado_display()}.'
+                ),
+                valor_anterior=None,
+                valor_nuevo=(
+                    f"Vehículo: {vehiculo.patente} | "
+                    f"Tipo: {mantencion.get_tipo_mantencion_display()} | "
+                    f"Estado: {mantencion.get_estado_display()} | "
+                    f"Fecha programada: {mantencion.fecha_programada} | "
+                    f"Kilometraje programado: {mantencion.kilometraje_programado} | "
+                    f"Fecha ingreso: {mantencion.fecha_ingreso} | "
+                    f"Kilometraje ingreso: {mantencion.kilometraje_ingreso} | "
+                    f"Motivo: {mantencion.motivo} | "
+                    f"Observación: {mantencion.observacion}"
+                )
+            )
+
+            if vehiculo_actualizado_por_mantencion:
+
+                if mantencion.tipo_mantencion == 'SINIESTRO':
+
+                    messages.success(
+                        request,
+                        (
+                            f'Mantención por siniestro registrada correctamente '
+                            f'para {vehiculo.patente}. '
+                            f'El vehículo fue actualizado automáticamente a '
+                            f'No operativo / Reparación.'
+                        )
+                    )
+
+                else:
+
+                    messages.success(
+                        request,
+                        (
+                            f'Mantención registrada correctamente para '
+                            f'{vehiculo.patente}. '
+                            f'El vehículo fue actualizado automáticamente a '
+                            f'No operativo / Mantención.'
+                        )
+                    )
+
+            else:
+
+                messages.success(
+                    request,
+                    (
+                        f'Mantención registrada correctamente para '
+                        f'{vehiculo.patente}. '
+                        f'El estado operacional del vehículo no fue modificado '
+                        f'porque la mantención aún no está en curso.'
+                    )
+                )
+
+            return redirect(
+                'detalle_vehiculo',
+                id=vehiculo.id
+            )
+
+    else:
+
+        valores_iniciales = {}
+
+        if kilometraje_programado_sugerido:
+
+            valores_iniciales['kilometraje_programado'] = kilometraje_programado_sugerido
+
+        form = MantencionVehiculoForm(
+            initial=valores_iniciales
+        )
+
+    return render(
+        request,
+        'flota/registrar_mantencion.html',
+        {
+            'form': form,
+            'vehiculo': vehiculo,
+            'kilometraje_programado_sugerido': kilometraje_programado_sugerido,
+        }
+    )

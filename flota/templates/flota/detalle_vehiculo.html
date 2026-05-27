@@ -40,6 +40,14 @@ Ficha {{ vehiculo.patente }}
     background: #7c3aed;
 }
 
+.btn-mantencion {
+    background: #0891b2;
+}
+
+.btn-mantencion:hover {
+    background: #0e7490;
+}
+
 .btn-baja {
     background: #dc2626;
 }
@@ -202,6 +210,152 @@ Ficha {{ vehiculo.patente }}
     font-weight: bold;
 }
 
+.historiales-contenedor{
+    margin-top:25px;
+}
+
+.historiales-contenedor h3{
+    margin-top:0;
+    margin-bottom:14px;
+}
+
+.historial-acordeon{
+    background:#ffffff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    margin-bottom:12px;
+    overflow:hidden;
+}
+
+.historial-acordeon summary{
+    cursor:pointer;
+    padding:14px 16px;
+    font-weight:bold;
+    color:#1e293b;
+    background:#f8fafc;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.historial-acordeon summary:hover{
+    background:#eef2f7;
+}
+
+.historial-contenido{
+    padding:14px;
+}
+
+.historial-tabla-contenedor{
+    overflow-x:auto;
+}
+
+.historial-tabla{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+.historial-tabla th{
+    background:#1e293b;
+    color:white;
+    padding:10px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.historial-tabla td{
+    padding:10px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:top;
+}
+
+.historial-tabla tbody tr:hover{
+    background:#f8fafc;
+}
+
+.historial-vacio{
+    color:#64748b;
+    padding:10px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:8px;
+}
+
+.detalle-observacion{
+    margin-top:6px;
+}
+
+.detalle-observacion summary{
+    background:transparent;
+    padding:0;
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+    display:inline-block;
+}
+
+.detalle-observacion summary:hover{
+    background:transparent;
+    text-decoration:underline;
+}
+
+.observacion-compacta{
+    margin-top:8px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+    white-space:pre-line;
+    color:#111827;
+}
+
+.texto-corto{
+    max-width:260px;
+    display:inline-block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    vertical-align:bottom;
+}
+
+.badge-tabla{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.badge-pendiente{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.badge-en-curso{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-cerrada{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-cancelada{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+@media(max-width:900px){
+
+    .texto-corto{
+        max-width:180px;
+    }
+
+}
 @media(max-width:900px) {
 
     .grid-secciones {
@@ -263,18 +417,25 @@ Ficha {{ vehiculo.patente }}
                 </a>
 
                 <a
-                href="{% url 'transferir_vehiculo' vehiculo.id %}"
-                class="btn-ficha btn-transferir"
-                >
-                    🔁 Transferir CC
-                </a>
+				href="{% url 'transferir_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-transferir"
+				>
+					🔁 Transferir CC
+				</a>
 
-                <a
-                href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
-                class="btn-ficha btn-baja"
-                >
-                    🛑 Dar de baja
-                </a>
+				<a
+				href="{% url 'registrar_mantencion_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-mantencion"
+				>
+					🔧 Registrar mantención
+				</a>
+
+				<a
+				href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-baja"
+				>
+					🛑 Dar de baja
+				</a>
 
             {% endif %}
 
@@ -492,180 +653,350 @@ Ficha {{ vehiculo.patente }}
         </div>
 
         <div class="seccion observaciones">
-            <h3>Observaciones</h3>
-            <p>{{ vehiculo.observaciones|default:"Sin observaciones registradas." }}</p>
+    <h3>Observaciones</h3>
+    <p>{{ vehiculo.observaciones|default:"Sin observaciones registradas." }}</p>
+</div>
+
+{% if vehiculo.estado_administrativo == 'Dado de Baja' or vehiculo.motivo_baja or vehiculo.observacion_baja %}
+
+    <div class="seccion observaciones">
+        <h3>Información de baja actual</h3>
+
+        <div class="campo">
+            <span class="label">Fecha de baja:</span>
+            <span class="valor">
+                {{ vehiculo.fecha_baja|date:"d-m-Y"|default:"-" }}
+            </span>
         </div>
 
-        {% if vehiculo.estado_administrativo == 'Dado de Baja' or vehiculo.motivo_baja or vehiculo.observacion_baja %}
+        <div class="campo">
+            <span class="label">Motivo de baja:</span>
+            <span class="valor">
+                {% if vehiculo.motivo_baja %}
+                    {{ vehiculo.get_motivo_baja_display }}
+                {% else %}
+                    -
+                {% endif %}
+            </span>
+        </div>
 
-            <div class="seccion observaciones">
-                <h3>Información de baja actual</h3>
-
-                <div class="campo">
-                    <span class="label">Fecha de baja:</span>
-                    <span class="valor">
-                        {{ vehiculo.fecha_baja|date:"d-m-Y"|default:"-" }}
-                    </span>
-                </div>
-
-                <div class="campo">
-                    <span class="label">Motivo de baja:</span>
-                    <span class="valor">
-                        {% if vehiculo.motivo_baja %}
-                            {{ vehiculo.get_motivo_baja_display }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </span>
-                </div>
-
-                <div class="campo">
-                    <span class="label">Observación de baja:</span>
-                    <div class="valor observacion-baja-texto">
-                        {{ vehiculo.observacion_baja|default:"-" }}
-                    </div>
-                </div>
+        <div class="campo">
+            <span class="label">Observación de baja:</span>
+            <div class="valor observacion-baja-texto">
+                {{ vehiculo.observacion_baja|default:"-" }}
             </div>
+        </div>
+    </div>
 
-        {% endif %}
+{% endif %}
 
-        {% if historial_bajas %}
+<div class="seccion historiales-contenedor">
 
-            <div class="seccion observaciones">
-                <h3>Historial de bajas</h3>
+    <h3>Historiales del vehículo</h3>
 
-                <div class="historial-lista">
+    <details class="historial-acordeon">
 
-                    {% for baja in historial_bajas %}
+        <summary>
+            <span>Historial de bajas</span>
+            <span>{{ historial_bajas|length }} registros</span>
+        </summary>
 
-                        <div class="historial-card">
+        <div class="historial-contenido">
 
-                            <div class="historial-header">
+            {% if historial_bajas %}
 
-                                <div>
-                                    <strong>Fecha de baja:</strong>
-                                    {{ baja.fecha_baja|date:"d-m-Y" }}
-                                </div>
+                <div class="historial-tabla-contenedor">
 
-                                <div>
-                                    <strong>Motivo:</strong>
-                                    {{ baja.get_motivo_baja_display }}
-                                </div>
+                    <table class="historial-tabla">
 
-                                <div>
-                                    <strong>Usuario baja:</strong>
-                                    {% if baja.usuario_baja %}
-                                        {{ baja.usuario_baja.username }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </div>
+                        <thead>
+                            <tr>
+                                <th>Fecha baja</th>
+                                <th>Motivo</th>
+                                <th>Usuario baja</th>
+                                <th>Fecha reactivación</th>
+                                <th>Usuario reactivación</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
 
-                            </div>
+                        <tbody>
 
-                            <div class="historial-observacion">
-                                <strong>Observación de baja:</strong>
+                            {% for baja in historial_bajas %}
 
-                                <div class="observacion-baja-texto">
-                                    {{ baja.observacion_baja|default:"Sin observación registrada." }}
-                                </div>
-                            </div>
+                                <tr>
+                                    <td>{{ baja.fecha_baja|date:"d-m-Y" }}</td>
 
-                            <div class="historial-footer">
+                                    <td>{{ baja.get_motivo_baja_display }}</td>
 
-                                <div>
-                                    <strong>Fecha reactivación:</strong>
+                                    <td>
+                                        {% if baja.usuario_baja %}
+                                            {{ baja.usuario_baja.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
 
-                                    {% if baja.fecha_reactivacion %}
-                                        {{ baja.fecha_reactivacion|date:"d-m-Y" }}
-                                    {% else %}
-                                        <span class="texto-alerta">
-                                            Actualmente de baja
+                                    <td>
+                                        {% if baja.fecha_reactivacion %}
+                                            {{ baja.fecha_reactivacion|date:"d-m-Y" }}
+                                        {% else %}
+                                            <span class="badge-tabla">
+                                                Actualmente de baja
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if baja.usuario_reactivacion %}
+                                            {{ baja.usuario_reactivacion.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <details class="detalle-observacion">
+                                            <summary>Ver</summary>
+
+                                            <div class="observacion-compacta">
+                                                {{ baja.observacion_baja|default:"Sin observación registrada." }}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay bajas registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+    <details class="historial-acordeon">
+
+        <summary>
+            <span>Historial de transferencias de Centro de Costo</span>
+            <span>{{ historial_transferencias|length }} registros</span>
+        </summary>
+
+        <div class="historial-contenido">
+
+            {% if historial_transferencias %}
+
+                <div class="historial-tabla-contenedor">
+
+                    <table class="historial-tabla">
+
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Origen</th>
+                                <th>Destino</th>
+                                <th>Usuario</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for transferencia in historial_transferencias %}
+
+                                <tr>
+                                    <td>{{ transferencia.fecha_transferencia|date:"d-m-Y" }}</td>
+
+                                    <td>
+                                        <span
+                                            class="texto-corto"
+                                            title="{{ transferencia.centro_costo_origen|default:'-' }}"
+                                        >
+                                            {{ transferencia.centro_costo_origen|default:"-" }}
                                         </span>
-                                    {% endif %}
-                                </div>
+                                    </td>
 
-                                <div>
-                                    <strong>Usuario reactivación:</strong>
+                                    <td>
+                                        <span
+                                            class="texto-corto"
+                                            title="{{ transferencia.centro_costo_destino|default:'-' }}"
+                                        >
+                                            {{ transferencia.centro_costo_destino|default:"-" }}
+                                        </span>
+                                    </td>
 
-                                    {% if baja.usuario_reactivacion %}
-                                        {{ baja.usuario_reactivacion.username }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </div>
+                                    <td>
+                                        {% if transferencia.usuario_transferencia %}
+                                            {{ transferencia.usuario_transferencia.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
 
-                            </div>
+                                    <td>
+                                        <details class="detalle-observacion">
+                                            <summary>Ver</summary>
 
-                        </div>
+                                            <div class="observacion-compacta">
+                                                {{ transferencia.observacion|default:"Sin observación registrada." }}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
 
-                    {% endfor %}
+                            {% endfor %}
 
-                </div>
-            </div>
+                        </tbody>
 
-        {% endif %}
-
-        {% if historial_transferencias %}
-
-            <div class="seccion observaciones">
-                <h3>Historial de transferencias de Centro de Costo</h3>
-
-                <div class="historial-lista">
-
-                    {% for transferencia in historial_transferencias %}
-
-                        <div class="historial-card">
-
-                            <div class="historial-header">
-
-                                <div>
-                                    <strong>Fecha transferencia:</strong>
-                                    {{ transferencia.fecha_transferencia|date:"d-m-Y" }}
-                                </div>
-
-                                <div>
-                                    <strong>Origen:</strong>
-                                    {{ transferencia.centro_costo_origen|default:"-" }}
-                                </div>
-
-                                <div>
-                                    <strong>Destino:</strong>
-                                    {{ transferencia.centro_costo_destino|default:"-" }}
-                                </div>
-
-                            </div>
-
-                            <div class="historial-observacion">
-                                <strong>Observación de transferencia:</strong>
-
-                                <div class="observacion-transferencia-texto">
-                                    {{ transferencia.observacion|default:"Sin observación registrada." }}
-                                </div>
-                            </div>
-
-                            <div class="historial-footer">
-
-                                <div>
-                                    <strong>Usuario transferencia:</strong>
-
-                                    {% if transferencia.usuario_transferencia %}
-                                        {{ transferencia.usuario_transferencia.username }}
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    {% endfor %}
+                    </table>
 
                 </div>
-            </div>
 
-        {% endif %}
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay transferencias de centro de costo registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+    <details class="historial-acordeon" open>
+
+        <summary>
+            <span>Historial de mantenciones</span>
+            <span>{{ historial_mantenciones|length }} registros</span>
+        </summary>
+
+        <div class="historial-contenido">
+
+            {% if historial_mantenciones %}
+
+                <div class="historial-tabla-contenedor">
+
+                    <table class="historial-tabla">
+
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Fecha programada</th>
+                                <th>KM programado</th>
+                                <th>Fecha ingreso</th>
+                                <th>Usuario</th>
+                                <th>Detalle</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for mantencion in historial_mantenciones %}
+
+                                <tr>
+                                    <td>{{ mantencion.get_tipo_mantencion_display }}</td>
+
+                                    <td>
+                                        {% if mantencion.estado == 'PENDIENTE' %}
+                                            <span class="badge-tabla badge-pendiente">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'EN_CURSO' %}
+                                            <span class="badge-tabla badge-en-curso">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'CERRADA' %}
+                                            <span class="badge-tabla badge-cerrada">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'CANCELADA' %}
+                                            <span class="badge-tabla badge-cancelada">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-tabla">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>{{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}</td>
+
+                                    <td>{{ mantencion.kilometraje_programado|default:"-" }}</td>
+
+                                    <td>{{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}</td>
+
+                                    <td>
+                                        {% if mantencion.usuario_registro %}
+                                            {{ mantencion.usuario_registro.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <details class="detalle-observacion">
+                                            <summary>Ver</summary>
+
+                                            <div class="observacion-compacta">
+                                                <strong>Motivo:</strong>
+                                                {{ mantencion.motivo|default:"Sin motivo registrado." }}
+
+                                                <br><br>
+
+                                                <strong>Observación:</strong>
+                                                {{ mantencion.observacion|default:"Sin observación registrada." }}
+
+                                                {% if mantencion.fecha_cierre or mantencion.observacion_cierre %}
+                                                    <br><br>
+
+                                                    <strong>Fecha cierre:</strong>
+                                                    {{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
+
+                                                    <br>
+
+                                                    <strong>Observación cierre:</strong>
+                                                    {{ mantencion.observacion_cierre|default:"-" }}
+                                                {% endif %}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay mantenciones registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+</div>
 
     </div>
 

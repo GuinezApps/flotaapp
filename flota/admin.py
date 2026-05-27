@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Vehiculo, CentroCosto, PerfilUsuario, BitacoraAccion
+from .models import Vehiculo, PerfilUsuario, CentroCosto, BitacoraAccion, HistorialBajaVehiculo, HistorialTransferenciaVehiculo, MantencionVehiculo
 
 @admin.register(CentroCosto)
 class CentroCostoAdmin(admin.ModelAdmin):
@@ -82,3 +82,42 @@ class BitacoraAccionAdmin(admin.ModelAdmin):
         'fecha_hora',
         'ip_origen',
     ]
+
+@admin.register(MantencionVehiculo)
+class MantencionVehiculoAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'vehiculo',
+        'tipo_mantencion',
+        'estado',
+        'fecha_programada',
+        'kilometraje_programado',
+        'fecha_ingreso',
+        'fecha_cierre',
+        'usuario_registro',
+    )
+
+    list_filter = (
+        'tipo_mantencion',
+        'estado',
+        'fecha_programada',
+        'fecha_ingreso',
+        'fecha_cierre',
+    )
+
+    search_fields = (
+        'vehiculo__patente',
+        'motivo',
+        'observacion',
+    )
+
+    autocomplete_fields = (
+        'vehiculo',
+        'usuario_registro',
+        'usuario_cierre',
+    )
+
+    readonly_fields = (
+        'creado_en',
+        'actualizado_en',
+    )
