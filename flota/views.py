@@ -341,6 +341,136 @@ def calcular_alerta_kilometraje_mantencion(vehiculo):
         'kilometros_restantes': kilometros_restantes,
         'estado_alerta': estado_alerta,
     }
+
+
+def calcular_porcentaje(valor, total):
+    if not total:
+        return 0
+
+    return round(
+        (valor / total) * 100,
+        1
+    )
+
+
+def obtener_resumen_mantenciones_km():
+    """
+    Resume el estado preventivo de mantenciones por kilometraje
+    para todos los vehículos vigentes.
+
+    Clasificación:
+    - AL_DIA: faltan más de 1.500 km.
+    - PROXIMA: faltan entre 1 y 1.500 km.
+    - VENCIDA: km restantes menor o igual a 0.
+    - SIN_DATOS: no hay datos suficientes para calcular.
+    """
+
+    vehiculos = Vehiculo.objects.select_related(
+        'centro_costo'
+    ).exclude(
+        estado_administrativo='Dado de Baja'
+    ).order_by(
+        'patente'
+    )
+
+    alertas_km_todas = []
+
+    for vehiculo in vehiculos:
+
+        alerta = calcular_alerta_kilometraje_mantencion(
+            vehiculo
+        )
+
+        alertas_km_todas.append(
+            alerta
+        )
+
+    alertas_km_vencidas = [
+        alerta for alerta in alertas_km_todas
+        if alerta['estado_alerta'] == 'VENCIDA'
+    ]
+
+    alertas_km_proximas = [
+        alerta for alerta in alertas_km_todas
+        if alerta['estado_alerta'] == 'PROXIMA'
+    ]
+
+    alertas_km_al_dia = [
+        alerta for alerta in alertas_km_todas
+        if alerta['estado_alerta'] == 'AL_DIA'
+    ]
+
+    alertas_km_sin_datos = [
+        alerta for alerta in alertas_km_todas
+        if alerta['estado_alerta'] == 'SIN_DATOS'
+    ]
+
+    total_vehiculos_controlados = len(
+        alertas_km_todas
+    )
+
+    total_km_al_dia = len(
+        alertas_km_al_dia
+    )
+
+    total_km_proximas = len(
+        alertas_km_proximas
+    )
+
+    total_km_vencidas = len(
+        alertas_km_vencidas
+    )
+
+    total_km_sin_datos = len(
+        alertas_km_sin_datos
+    )
+
+    return {
+        'alertas_km_todas': alertas_km_todas,
+        'alertas_km_al_dia': alertas_km_al_dia,
+        'alertas_km_proximas': alertas_km_proximas,
+        'alertas_km_vencidas': alertas_km_vencidas,
+        'alertas_km_sin_datos': alertas_km_sin_datos,
+
+        'total_vehiculos_controlados':
+        total_vehiculos_controlados,
+
+        'total_km_al_dia':
+        total_km_al_dia,
+
+        'total_km_proximas':
+        total_km_proximas,
+
+        'total_km_vencidas':
+        total_km_vencidas,
+
+        'total_km_sin_datos':
+        total_km_sin_datos,
+
+        'porcentaje_km_al_dia':
+        calcular_porcentaje(
+            total_km_al_dia,
+            total_vehiculos_controlados
+        ),
+
+        'porcentaje_km_proximas':
+        calcular_porcentaje(
+            total_km_proximas,
+            total_vehiculos_controlados
+        ),
+
+        'porcentaje_km_vencidas':
+        calcular_porcentaje(
+            total_km_vencidas,
+            total_vehiculos_controlados
+        ),
+
+        'porcentaje_km_sin_datos':
+        calcular_porcentaje(
+            total_km_sin_datos,
+            total_vehiculos_controlados
+        ),
+    }
 @login_required
 @editor_required
 def cerrar_mantencion_vehiculo(request, id):
@@ -604,6 +734,12 @@ def inicio(request):
 
     metricas = obtener_metricas_estado(
         vehiculos_base
+    )
+
+    metricas_mantenciones = obtener_resumen_mantenciones_km()
+
+    metricas.update(
+        metricas_mantenciones
     )
 
     return render(
@@ -3081,40 +3217,7 @@ def control_mantenciones(request):
         days=15
     )
 
-    vehiculos = Vehiculo.objects.select_related(
-        'centro_costo'
-    ).exclude(
-        estado_administrativo='Dado de Baja'
-    ).order_by(
-        'patente'
-    )
-
-    alertas_km = []
-
-    for vehiculo in vehiculos:
-
-        alerta = calcular_alerta_kilometraje_mantencion(
-            vehiculo
-        )
-
-        if alerta['estado_alerta'] in [
-            'VENCIDA',
-            'PROXIMA',
-        ]:
-
-            alertas_km.append(
-                alerta
-            )
-
-    alertas_km_vencidas = [
-        alerta for alerta in alertas_km
-        if alerta['estado_alerta'] == 'VENCIDA'
-    ]
-
-    alertas_km_proximas = [
-        alerta for alerta in alertas_km
-        if alerta['estado_alerta'] == 'PROXIMA'
-    ]
+    resumen_mantenciones_km = obtener_resumen_mantenciones_km()
 
     mantenciones_programadas = MantencionVehiculo.objects.select_related(
         'vehiculo',
@@ -3155,9 +3258,6 @@ def control_mantenciones(request):
     contexto = {
         'hoy': hoy,
 
-        'alertas_km_vencidas': alertas_km_vencidas,
-        'alertas_km_proximas': alertas_km_proximas,
-
         'mantenciones_programadas_vencidas':
         mantenciones_programadas_vencidas,
 
@@ -3166,12 +3266,6 @@ def control_mantenciones(request):
 
         'mantenciones_en_curso':
         mantenciones_en_curso,
-
-        'total_km_vencidas':
-        len(alertas_km_vencidas),
-
-        'total_km_proximas':
-        len(alertas_km_proximas),
 
         'total_programadas_vencidas':
         mantenciones_programadas_vencidas.count(),
@@ -3182,6 +3276,10 @@ def control_mantenciones(request):
         'total_en_curso':
         mantenciones_en_curso.count(),
     }
+
+    contexto.update(
+        resumen_mantenciones_km
+    )
 
     return render(
         request,

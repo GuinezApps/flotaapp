@@ -6,44 +6,100 @@ Control de mantenciones
 
 {% block extra_css %}
 
-.resumen-grid{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:16px;
-    margin-bottom:24px;
+.page-header{
+    margin-bottom:22px;
 }
 
-.resumen-card{
+.page-header h1{
+    margin-bottom:5px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:22px;
+}
+
+.kpi-card{
     background:white;
+    border:1px solid #e5e7eb;
+    border-left:5px solid #2563eb;
     border-radius:12px;
     padding:18px;
     box-shadow:0 2px 8px rgba(0,0,0,.08);
-    border:1px solid #e5e7eb;
+    text-align:left;
+    width:100%;
+    cursor:pointer;
+    transition:.2s;
+    font-family:inherit;
 }
 
-.resumen-card h3{
-    margin:0;
-    font-size:14px;
-    color:#64748b;
+.kpi-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 14px rgba(0,0,0,.12);
 }
 
-.resumen-numero{
-    margin-top:8px;
+.kpi-card.todas{
+    border-left-color:#2563eb;
+}
+
+.kpi-card.criticas{
+    border-left-color:#dc2626;
+}
+
+.kpi-card.proximas{
+    border-left-color:#f59e0b;
+}
+
+.kpi-card.en-curso{
+    border-left-color:#7c3aed;
+}
+
+.kpi-label{
+    color:#475569;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+}
+
+.kpi-numero{
     font-size:30px;
     font-weight:bold;
-    color:#1e293b;
+    color:#0f172a;
+    line-height:1;
+    margin-bottom:8px;
 }
 
-.resumen-alerta{
-    border-left:6px solid #dc2626;
+.kpi-texto{
+    color:#64748b;
+    font-size:13px;
 }
 
-.resumen-proxima{
-    border-left:6px solid #f59e0b;
+.kpi-mini-lista{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-top:10px;
 }
 
-.resumen-curso{
-    border-left:6px solid #2563eb;
+.kpi-mini-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    color:#334155;
+    font-size:13px;
+}
+
+.kpi-mini-item strong{
+    color:#0f172a;
 }
 
 .panel-card{
@@ -59,6 +115,189 @@ Control de mantenciones
     margin:0 0 14px 0;
     color:#1e293b;
     font-size:22px;
+}
+
+.panel-analitico{
+    display:grid;
+    grid-template-columns:2fr 1.1fr;
+    gap:22px;
+    align-items:start;
+}
+
+.grafico-mantenciones h2{
+    margin:0 0 8px 0;
+    color:#1e293b;
+}
+
+.grafico-subtitulo{
+    color:#64748b;
+    margin-bottom:18px;
+}
+
+.grafico-barras{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.barra-item{
+    display:grid;
+    grid-template-columns:180px 1fr 110px;
+    gap:14px;
+    align-items:center;
+}
+
+.barra-label{
+    font-weight:bold;
+    color:#334155;
+}
+
+.barra-fondo{
+    height:18px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.barra{
+    height:100%;
+    min-width:4px;
+    border-radius:999px;
+}
+
+.barra-ok{
+    background:#16a34a;
+}
+
+.barra-proxima{
+    background:#f59e0b;
+}
+
+.barra-vencida{
+    background:#dc2626;
+}
+
+.barra-sin-datos{
+    background:#64748b;
+}
+
+.barra-metrica{
+    justify-self:end;
+    min-width:90px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:7px 10px;
+    text-align:right;
+}
+
+.barra-metrica-cantidad{
+    display:block;
+    color:#1e293b;
+    font-size:15px;
+    font-weight:800;
+    line-height:1.1;
+}
+
+.barra-metrica-porcentaje{
+    display:block;
+    color:#64748b;
+    font-size:12px;
+    font-weight:600;
+    margin-top:2px;
+}
+
+.grafico-leyenda{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    color:#64748b;
+    font-size:13px;
+}
+
+.leyenda-item{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.leyenda-color{
+    width:12px;
+    height:12px;
+    border-radius:999px;
+    display:inline-block;
+}
+
+.resumen-operativo{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:16px;
+}
+
+.resumen-operativo h3{
+    margin:0 0 12px 0;
+    color:#1e293b;
+}
+
+.resumen-operativo-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    margin-bottom:8px;
+    color:#334155;
+    font-weight:bold;
+}
+
+.resumen-operativo-item:last-child{
+    margin-bottom:0;
+}
+
+.filtros-card{
+    display:grid;
+    grid-template-columns:1.5fr 1fr auto;
+    gap:14px;
+    align-items:end;
+}
+
+.filtro-grupo{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.filtro-grupo label{
+    color:#334155;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.filtro-grupo input,
+.filtro-grupo select{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+}
+
+.btn-limpiar{
+    background:#1e293b;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-limpiar:hover{
+    background:#0f172a;
 }
 
 .texto-ayuda{
@@ -170,7 +409,17 @@ Control de mantenciones
     background:#0e7490;
 }
 
-.estado-vacio{
+.btn-cerrar{
+    background:#16a34a;
+    color:white;
+}
+
+.btn-cerrar:hover{
+    background:#15803d;
+}
+
+.estado-vacio,
+.sin-resultados-panel{
     background:#f8fafc;
     border:1px dashed #cbd5e1;
     border-radius:10px;
@@ -178,19 +427,43 @@ Control de mantenciones
     color:#64748b;
 }
 
+.sin-resultados-panel{
+    display:none;
+    margin-top:12px;
+}
+
+.panel-oculto{
+    display:none;
+}
+
 @media(max-width:1200px){
 
-    .resumen-grid{
+    .kpi-grid{
         grid-template-columns:repeat(2,1fr);
+    }
+
+    .panel-analitico{
+        grid-template-columns:1fr;
     }
 
 }
 
-@media(max-width:700px){
+@media(max-width:800px){
 
-    .resumen-grid{
+    .kpi-grid,
+    .filtros-card{
         grid-template-columns:1fr;
     }
+
+    .barra-item{
+        grid-template-columns:1fr;
+        gap:6px;
+    }
+
+    .barra-metrica{
+		justify-self:start;
+		text-align:left;
+	}
 
 }
 
@@ -198,54 +471,278 @@ Control de mantenciones
 
 {% block content %}
 
-<h1>Control de mantenciones</h1>
+<div class="page-header">
 
-<p>
-    Vista operativa para revisar mantenciones próximas, vencidas y en curso.
-</p>
+    <h1>Control de mantenciones</h1>
+
+    <p class="subtitulo-pagina">
+        Vista operativa para revisar mantenciones próximas, vencidas y en curso.
+    </p>
+
+</div>
 
 {% include 'flota/includes/mensajes.html' %}
 
-<div class="resumen-grid">
+<div class="kpi-grid">
 
-    <div class="resumen-card resumen-alerta">
-        <h3>KM vencidas</h3>
-        <div class="resumen-numero">
-            {{ total_km_vencidas }}
-        </div>
-    </div>
+    <button
+        type="button"
+        class="kpi-card todas"
+        data-filtro-rapido="TODAS"
+    >
+        <div class="kpi-label">Vehículos controlados</div>
+        <div class="kpi-numero">{{ total_vehiculos_controlados }}</div>
+        <div class="kpi-texto">Vehículos vigentes evaluados por kilometraje.</div>
+    </button>
 
-    <div class="resumen-card resumen-proxima">
-        <h3>KM próximas</h3>
-        <div class="resumen-numero">
-            {{ total_km_proximas }}
-        </div>
-    </div>
+    <button
+        type="button"
+        class="kpi-card criticas"
+        data-filtro-rapido="CRITICAS"
+    >
+        <div class="kpi-label">Alertas críticas</div>
 
-    <div class="resumen-card resumen-alerta">
-        <h3>Programadas vencidas</h3>
-        <div class="resumen-numero">
-            {{ total_programadas_vencidas }}
-        </div>
-    </div>
+        <div class="kpi-mini-lista">
+            <div class="kpi-mini-item">
+                <span>KM vencidas</span>
+                <strong>{{ total_km_vencidas }}</strong>
+            </div>
 
-    <div class="resumen-card resumen-proxima">
-        <h3>Programadas próximas</h3>
-        <div class="resumen-numero">
-            {{ total_programadas_proximas }}
+            <div class="kpi-mini-item">
+                <span>Programadas vencidas</span>
+                <strong>{{ total_programadas_vencidas }}</strong>
+            </div>
         </div>
-    </div>
+    </button>
 
-    <div class="resumen-card resumen-curso">
-        <h3>En curso</h3>
-        <div class="resumen-numero">
-            {{ total_en_curso }}
+    <button
+        type="button"
+        class="kpi-card proximas"
+        data-filtro-rapido="PROXIMAS"
+    >
+        <div class="kpi-label">Próximas acciones</div>
+
+        <div class="kpi-mini-lista">
+            <div class="kpi-mini-item">
+                <span>KM próximas</span>
+                <strong>{{ total_km_proximas }}</strong>
+            </div>
+
+            <div class="kpi-mini-item">
+                <span>Programadas próximas</span>
+                <strong>{{ total_programadas_proximas }}</strong>
+            </div>
         </div>
-    </div>
+    </button>
+
+    <button
+        type="button"
+        class="kpi-card en-curso"
+        data-filtro-rapido="EN_CURSO"
+    >
+        <div class="kpi-label">Mantenciones en curso</div>
+        <div class="kpi-numero">{{ total_en_curso }}</div>
+        <div class="kpi-texto">Mantenciones abiertas actualmente.</div>
+    </button>
 
 </div>
 
 <div class="panel-card">
+
+    <div class="panel-analitico">
+
+        <div class="grafico-mantenciones">
+
+            <h2>Estado preventivo por kilometraje</h2>
+
+            <div class="grafico-subtitulo">
+                Resumen calculado sobre vehículos vigentes. Regla actual: mantención cada 10.000 km.
+            </div>
+
+            <div class="grafico-barras">
+
+                <div class="barra-item">
+                    <div class="barra-label">Al día</div>
+
+                    <div class="barra-fondo">
+                        <div
+                            class="barra barra-ok"
+                            style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
+                        ></div>
+                    </div>
+
+                    <div class="barra-metrica">
+						<span class="barra-metrica-cantidad">
+							{{ total_km_al_dia }}
+						</span>
+						<span class="barra-metrica-porcentaje">
+							{{ porcentaje_km_al_dia }}%
+						</span>
+					</div>
+                </div>
+
+                <div class="barra-item">
+                    <div class="barra-label">Próximas</div>
+
+                    <div class="barra-fondo">
+                        <div
+                            class="barra barra-proxima"
+                            style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
+                        ></div>
+                    </div>
+
+                    <div class="barra-metrica">
+                        <span class="barra-metrica-cantidad">
+                            {{ total_km_proximas }}
+                        </span>
+                        <span class="barra-metrica-porcentaje">
+                            {{ porcentaje_km_proximas|default:0 }}%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="barra-item">
+                    <div class="barra-label">Vencidas</div>
+
+                    <div class="barra-fondo">
+                        <div
+                            class="barra barra-vencida"
+                            style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
+                        ></div>
+                    </div>
+
+                    <div class="barra-metrica">
+                        <span class="barra-metrica-cantidad">
+                            {{ total_km_vencidas }}
+                        </span>
+                        <span class="barra-metrica-porcentaje">
+                            {{ porcentaje_km_vencidas|default:0 }}%
+                        </span>
+                    </div>
+                </div>
+
+                <div class="barra-item">
+                    <div class="barra-label">Sin información</div>
+
+                    <div class="barra-fondo">
+                        <div
+                            class="barra barra-sin-datos"
+                            style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
+                        ></div>
+                    </div>
+
+                    <div class="barra-metrica">
+                        <span class="barra-metrica-cantidad">
+                            {{ total_km_sin_datos }}
+                        </span>
+                        <span class="barra-metrica-porcentaje">
+                            {{ porcentaje_km_sin_datos|default:0 }}%
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="grafico-leyenda">
+
+                <div class="leyenda-item">
+                    <span class="leyenda-color barra-ok"></span>
+                    Al día: más de 1.500 km restantes.
+                </div>
+
+                <div class="leyenda-item">
+                    <span class="leyenda-color barra-proxima"></span>
+                    Próxima: 1.500 km o menos.
+                </div>
+
+                <div class="leyenda-item">
+                    <span class="leyenda-color barra-vencida"></span>
+                    Vencida: llegó o superó el kilometraje objetivo.
+                </div>
+
+                <div class="leyenda-item">
+                    <span class="leyenda-color barra-sin-datos"></span>
+                    Sin información: faltan datos de kilometraje.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="resumen-operativo">
+
+            <h3>Resumen operativo</h3>
+
+            <div class="resumen-operativo-item">
+                <span>KM vencidas</span>
+                <strong>{{ total_km_vencidas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>KM próximas</span>
+                <strong>{{ total_km_proximas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Programadas vencidas</span>
+                <strong>{{ total_programadas_vencidas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Programadas próximas</span>
+                <strong>{{ total_programadas_proximas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Mantenciones en curso</span>
+                <strong>{{ total_en_curso }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="panel-card filtros-card">
+
+    <div class="filtro-grupo">
+        <label for="filtroTextoMantenciones">Buscar en tablas</label>
+        <input
+            type="text"
+            id="filtroTextoMantenciones"
+            placeholder="Buscar patente, centro de costo, motivo, usuario o tipo..."
+        >
+    </div>
+
+    <div class="filtro-grupo">
+        <label for="filtroCategoriaMantenciones">Categoría</label>
+        <select id="filtroCategoriaMantenciones">
+            <option value="TODAS">Todas las tablas</option>
+            <option value="CRITICAS">Alertas críticas</option>
+            <option value="PROXIMAS">Próximas acciones</option>
+            <option value="KM_VENCIDAS">KM vencidas</option>
+            <option value="KM_PROXIMAS">KM próximas</option>
+            <option value="PROGRAMADAS_VENCIDAS">Programadas vencidas</option>
+            <option value="PROGRAMADAS_PROXIMAS">Programadas próximas</option>
+            <option value="EN_CURSO">Mantenciones en curso</option>
+        </select>
+    </div>
+
+    <button
+        type="button"
+        id="limpiarFiltrosMantenciones"
+        class="btn-limpiar"
+    >
+        Limpiar filtros
+    </button>
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="KM_VENCIDAS"
+>
 
     <h2>Mantenciones por kilometraje vencidas</h2>
 
@@ -257,7 +754,7 @@ Control de mantenciones
 
         <div class="tabla-contenedor">
 
-            <table class="tabla-control">
+            <table class="tabla-control tabla-filtrable">
 
                 <thead>
                     <tr>
@@ -275,7 +772,10 @@ Control de mantenciones
 
                     {% for alerta in alertas_km_vencidas %}
 
-                        <tr>
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} kilometraje vencida km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
                             <td>
                                 <strong>{{ alerta.vehiculo.patente }}</strong>
                             </td>
@@ -329,6 +829,10 @@ Control de mantenciones
 
         </div>
 
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
     {% else %}
 
         <div class="estado-vacio">
@@ -339,7 +843,10 @@ Control de mantenciones
 
 </div>
 
-<div class="panel-card">
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="KM_PROXIMAS"
+>
 
     <h2>Mantenciones por kilometraje próximas</h2>
 
@@ -351,7 +858,7 @@ Control de mantenciones
 
         <div class="tabla-contenedor">
 
-            <table class="tabla-control">
+            <table class="tabla-control tabla-filtrable">
 
                 <thead>
                     <tr>
@@ -369,7 +876,10 @@ Control de mantenciones
 
                     {% for alerta in alertas_km_proximas %}
 
-                        <tr>
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} kilometraje proxima próxima km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
                             <td>
                                 <strong>{{ alerta.vehiculo.patente }}</strong>
                             </td>
@@ -423,6 +933,10 @@ Control de mantenciones
 
         </div>
 
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
     {% else %}
 
         <div class="estado-vacio">
@@ -433,7 +947,10 @@ Control de mantenciones
 
 </div>
 
-<div class="panel-card">
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="PROGRAMADAS_VENCIDAS"
+>
 
     <h2>Mantenciones programadas vencidas</h2>
 
@@ -445,7 +962,7 @@ Control de mantenciones
 
         <div class="tabla-contenedor">
 
-            <table class="tabla-control">
+            <table class="tabla-control tabla-filtrable">
 
                 <thead>
                     <tr>
@@ -463,7 +980,10 @@ Control de mantenciones
 
                     {% for mantencion in mantenciones_programadas_vencidas %}
 
-                        <tr>
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} programada vencida {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
                             <td>
                                 <strong>{{ mantencion.vehiculo.patente }}</strong>
                             </td>
@@ -495,12 +1015,23 @@ Control de mantenciones
                             </td>
 
                             <td>
-                                <a
-                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
-                                class="btn-tabla btn-ver"
-                                >
-                                    Ver ficha
-                                </a>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+                                    class="btn-tabla btn-cerrar"
+                                    >
+                                        Cerrar
+                                    </a>
+
+                                </div>
                             </td>
                         </tr>
 
@@ -510,6 +1041,10 @@ Control de mantenciones
 
             </table>
 
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
         </div>
 
     {% else %}
@@ -522,7 +1057,10 @@ Control de mantenciones
 
 </div>
 
-<div class="panel-card">
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="PROGRAMADAS_PROXIMAS"
+>
 
     <h2>Mantenciones programadas próximas</h2>
 
@@ -534,7 +1072,7 @@ Control de mantenciones
 
         <div class="tabla-contenedor">
 
-            <table class="tabla-control">
+            <table class="tabla-control tabla-filtrable">
 
                 <thead>
                     <tr>
@@ -552,7 +1090,10 @@ Control de mantenciones
 
                     {% for mantencion in mantenciones_programadas_proximas %}
 
-                        <tr>
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} programada proxima próxima {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
                             <td>
                                 <strong>{{ mantencion.vehiculo.patente }}</strong>
                             </td>
@@ -584,12 +1125,23 @@ Control de mantenciones
                             </td>
 
                             <td>
-                                <a
-                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
-                                class="btn-tabla btn-ver"
-                                >
-                                    Ver ficha
-                                </a>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+                                    class="btn-tabla btn-cerrar"
+                                    >
+                                        Cerrar
+                                    </a>
+
+                                </div>
                             </td>
                         </tr>
 
@@ -599,6 +1151,10 @@ Control de mantenciones
 
             </table>
 
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
         </div>
 
     {% else %}
@@ -611,7 +1167,10 @@ Control de mantenciones
 
 </div>
 
-<div class="panel-card">
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="EN_CURSO"
+>
 
     <h2>Mantenciones en curso</h2>
 
@@ -623,7 +1182,7 @@ Control de mantenciones
 
         <div class="tabla-contenedor">
 
-            <table class="tabla-control">
+            <table class="tabla-control tabla-filtrable">
 
                 <thead>
                     <tr>
@@ -642,7 +1201,10 @@ Control de mantenciones
 
                     {% for mantencion in mantenciones_en_curso %}
 
-                        <tr>
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} {{ mantencion.get_tipo_mantencion_display }} en curso {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
                             <td>
                                 <strong>{{ mantencion.vehiculo.patente }}</strong>
                             </td>
@@ -690,12 +1252,23 @@ Control de mantenciones
                             </td>
 
                             <td>
-                                <a
-                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
-                                class="btn-tabla btn-ver"
-                                >
-                                    Ver ficha
-                                </a>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+                                    class="btn-tabla btn-cerrar"
+                                    >
+                                        Cerrar
+                                    </a>
+
+                                </div>
                             </td>
                         </tr>
 
@@ -707,6 +1280,10 @@ Control de mantenciones
 
         </div>
 
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
     {% else %}
 
         <div class="estado-vacio">
@@ -716,5 +1293,138 @@ Control de mantenciones
     {% endif %}
 
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+(function(){
+
+    const inputBusqueda = document.getElementById('filtroTextoMantenciones');
+    const selectCategoria = document.getElementById('filtroCategoriaMantenciones');
+    const botonLimpiar = document.getElementById('limpiarFiltrosMantenciones');
+    const botonesRapidos = document.querySelectorAll('[data-filtro-rapido]');
+    const paneles = document.querySelectorAll('.panel-tabla-mantenciones');
+
+    const gruposCategoria = {
+        TODAS: ['KM_VENCIDAS', 'KM_PROXIMAS', 'PROGRAMADAS_VENCIDAS', 'PROGRAMADAS_PROXIMAS', 'EN_CURSO'],
+        CRITICAS: ['KM_VENCIDAS', 'PROGRAMADAS_VENCIDAS'],
+        PROXIMAS: ['KM_PROXIMAS', 'PROGRAMADAS_PROXIMAS'],
+        KM_VENCIDAS: ['KM_VENCIDAS'],
+        KM_PROXIMAS: ['KM_PROXIMAS'],
+        PROGRAMADAS_VENCIDAS: ['PROGRAMADAS_VENCIDAS'],
+        PROGRAMADAS_PROXIMAS: ['PROGRAMADAS_PROXIMAS'],
+        EN_CURSO: ['EN_CURSO']
+    };
+
+    function normalizarTexto(texto){
+        return (texto || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
+    function aplicarFiltros(){
+
+        const texto = normalizarTexto(inputBusqueda ? inputBusqueda.value : '');
+        const categoria = selectCategoria ? selectCategoria.value : 'TODAS';
+        const categoriasVisibles = gruposCategoria[categoria] || gruposCategoria.TODAS;
+
+        paneles.forEach(function(panel){
+
+            const categoriaPanel = panel.dataset.panel;
+            const categoriaVisible = categoriasVisibles.includes(categoriaPanel);
+
+            if(!categoriaVisible){
+                panel.classList.add('panel-oculto');
+                return;
+            }
+
+            panel.classList.remove('panel-oculto');
+
+            const filas = panel.querySelectorAll('.fila-filtrable');
+            const tablaContenedor = panel.querySelector('.tabla-contenedor');
+            const mensajeSinResultados = panel.querySelector('.sin-resultados-panel');
+
+            if(!filas.length){
+                return;
+            }
+
+            let filasVisibles = 0;
+
+            filas.forEach(function(fila){
+
+                const textoFila = normalizarTexto(fila.dataset.search || fila.textContent);
+                const coincide = !texto || textoFila.includes(texto);
+
+                fila.style.display = coincide ? '' : 'none';
+
+                if(coincide){
+                    filasVisibles += 1;
+                }
+
+            });
+
+            if(tablaContenedor){
+                tablaContenedor.style.display = filasVisibles > 0 ? '' : 'none';
+            }
+
+            if(mensajeSinResultados){
+                mensajeSinResultados.style.display = filasVisibles > 0 ? 'none' : 'block';
+            }
+
+        });
+    }
+
+    if(inputBusqueda){
+        inputBusqueda.addEventListener('input', aplicarFiltros);
+    }
+
+    if(selectCategoria){
+        selectCategoria.addEventListener('change', aplicarFiltros);
+    }
+
+    if(botonLimpiar){
+        botonLimpiar.addEventListener('click', function(){
+            if(inputBusqueda){
+                inputBusqueda.value = '';
+            }
+
+            if(selectCategoria){
+                selectCategoria.value = 'TODAS';
+            }
+
+            aplicarFiltros();
+        });
+    }
+
+    botonesRapidos.forEach(function(boton){
+        boton.addEventListener('click', function(){
+            const filtro = boton.dataset.filtroRapido || 'TODAS';
+
+            if(selectCategoria){
+                selectCategoria.value = filtro;
+            }
+
+            aplicarFiltros();
+
+            const filtros = document.querySelector('.filtros-card');
+
+            if(filtros){
+                filtros.scrollIntoView({
+                    behavior:'smooth',
+                    block:'start'
+                });
+            }
+        });
+    });
+
+    aplicarFiltros();
+
+})();
+</script>
 
 {% endblock %}
