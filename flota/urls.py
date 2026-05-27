@@ -24,4 +24,6 @@ urlpatterns = [
     path('vehiculos/transferencias-cc/',views.transferencias_cc,name='transferencias_cc'),
     path('vehiculo/<int:id>/mantencion/registrar/',views.registrar_mantencion_vehiculo,name='registrar_mantencion_vehiculo'),
     path('vehiculos/control-mantenciones/',views.control_mantenciones,name='control_mantenciones'),
+    path(
+    'mantencion/<int:id>/cerrar/',views.cerrar_mantencion_vehiculo,name='cerrar_mantencion_vehiculo'),
 ]

@@ -418,3 +418,88 @@ class MantencionVehiculoForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+class CerrarMantencionVehiculoForm(forms.Form):
+
+    ESTADOS_POSTERIORES = [
+        ('NO_CAMBIAR', 'No cambiar estado del vehículo'),
+        ('OPERATIVO', 'Marcar como Operativo'),
+        ('NO_INFORMADO', 'Marcar como No informado'),
+        ('NO_OPERATIVO_MANTENCION', 'Mantener como No operativo / Mantención'),
+        ('NO_OPERATIVO_REPARACION', 'Mantener como No operativo / Reparación'),
+        ('NO_OPERATIVO_DETENIDO', 'Marcar como No operativo / Detenido'),
+    ]
+
+    fecha_cierre = forms.DateField(
+        widget=forms.DateInput(
+            attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }
+        ),
+        label='Fecha de cierre'
+    )
+
+    kilometraje_cierre = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Kilometraje al cierre de la mantención'
+            }
+        ),
+        label='Kilometraje de cierre'
+    )
+
+    estado_posterior_vehiculo = forms.ChoiceField(
+        choices=ESTADOS_POSTERIORES,
+        initial='NO_CAMBIAR',
+        widget=forms.Select(
+            attrs={
+                'class': 'form-control'
+            }
+        ),
+        label='Estado posterior del vehículo'
+    )
+
+    observacion_cierre = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Observación de cierre de la mantención...'
+            }
+        ),
+        label='Observación de cierre'
+    )
+
+    def __init__(self, *args, **kwargs):
+
+        self.mantencion = kwargs.pop(
+            'mantencion',
+            None
+        )
+
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        kilometraje_cierre = cleaned_data.get(
+            'kilometraje_cierre'
+        )
+
+        if (
+            self.mantencion
+            and self.mantencion.tipo_mantencion == 'KILOMETRAJE'
+            and kilometraje_cierre is None
+        ):
+
+            self.add_error(
+                'kilometraje_cierre',
+                'Debes indicar el kilometraje de cierre para una mantención por kilometraje.'
+            )
+
+        return cleaned_data

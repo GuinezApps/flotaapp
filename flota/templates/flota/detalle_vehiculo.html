@@ -349,6 +349,90 @@ Ficha {{ vehiculo.patente }}
     color:#991b1b;
 }
 
+
+.btn-tabla{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.btn-registrar{
+    background:#0891b2;
+    color:white;
+}
+
+.btn-registrar:hover{
+    background:#0e7490;
+}
+
+.acciones-detalle-mantencion{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.btn-detalle{
+    background:#e2e8f0;
+    color:#334155;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-detalle:hover{
+    background:#cbd5e1;
+}
+
+.detalle-row{
+    display:none;
+    background:#f8fafc;
+}
+
+.detalle-row.abierta{
+    display:table-row;
+}
+
+.detalle-panel{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:14px;
+    color:#111827;
+    white-space:normal;
+}
+
+.detalle-panel-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+
+.detalle-panel-item{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+}
+
+.detalle-panel-label{
+    display:block;
+    font-weight:bold;
+    color:#334155;
+    margin-bottom:6px;
+}
+
+@media(max-width:900px){
+
+    .detalle-panel-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
 @media(max-width:900px){
 
     .texto-corto{
@@ -897,8 +981,10 @@ Ficha {{ vehiculo.patente }}
                                 <th>Fecha programada</th>
                                 <th>KM programado</th>
                                 <th>Fecha ingreso</th>
-                                <th>Usuario</th>
-                                <th>Detalle</th>
+                                <th>Fecha cierre</th>
+                                <th>Usuario registro</th>
+                                <th>Usuario cierre</th>
+                                <th>Acciónes</th>
                             </tr>
                         </thead>
 
@@ -907,7 +993,9 @@ Ficha {{ vehiculo.patente }}
                             {% for mantencion in historial_mantenciones %}
 
                                 <tr>
-                                    <td>{{ mantencion.get_tipo_mantencion_display }}</td>
+                                    <td>
+                                        {{ mantencion.get_tipo_mantencion_display }}
+                                    </td>
 
                                     <td>
                                         {% if mantencion.estado == 'PENDIENTE' %}
@@ -933,11 +1021,21 @@ Ficha {{ vehiculo.patente }}
                                         {% endif %}
                                     </td>
 
-                                    <td>{{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}</td>
+                                    <td>
+                                        {{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}
+                                    </td>
 
-                                    <td>{{ mantencion.kilometraje_programado|default:"-" }}</td>
+                                    <td>
+                                        {{ mantencion.kilometraje_programado|default:"-" }}
+                                    </td>
 
-                                    <td>{{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}</td>
+                                    <td>
+                                        {{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
+                                    </td>
 
                                     <td>
                                         {% if mantencion.usuario_registro %}
@@ -948,33 +1046,86 @@ Ficha {{ vehiculo.patente }}
                                     </td>
 
                                     <td>
-                                        <details class="detalle-observacion">
-                                            <summary>Ver</summary>
-
-                                            <div class="observacion-compacta">
-                                                <strong>Motivo:</strong>
-                                                {{ mantencion.motivo|default:"Sin motivo registrado." }}
-
-                                                <br><br>
-
-                                                <strong>Observación:</strong>
-                                                {{ mantencion.observacion|default:"Sin observación registrada." }}
-
-                                                {% if mantencion.fecha_cierre or mantencion.observacion_cierre %}
-                                                    <br><br>
-
-                                                    <strong>Fecha cierre:</strong>
-                                                    {{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
-
-                                                    <br>
-
-                                                    <strong>Observación cierre:</strong>
-                                                    {{ mantencion.observacion_cierre|default:"-" }}
-                                                {% endif %}
-                                            </div>
-                                        </details>
+                                        {% if mantencion.usuario_cierre %}
+                                            {{ mantencion.usuario_cierre.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
                                     </td>
+
+                                    <td>
+										<div class="acciones-detalle-mantencion">
+
+											<button
+												type="button"
+												class="btn-tabla btn-detalle"
+												onclick="toggleDetalleMantencion('detalle-mantencion-{{ mantencion.id }}')"
+											>
+												Ver detalle
+											</button>
+
+											{% if mantencion.estado == 'PENDIENTE' or mantencion.estado == 'EN_CURSO' %}
+												<a
+													href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+													class="btn-tabla btn-registrar"
+												>
+													Cerrar
+												</a>
+											{% endif %}
+
+										</div>
+									</td>
                                 </tr>
+								<tr
+									id="detalle-mantencion-{{ mantencion.id }}"
+									class="detalle-row"
+								>
+									<td colspan="9">
+
+										<div class="detalle-panel">
+
+											<div class="detalle-panel-grid">
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Motivo</span>
+													{{ mantencion.motivo|default:"Sin motivo registrado." }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Observación inicial</span>
+													{{ mantencion.observacion|default:"Sin observación registrada." }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Fecha cierre</span>
+													{{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Kilometraje cierre</span>
+													{{ mantencion.kilometraje_cierre|default:"-" }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Usuario cierre</span>
+													{% if mantencion.usuario_cierre %}
+														{{ mantencion.usuario_cierre.username }}
+													{% else %}
+														-
+													{% endif %}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Observación cierre</span>
+													{{ mantencion.observacion_cierre|default:"-" }}
+												</div>
+
+											</div>
+
+										</div>
+
+									</td>
+								</tr>
 
                             {% endfor %}
 
@@ -1001,5 +1152,17 @@ Ficha {{ vehiculo.patente }}
     </div>
 
 </div>
+
+<script>
+function toggleDetalleMantencion(id){
+
+    const fila = document.getElementById(id);
+
+    if(fila){
+        fila.classList.toggle('abierta');
+    }
+
+}
+</script>
 
 {% endblock %}

@@ -29,6 +29,7 @@ from .forms import (
     VehiculoForm,
     CrearUsuarioForm,
     MantencionVehiculoForm,
+    CerrarMantencionVehiculoForm,
 )
 
 from .decorators import (
@@ -222,6 +223,73 @@ def aplicar_estado_operacional(
  
 INTERVALO_MANTENCION_KM = 10000
 
+def aplicar_estado_posterior_mantencion(
+    vehiculo,
+    estado_posterior
+):
+    if estado_posterior == 'NO_CAMBIAR':
+
+        return
+
+    if estado_posterior == 'OPERATIVO':
+
+        vehiculo.estado_operacional = 'Operativo'
+        vehiculo.subestado_no_operativo = None
+
+    elif estado_posterior == 'NO_INFORMADO':
+
+        vehiculo.estado_operacional = 'No informado'
+        vehiculo.subestado_no_operativo = None
+
+    elif estado_posterior == 'NO_OPERATIVO_MANTENCION':
+
+        vehiculo.estado_operacional = 'No operativo'
+        vehiculo.subestado_no_operativo = 'Mantencion'
+
+    elif estado_posterior == 'NO_OPERATIVO_REPARACION':
+
+        vehiculo.estado_operacional = 'No operativo'
+        vehiculo.subestado_no_operativo = 'Reparacion'
+
+    elif estado_posterior == 'NO_OPERATIVO_DETENIDO':
+
+        vehiculo.estado_operacional = 'No operativo'
+        vehiculo.subestado_no_operativo = 'Detenido'
+        
+def actualizar_ciclo_mantencion_km(
+    vehiculo,
+    kilometraje_cierre
+):
+    vehiculo.kilometraje_ultima_mantencion = kilometraje_cierre
+
+    vehiculo.kilometraje_proxima_mantencion = (
+        kilometraje_cierre + INTERVALO_MANTENCION_KM
+    )
+
+    if vehiculo.kilometraje_actual is not None:
+
+        vehiculo.kilometraje_restante = (
+            vehiculo.kilometraje_proxima_mantencion
+            - vehiculo.kilometraje_actual
+        )
+
+        if vehiculo.kilometraje_restante <= 0:
+
+            vehiculo.alerta_mantencion = 'Vencida'
+
+        elif vehiculo.kilometraje_restante <= 1500:
+
+            vehiculo.alerta_mantencion = 'Próxima'
+
+        else:
+
+            vehiculo.alerta_mantencion = 'Al día'
+
+    else:
+
+        vehiculo.kilometraje_restante = None
+        vehiculo.alerta_mantencion = 'Sin información'
+
 def obtener_kilometraje_programado_mantencion(vehiculo):
     
     if vehiculo.kilometraje_ultima_mantencion is not None:
@@ -273,6 +341,173 @@ def calcular_alerta_kilometraje_mantencion(vehiculo):
         'kilometros_restantes': kilometros_restantes,
         'estado_alerta': estado_alerta,
     }
+@login_required
+@editor_required
+def cerrar_mantencion_vehiculo(request, id):
+
+    mantencion = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo'
+    ).get(
+        id=id
+    )
+
+    vehiculo = mantencion.vehiculo
+
+    if mantencion.estado == 'CERRADA':
+
+        messages.info(
+            request,
+            'Esta mantención ya se encuentra cerrada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if request.method == 'POST':
+
+        form = CerrarMantencionVehiculoForm(
+            request.POST,
+            mantencion=mantencion
+        )
+
+        if form.is_valid():
+
+            estado_mantencion_anterior = (
+                f"Estado mantención: {mantencion.estado} | "
+                f"Fecha cierre: {mantencion.fecha_cierre} | "
+                f"Kilometraje cierre: {mantencion.kilometraje_cierre} | "
+                f"Observación cierre: {mantencion.observacion_cierre}"
+            )
+
+            estado_vehiculo_anterior = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo} | "
+                f"Última mantención: {vehiculo.kilometraje_ultima_mantencion} | "
+                f"Próxima mantención: {vehiculo.kilometraje_proxima_mantencion} | "
+                f"Km restantes: {vehiculo.kilometraje_restante} | "
+                f"Alerta mantención: {vehiculo.alerta_mantencion}"
+            )
+
+            fecha_cierre = form.cleaned_data[
+                'fecha_cierre'
+            ]
+
+            kilometraje_cierre = form.cleaned_data[
+                'kilometraje_cierre'
+            ]
+
+            observacion_cierre = form.cleaned_data[
+                'observacion_cierre'
+            ]
+
+            estado_posterior = form.cleaned_data[
+                'estado_posterior_vehiculo'
+            ]
+
+            mantencion.estado = 'CERRADA'
+            mantencion.fecha_cierre = fecha_cierre
+            mantencion.kilometraje_cierre = kilometraje_cierre
+            mantencion.observacion_cierre = observacion_cierre
+            mantencion.usuario_cierre = request.user
+
+            mantencion.save()
+
+            if mantencion.tipo_mantencion == 'KILOMETRAJE':
+
+                actualizar_ciclo_mantencion_km(
+                    vehiculo,
+                    kilometraje_cierre
+                )
+
+            aplicar_estado_posterior_mantencion(
+                vehiculo,
+                estado_posterior
+            )
+
+            vehiculo.save()
+
+            estado_mantencion_nuevo = (
+                f"Estado mantención: {mantencion.estado} | "
+                f"Fecha cierre: {mantencion.fecha_cierre} | "
+                f"Kilometraje cierre: {mantencion.kilometraje_cierre} | "
+                f"Observación cierre: {mantencion.observacion_cierre}"
+            )
+
+            estado_vehiculo_nuevo = (
+                f"Estado operacional: {vehiculo.estado_operacional} | "
+                f"Subestado: {vehiculo.subestado_no_operativo} | "
+                f"Última mantención: {vehiculo.kilometraje_ultima_mantencion} | "
+                f"Próxima mantención: {vehiculo.kilometraje_proxima_mantencion} | "
+                f"Km restantes: {vehiculo.kilometraje_restante} | "
+                f"Alerta mantención: {vehiculo.alerta_mantencion}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='EDITAR',
+                modulo='Mantenciones',
+                modelo_afectado='MantencionVehiculo',
+                objeto_id=mantencion.id,
+                objeto_repr=(
+                    f'{vehiculo.patente} - '
+                    f'{mantencion.get_tipo_mantencion_display()}'
+                ),
+                descripcion=(
+                    f'Cierre de mantención para vehículo '
+                    f'{vehiculo.patente}.'
+                ),
+                valor_anterior=estado_mantencion_anterior,
+                valor_nuevo=estado_mantencion_nuevo
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='CAMBIO_ESTADO',
+                modulo='Vehículos',
+                modelo_afectado='Vehiculo',
+                objeto_id=vehiculo.id,
+                objeto_repr=vehiculo.patente,
+                descripcion=(
+                    f'Vehículo {vehiculo.patente} actualizado por cierre '
+                    f'de mantención.'
+                ),
+                valor_anterior=estado_vehiculo_anterior,
+                valor_nuevo=estado_vehiculo_nuevo
+            )
+
+            messages.success(
+                request,
+                f'Mantención de {vehiculo.patente} cerrada correctamente.'
+            )
+
+            return redirect(
+                'detalle_vehiculo',
+                id=vehiculo.id
+            )
+
+    else:
+
+        form = CerrarMantencionVehiculoForm(
+            initial={
+                'fecha_cierre': timezone.now().date().isoformat(),
+                'kilometraje_cierre': vehiculo.kilometraje_actual,
+                'estado_posterior_vehiculo': 'OPERATIVO',
+            },
+            mantencion=mantencion
+        )
+
+    return render(
+        request,
+        'flota/cerrar_mantencion.html',
+        {
+            'form': form,
+            'mantencion': mantencion,
+            'vehiculo': vehiculo,
+        }
+    )
 
 
 def obtener_metricas_estado(queryset):
