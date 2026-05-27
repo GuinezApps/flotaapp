@@ -347,6 +347,141 @@ Inicio
     font-size:13px;
 }
 
+.mantenciones-dashboard-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    transition:.2s;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+}
+
+.dashboard-card-link:hover .mantenciones-dashboard-card{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+
+.mantenciones-resumen-principal{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.mantenciones-mini-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+}
+
+.mantenciones-mini-label{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.mantenciones-mini-numero{
+    color:#1e293b;
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+}
+
+.mantenciones-mini-subtexto{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.barra-apilada-contenedor{
+    margin:14px 0 16px 0;
+}
+
+.barra-apilada{
+    display:flex;
+    width:100%;
+    height:22px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.segmento-barra{
+    height:100%;
+    min-width:3px;
+}
+
+.segmento-ok{
+    background:#16a34a;
+}
+
+.segmento-proxima{
+    background:#f59e0b;
+}
+
+.segmento-vencida{
+    background:#dc2626;
+}
+
+.segmento-sin-datos{
+    background:#64748b;
+}
+
+.mantenciones-metricas{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    margin-top:6px;
+}
+
+.mantenciones-metrica{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:10px;
+    align-items:center;
+    font-size:14px;
+}
+
+.metrica-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+}
+
+.metrica-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.metrica-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.mantenciones-alerta{
+    margin-top:14px;
+    padding:10px;
+    border-radius:10px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.mantenciones-footer{
+    margin-top:auto;
+    padding-top:14px;
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+}
+
 @media(max-width:1200px){
 
     .dashboard-grid{
@@ -493,185 +628,173 @@ Inicio
     </a>
 
     <a
-    href="{% url 'control_mantenciones' %}"
-    class="dashboard-card-link"
-    >
+href="{% url 'control_mantenciones' %}"
+class="dashboard-card-link"
+>
 
-        <div class="dashboard-card mantenciones-card">
+    <div class="mantenciones-dashboard-card">
 
-            <div class="card-header">
+        <div class="card-header">
 
-                <div>
-                    <h3 class="card-title">
-                        Estado de mantenciones
-                    </h3>
+            <div>
+                <h3 class="card-title">
+                    Estado de mantenciones
+                </h3>
 
-                    <div class="card-subtitle">
-                        Resumen preventivo por kilometraje.
-                    </div>
+                <div class="card-subtitle">
+                    Resumen preventivo por kilometraje.
                 </div>
-
-                <div class="card-action">
-                    Ver control →
-                </div>
-
             </div>
 
-            <div class="mantenciones-resumen-superior">
-
-                <div class="mantencion-kpi">
-                    <div class="mantencion-kpi-label">
-                        Vehículos controlados
-                    </div>
-
-                    <div class="mantencion-kpi-numero">
-                        {{ total_vehiculos_controlados|default:0 }}
-                    </div>
-
-                    <div class="mantencion-kpi-subtexto">
-                        Vigentes considerados
-                    </div>
-                </div>
-
-                <div class="mantencion-kpi">
-                    <div class="mantencion-kpi-label">
-                        Vencidas + próximas
-                    </div>
-
-                    <div class="mantencion-kpi-numero">
-                        {{ total_km_vencidas|default:0|add:total_km_proximas|default:0 }}
-                    </div>
-
-                    <div class="mantencion-kpi-subtexto">
-                        Requieren seguimiento
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="estado-mantenciones-lista">
-
-                <div class="estado-mantencion-item">
-                    <div class="estado-mantencion-label">
-                        Al día
-                    </div>
-
-                    <div class="estado-mantencion-barra-fondo">
-                        <div
-                            class="estado-mantencion-barra barra-ok"
-                            style="width:{{ porcentaje_km_al_dia|default:0 }}%;"
-                        ></div>
-                    </div>
-
-                    <div class="estado-mantencion-dato">
-                        {{ total_km_al_dia|default:0 }}
-                        <span>({{ porcentaje_km_al_dia|default:0 }}%)</span>
-                    </div>
-                </div>
-
-                <div class="estado-mantencion-item">
-                    <div class="estado-mantencion-label">
-                        Próximas
-                    </div>
-
-                    <div class="estado-mantencion-barra-fondo">
-                        <div
-                            class="estado-mantencion-barra barra-proxima"
-                            style="width:{{ porcentaje_km_proximas|default:0 }}%;"
-                        ></div>
-                    </div>
-
-                    <div class="estado-mantencion-dato">
-                        {{ total_km_proximas|default:0 }}
-                        <span>({{ porcentaje_km_proximas|default:0 }}%)</span>
-                    </div>
-                </div>
-
-                <div class="estado-mantencion-item">
-                    <div class="estado-mantencion-label">
-                        Vencidas
-                    </div>
-
-                    <div class="estado-mantencion-barra-fondo">
-                        <div
-                            class="estado-mantencion-barra barra-vencida"
-                            style="width:{{ porcentaje_km_vencidas|default:0 }}%;"
-                        ></div>
-                    </div>
-
-                    <div class="estado-mantencion-dato">
-                        {{ total_km_vencidas|default:0 }}
-                        <span>({{ porcentaje_km_vencidas|default:0 }}%)</span>
-                    </div>
-                </div>
-
-                <div class="estado-mantencion-item">
-                    <div class="estado-mantencion-label">
-                        Sin info
-                    </div>
-
-                    <div class="estado-mantencion-barra-fondo">
-                        <div
-                            class="estado-mantencion-barra barra-sin-datos"
-                            style="width:{{ porcentaje_km_sin_datos|default:0 }}%;"
-                        ></div>
-                    </div>
-
-                    <div class="estado-mantencion-dato">
-                        {{ total_km_sin_datos|default:0 }}
-                        <span>({{ porcentaje_km_sin_datos|default:0 }}%)</span>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="mantenciones-alertas">
-
-                <div class="alerta-mini roja">
-                    <div class="alerta-mini-label">
-                        KM vencidas
-                    </div>
-                    <div class="alerta-mini-numero">
-                        {{ total_km_vencidas|default:0 }}
-                    </div>
-                </div>
-
-                <div class="alerta-mini amarilla">
-                    <div class="alerta-mini-label">
-                        Programadas próximas
-                    </div>
-                    <div class="alerta-mini-numero">
-                        {{ total_programadas_proximas|default:0 }}
-                    </div>
-                </div>
-
-                <div class="alerta-mini roja">
-                    <div class="alerta-mini-label">
-                        Programadas vencidas
-                    </div>
-                    <div class="alerta-mini-numero">
-                        {{ total_programadas_vencidas|default:0 }}
-                    </div>
-                </div>
-
-                <div class="alerta-mini azul">
-                    <div class="alerta-mini-label">
-                        En curso
-                    </div>
-                    <div class="alerta-mini-numero">
-                        {{ total_en_curso|default:0 }}
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="mantenciones-nota">
-                Incluye vehículos sin información suficiente para detectar brechas de datos.
+            <div class="card-action">
+                Ver control →
             </div>
 
         </div>
 
-    </a>
+        <div class="mantenciones-resumen-principal">
+
+            <div class="mantenciones-mini-card">
+                <div class="mantenciones-mini-label">
+                    Vehículos controlados
+                </div>
+
+                <div class="mantenciones-mini-numero">
+                    {{ total_vehiculos_controlados|default:0 }}
+                </div>
+
+                <div class="mantenciones-mini-subtexto">
+                    Vigentes evaluados
+                </div>
+            </div>
+
+            <div class="mantenciones-mini-card">
+                <div class="mantenciones-mini-label">
+                    Alertas críticas
+                </div>
+
+                <div class="mantenciones-mini-numero">
+                    {{ total_km_vencidas|default:0 }}
+                </div>
+
+                <div class="mantenciones-mini-subtexto">
+                    KM vencidas
+                </div>
+            </div>
+
+        </div>
+
+        <div class="barra-apilada-contenedor">
+
+            <div class="barra-apilada">
+
+                <div
+                    class="segmento-barra segmento-ok"
+                    title="Al día"
+                    style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-proxima"
+                    title="Próximas"
+                    style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-vencida"
+                    title="Vencidas"
+                    style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-sin-datos"
+                    title="Sin información"
+                    style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
+                ></div>
+
+            </div>
+
+        </div>
+
+        <div class="mantenciones-metricas">
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-ok"></span>
+
+                <span class="metrica-label">
+                    Al día
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_al_dia|default:0 }}
+                    ·
+                    {{ porcentaje_km_al_dia|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-proxima"></span>
+
+                <span class="metrica-label">
+                    Próximas
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_proximas|default:0 }}
+                    ·
+                    {{ porcentaje_km_proximas|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-vencida"></span>
+
+                <span class="metrica-label">
+                    Vencidas
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_vencidas|default:0 }}
+                    ·
+                    {{ porcentaje_km_vencidas|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-sin-datos"></span>
+
+                <span class="metrica-label">
+                    Sin información
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_sin_datos|default:0 }}
+                    ·
+                    {{ porcentaje_km_sin_datos|default:0 }}%
+                </span>
+            </div>
+
+        </div>
+
+        {% if total_km_vencidas or total_km_sin_datos %}
+
+            <div class="mantenciones-alerta">
+                Atención requerida:
+                {{ total_km_vencidas|default:0 }}
+                vencidas y
+                {{ total_km_sin_datos|default:0 }}
+                sin información.
+            </div>
+
+        {% endif %}
+
+        <div class="mantenciones-footer">
+            Abrir módulo de mantenciones →
+        </div>
+
+    </div>
+
+</a>
 
     <div class="dashboard-placeholder">
 
