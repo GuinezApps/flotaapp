@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
+from datetime import timedelta
 
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -75,10 +76,6 @@ EXCEL_MAP = {
     'Gerencia': 'gerencia',
     'Fecha De Creacion': 'fecha_creacion',
     'Fecha En Que Se Dio De Baja': 'fecha_baja',
-
-    # Importante:
-    # Esta columna del Excel se usa como dato de mantención,
-    # NO como estado operacional de la flota.
     'Estado': 'estado_mantencion',
 }
 
@@ -194,10 +191,6 @@ def obtener_estado_administrativo(fecha_baja):
     return 'Vigente'
 
 def normalizar_estado_operacional(estado):
-    """
-    Convierte estados antiguos o externos al nuevo esquema operacional.
-    """
-
     conversiones = {
         'Operativo': ('Operativo', None),
         'En Mantencion': ('No operativo', 'Mantencion'),
@@ -226,18 +219,60 @@ def aplicar_estado_operacional(
         vehiculo.subestado_no_operativo = subestado
     else:
         vehiculo.subestado_no_operativo = None
-        
-def obtener_kilometraje_programado_mantencion(vehiculo):
+ 
+INTERVALO_MANTENCION_KM = 10000
 
-    if vehiculo.kilometraje_proxima_mantencion:
+def obtener_kilometraje_programado_mantencion(vehiculo):
+    
+    if vehiculo.kilometraje_ultima_mantencion is not None:
+
+        return vehiculo.kilometraje_ultima_mantencion + INTERVALO_MANTENCION_KM
+
+    if vehiculo.kilometraje_proxima_mantencion is not None:
 
         return vehiculo.kilometraje_proxima_mantencion
 
-    if vehiculo.kilometraje_ultima_mantencion:
-
-        return vehiculo.kilometraje_ultima_mantencion + 10000
-
     return None
+    
+def calcular_alerta_kilometraje_mantencion(vehiculo):
+
+    kilometraje_actual = vehiculo.kilometraje_actual
+
+    kilometraje_programado = obtener_kilometraje_programado_mantencion(
+        vehiculo
+    )
+
+    if kilometraje_actual is None or kilometraje_programado is None:
+
+        return {
+            'vehiculo': vehiculo,
+            'kilometraje_actual': kilometraje_actual,
+            'kilometraje_programado': kilometraje_programado,
+            'kilometros_restantes': None,
+            'estado_alerta': 'SIN_DATOS',
+        }
+
+    kilometros_restantes = kilometraje_programado - kilometraje_actual
+
+    if kilometros_restantes <= 0:
+
+        estado_alerta = 'VENCIDA'
+
+    elif kilometros_restantes <= 1500:
+
+        estado_alerta = 'PROXIMA'
+
+    else:
+
+        estado_alerta = 'AL_DIA'
+
+    return {
+        'vehiculo': vehiculo,
+        'kilometraje_actual': kilometraje_actual,
+        'kilometraje_programado': kilometraje_programado,
+        'kilometros_restantes': kilometros_restantes,
+        'estado_alerta': estado_alerta,
+    }
 
 
 def obtener_metricas_estado(queryset):
@@ -327,11 +362,6 @@ def obtener_metricas_estado(queryset):
     }
 @login_required
 def inicio(request):
-    """
-    Vista ejecutiva inicial.
-
-    Muestra métricas generales de la flota vigente.
-    """
 
     vehiculos_base = Vehiculo.objects.exclude(
         estado_administrativo='Dado de Baja'
@@ -349,12 +379,6 @@ def inicio(request):
 
 @login_required
 def dashboard(request):
-    """
-    Vista del módulo Vehículos.
-
-    Contiene listado, filtros, paginación, exportación
-    y métricas asociadas a los vehículos filtrados.
-    """
 
     centro_costo_id = request.GET.get('centro_costo')
     marca = request.GET.get('marca')
@@ -1104,12 +1128,6 @@ def confirmar_importacion(request):
 @login_required
 @editor_required
 def gestionar_estados(request):
-    """
-    Permite actualizar el estado operacional de vehículos.
-
-    Soporta cambio individual y cambio masivo.
-    Si el estado no es 'No operativo', el subestado se limpia.
-    """
 
     if request.method == 'POST':
 
@@ -2816,4 +2834,122 @@ def registrar_mantencion_vehiculo(request, id):
             'vehiculo': vehiculo,
             'kilometraje_programado_sugerido': kilometraje_programado_sugerido,
         }
+    )
+ 
+@login_required
+@editor_required
+def control_mantenciones(request):
+
+    hoy = timezone.now().date()
+
+    fecha_limite_proximas = hoy + timedelta(
+        days=15
+    )
+
+    vehiculos = Vehiculo.objects.select_related(
+        'centro_costo'
+    ).exclude(
+        estado_administrativo='Dado de Baja'
+    ).order_by(
+        'patente'
+    )
+
+    alertas_km = []
+
+    for vehiculo in vehiculos:
+
+        alerta = calcular_alerta_kilometraje_mantencion(
+            vehiculo
+        )
+
+        if alerta['estado_alerta'] in [
+            'VENCIDA',
+            'PROXIMA',
+        ]:
+
+            alertas_km.append(
+                alerta
+            )
+
+    alertas_km_vencidas = [
+        alerta for alerta in alertas_km
+        if alerta['estado_alerta'] == 'VENCIDA'
+    ]
+
+    alertas_km_proximas = [
+        alerta for alerta in alertas_km
+        if alerta['estado_alerta'] == 'PROXIMA'
+    ]
+
+    mantenciones_programadas = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo',
+        'usuario_registro'
+    ).filter(
+        estado='PENDIENTE',
+        tipo_mantencion='PROGRAMADA',
+        fecha_programada__isnull=False
+    ).exclude(
+        vehiculo__estado_administrativo='Dado de Baja'
+    ).order_by(
+        'fecha_programada'
+    )
+
+    mantenciones_programadas_vencidas = mantenciones_programadas.filter(
+        fecha_programada__lt=hoy
+    )
+
+    mantenciones_programadas_proximas = mantenciones_programadas.filter(
+        fecha_programada__gte=hoy,
+        fecha_programada__lte=fecha_limite_proximas
+    )
+
+    mantenciones_en_curso = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo',
+        'usuario_registro'
+    ).filter(
+        estado='EN_CURSO'
+    ).exclude(
+        vehiculo__estado_administrativo='Dado de Baja'
+    ).order_by(
+        'fecha_ingreso',
+        'fecha_programada'
+    )
+
+    contexto = {
+        'hoy': hoy,
+
+        'alertas_km_vencidas': alertas_km_vencidas,
+        'alertas_km_proximas': alertas_km_proximas,
+
+        'mantenciones_programadas_vencidas':
+        mantenciones_programadas_vencidas,
+
+        'mantenciones_programadas_proximas':
+        mantenciones_programadas_proximas,
+
+        'mantenciones_en_curso':
+        mantenciones_en_curso,
+
+        'total_km_vencidas':
+        len(alertas_km_vencidas),
+
+        'total_km_proximas':
+        len(alertas_km_proximas),
+
+        'total_programadas_vencidas':
+        mantenciones_programadas_vencidas.count(),
+
+        'total_programadas_proximas':
+        mantenciones_programadas_proximas.count(),
+
+        'total_en_curso':
+        mantenciones_en_curso.count(),
+    }
+
+    return render(
+        request,
+        'flota/control_mantenciones.html',
+        contexto
     )

@@ -1,0 +1,720 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Control de mantenciones
+{% endblock %}
+
+{% block extra_css %}
+
+.resumen-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:16px;
+    margin-bottom:24px;
+}
+
+.resumen-card{
+    background:white;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    border:1px solid #e5e7eb;
+}
+
+.resumen-card h3{
+    margin:0;
+    font-size:14px;
+    color:#64748b;
+}
+
+.resumen-numero{
+    margin-top:8px;
+    font-size:30px;
+    font-weight:bold;
+    color:#1e293b;
+}
+
+.resumen-alerta{
+    border-left:6px solid #dc2626;
+}
+
+.resumen-proxima{
+    border-left:6px solid #f59e0b;
+}
+
+.resumen-curso{
+    border-left:6px solid #2563eb;
+}
+
+.panel-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    border:1px solid #e5e7eb;
+    margin-bottom:22px;
+}
+
+.panel-card h2{
+    margin:0 0 14px 0;
+    color:#1e293b;
+    font-size:22px;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    margin-bottom:16px;
+}
+
+.tabla-contenedor{
+    overflow-x:auto;
+}
+
+.tabla-control{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+.tabla-control thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-control th{
+    padding:12px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.tabla-control td{
+    padding:11px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:middle;
+}
+
+.tabla-control tbody tr:hover{
+    background:#f8fafc;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.badge-vencida{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.badge-proxima{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.badge-curso{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-programada{
+    background:#e0f2fe;
+    color:#075985;
+}
+
+.badge-km{
+    background:#ede9fe;
+    color:#5b21b6;
+}
+
+.badge-siniestro{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.acciones-tabla{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.btn-tabla{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.btn-ver{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.btn-ver:hover{
+    background:#cbd5e1;
+}
+
+.btn-registrar{
+    background:#0891b2;
+    color:white;
+}
+
+.btn-registrar:hover{
+    background:#0e7490;
+}
+
+.estado-vacio{
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:10px;
+    padding:14px;
+    color:#64748b;
+}
+
+@media(max-width:1200px){
+
+    .resumen-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:700px){
+
+    .resumen-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Control de mantenciones</h1>
+
+<p>
+    Vista operativa para revisar mantenciones próximas, vencidas y en curso.
+</p>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="resumen-grid">
+
+    <div class="resumen-card resumen-alerta">
+        <h3>KM vencidas</h3>
+        <div class="resumen-numero">
+            {{ total_km_vencidas }}
+        </div>
+    </div>
+
+    <div class="resumen-card resumen-proxima">
+        <h3>KM próximas</h3>
+        <div class="resumen-numero">
+            {{ total_km_proximas }}
+        </div>
+    </div>
+
+    <div class="resumen-card resumen-alerta">
+        <h3>Programadas vencidas</h3>
+        <div class="resumen-numero">
+            {{ total_programadas_vencidas }}
+        </div>
+    </div>
+
+    <div class="resumen-card resumen-proxima">
+        <h3>Programadas próximas</h3>
+        <div class="resumen-numero">
+            {{ total_programadas_proximas }}
+        </div>
+    </div>
+
+    <div class="resumen-card resumen-curso">
+        <h3>En curso</h3>
+        <div class="resumen-numero">
+            {{ total_en_curso }}
+        </div>
+    </div>
+
+</div>
+
+<div class="panel-card">
+
+    <h2>Mantenciones por kilometraje vencidas</h2>
+
+    <div class="texto-ayuda">
+        Vehículos que ya superaron el kilometraje objetivo de mantención. Regla actual: cada 10.000 km.
+    </div>
+
+    {% if alertas_km_vencidas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_vencidas %}
+
+                        <tr>
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-vencida">
+                                    Vencida
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-registrar"
+                                    >
+                                        Registrar mantención
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones por kilometraje vencidas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div class="panel-card">
+
+    <h2>Mantenciones por kilometraje próximas</h2>
+
+    <div class="texto-ayuda">
+        Vehículos a 1.500 km o menos de su próxima mantención.
+    </div>
+
+    {% if alertas_km_proximas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_proximas %}
+
+                        <tr>
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-proxima">
+                                    Próxima
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-registrar"
+                                    >
+                                        Registrar mantención
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones por kilometraje próximas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div class="panel-card">
+
+    <h2>Mantenciones programadas vencidas</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones programadas por fecha que ya superaron su fecha programada.
+    </div>
+
+    {% if mantenciones_programadas_vencidas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Fecha programada</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_programadas_vencidas %}
+
+                        <tr>
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_programada|date:"d-m-Y" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-vencida">
+                                    Vencida
+                                </span>
+                            </td>
+
+                            <td>
+                                <a
+                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                class="btn-tabla btn-ver"
+                                >
+                                    Ver ficha
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones programadas vencidas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div class="panel-card">
+
+    <h2>Mantenciones programadas próximas</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones programadas con fecha dentro de los próximos 15 días.
+    </div>
+
+    {% if mantenciones_programadas_proximas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Fecha programada</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_programadas_proximas %}
+
+                        <tr>
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_programada|date:"d-m-Y" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-proxima">
+                                    Próxima
+                                </span>
+                            </td>
+
+                            <td>
+                                <a
+                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                class="btn-tabla btn-ver"
+                                >
+                                    Ver ficha
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones programadas próximas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div class="panel-card">
+
+    <h2>Mantenciones en curso</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones actualmente abiertas o en ejecución.
+    </div>
+
+    {% if mantenciones_en_curso %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Tipo</th>
+                        <th>Fecha ingreso</th>
+                        <th>KM ingreso</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_en_curso %}
+
+                        <tr>
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.tipo_mantencion == 'PROGRAMADA' %}
+                                    <span class="badge badge-programada">
+                                        Programada
+                                    </span>
+                                {% elif mantencion.tipo_mantencion == 'KILOMETRAJE' %}
+                                    <span class="badge badge-km">
+                                        Por kilometraje
+                                    </span>
+                                {% elif mantencion.tipo_mantencion == 'SINIESTRO' %}
+                                    <span class="badge badge-siniestro">
+                                        Por siniestro
+                                    </span>
+                                {% else %}
+                                    {{ mantencion.get_tipo_mantencion_display }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.kilometraje_ingreso|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a
+                                href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                class="btn-tabla btn-ver"
+                                >
+                                    Ver ficha
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones en curso.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

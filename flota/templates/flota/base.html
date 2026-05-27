@@ -480,6 +480,13 @@ class="submenu"
     >
         <span class="texto-menu">Modificación de CCs</span>
     </a>
+	
+	<a
+	href="{% url 'control_mantenciones' %}"
+	class="{% if '/vehiculos/control-mantenciones/' in request.path %}activo{% endif %}"
+	>
+		<span class="texto-menu">Control de mantenciones</span>
+	</a>
 </div>
 
 </li>
