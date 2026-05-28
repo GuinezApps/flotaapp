@@ -1,0 +1,269 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Reprogramar mantención {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.reprogramar-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    max-width:900px;
+}
+
+.resumen-mantencion{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin:18px 0;
+}
+
+.resumen-mantencion h2{
+    margin:0 0 8px 0;
+    color:#1e293b;
+}
+
+.resumen-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 18px;
+    margin-top:12px;
+}
+
+.resumen-item{
+    color:#334155;
+}
+
+.resumen-label{
+    font-weight:bold;
+    color:#1e293b;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:20px;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-field.full{
+    grid-column:1 / -1;
+}
+
+.form-field label{
+    font-weight:bold;
+    margin-bottom:6px;
+    color:#334155;
+}
+
+.form-field input,
+.form-field textarea{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+    box-sizing:border-box;
+    width:100%;
+}
+
+.form-field textarea{
+    resize:vertical;
+}
+
+.error-campo{
+    color:#dc2626;
+    font-size:13px;
+    margin-top:5px;
+    font-weight:bold;
+}
+
+.alerta-info{
+    background:#eff6ff;
+    color:#1e40af;
+    border:1px solid #bfdbfe;
+    border-radius:10px;
+    padding:14px;
+    margin-top:16px;
+}
+
+.acciones-reprogramar{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:22px;
+}
+
+.boton-reprogramar{
+    background:#f59e0b;
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-reprogramar:hover{
+    background:#d97706;
+}
+
+.link-volver{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.link-volver:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:800px){
+
+    .form-grid,
+    .resumen-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Reprogramar mantención</h1>
+
+<div class="reprogramar-card">
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <p>
+        Modifica la fecha programada, el motivo o la observación de una mantención pendiente.
+    </p>
+
+    <div class="resumen-mantencion">
+
+        <h2>
+            {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+        </h2>
+
+        <div class="resumen-grid">
+
+            <div class="resumen-item">
+                <span class="resumen-label">Tipo:</span>
+                {{ mantencion.get_tipo_mantencion_display }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Estado actual:</span>
+                {{ mantencion.get_estado_display }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Fecha programada actual:</span>
+                {{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Centro de costo:</span>
+                {{ vehiculo.centro_costo|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Motivo actual:</span>
+                {{ mantencion.motivo|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Usuario registro:</span>
+                {% if mantencion.usuario_registro %}
+                    {{ mantencion.usuario_registro.username }}
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="alerta-info">
+            Solo se pueden reprogramar mantenciones pendientes. Las mantenciones en curso, cerradas o canceladas no pueden ser reprogramadas.
+        </div>
+
+    </div>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                <label for="{{ form.nueva_fecha_programada.id_for_label }}">
+                    Nueva fecha programada
+                </label>
+
+                {{ form.nueva_fecha_programada }}
+
+                {% for error in form.nueva_fecha_programada.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.motivo.id_for_label }}">
+                    Motivo
+                </label>
+
+                {{ form.motivo }}
+
+                {% for error in form.motivo.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field full">
+                <label for="{{ form.observacion.id_for_label }}">
+                    Observación
+                </label>
+
+                {{ form.observacion }}
+
+                {% for error in form.observacion.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <div class="acciones-reprogramar">
+
+            <button
+                type="submit"
+                class="boton-reprogramar"
+            >
+                Guardar reprogramación
+            </button>
+
+            <a
+                href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                class="link-volver"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

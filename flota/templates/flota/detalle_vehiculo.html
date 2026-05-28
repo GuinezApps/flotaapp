@@ -369,6 +369,33 @@ Ficha {{ vehiculo.patente }}
     background:#0e7490;
 }
 
+.btn-cerrar{
+    background:#16a34a;
+    color:white;
+}
+
+.btn-cerrar:hover{
+    background:#15803d;
+}
+
+.btn-reprogramar{
+    background:#f59e0b;
+    color:white;
+}
+
+.btn-reprogramar:hover{
+    background:#d97706;
+}
+
+.btn-cancelar{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-cancelar:hover{
+    background:#b91c1c;
+}
+
 .acciones-detalle-mantencion{
     display:flex;
     gap:8px;
@@ -1064,13 +1091,38 @@ Ficha {{ vehiculo.patente }}
 												Ver detalle
 											</button>
 
-											{% if mantencion.estado == 'PENDIENTE' or mantencion.estado == 'EN_CURSO' %}
+											{% if mantencion.estado == 'PENDIENTE' %}
+
 												<a
-													href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
-													class="btn-tabla btn-registrar"
+												href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-registrar"
+												>
+													Iniciar
+												</a>
+
+												<a
+												href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-reprogramar"
+												>
+													Reprogramar
+												</a>
+
+												<a
+												href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-cancelar"
+												>
+													Cancelar
+												</a>
+
+											{% elif mantencion.estado == 'EN_CURSO' %}
+
+												<a
+												href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-cerrar"
 												>
 													Cerrar
 												</a>
+
 											{% endif %}
 
 										</div>

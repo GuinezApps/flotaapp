@@ -30,6 +30,8 @@ from .forms import (
     CrearUsuarioForm,
     MantencionVehiculoForm,
     CerrarMantencionVehiculoForm,
+    CancelarMantencionVehiculoForm,
+    ReprogramarMantencionVehiculoForm,
 )
 
 from .decorators import (
@@ -310,6 +312,35 @@ def calcular_alerta_kilometraje_mantencion(vehiculo):
         vehiculo
     )
 
+    problemas = []
+
+    if kilometraje_actual is None:
+
+        problemas.append(
+            'Sin kilometraje actual'
+        )
+
+    if (
+        vehiculo.kilometraje_ultima_mantencion is None
+        and vehiculo.kilometraje_proxima_mantencion is None
+    ):
+
+        problemas.append(
+            'Sin última ni próxima mantención'
+        )
+
+    elif vehiculo.kilometraje_ultima_mantencion is None:
+
+        problemas.append(
+            'Sin última mantención'
+        )
+
+    elif vehiculo.kilometraje_proxima_mantencion is None:
+
+        problemas.append(
+            'Sin próxima mantención registrada'
+        )
+
     if kilometraje_actual is None or kilometraje_programado is None:
 
         return {
@@ -318,6 +349,7 @@ def calcular_alerta_kilometraje_mantencion(vehiculo):
             'kilometraje_programado': kilometraje_programado,
             'kilometros_restantes': None,
             'estado_alerta': 'SIN_DATOS',
+            'problemas': problemas if problemas else ['Sin datos suficientes'],
         }
 
     kilometros_restantes = kilometraje_programado - kilometraje_actual
@@ -340,8 +372,16 @@ def calcular_alerta_kilometraje_mantencion(vehiculo):
         'kilometraje_programado': kilometraje_programado,
         'kilometros_restantes': kilometros_restantes,
         'estado_alerta': estado_alerta,
+        'problemas': problemas,
     }
 
+def obtener_mantencion_en_curso_vehiculo(vehiculo):
+    return vehiculo.mantenciones.filter(
+        estado='EN_CURSO'
+    ).order_by(
+        'fecha_ingreso',
+        'id'
+    ).first()
 
 def calcular_porcentaje(valor, total):
     if not total:
@@ -354,16 +394,6 @@ def calcular_porcentaje(valor, total):
 
 
 def obtener_resumen_mantenciones_km():
-    """
-    Resume el estado preventivo de mantenciones por kilometraje
-    para todos los vehículos vigentes.
-
-    Clasificación:
-    - AL_DIA: faltan más de 1.500 km.
-    - PROXIMA: faltan entre 1 y 1.500 km.
-    - VENCIDA: km restantes menor o igual a 0.
-    - SIN_DATOS: no hay datos suficientes para calcular.
-    """
 
     vehiculos = Vehiculo.objects.select_related(
         'centro_costo'
@@ -405,9 +435,7 @@ def obtener_resumen_mantenciones_km():
         if alerta['estado_alerta'] == 'SIN_DATOS'
     ]
 
-    total_vehiculos_controlados = len(
-        alertas_km_todas
-    )
+    total_vehiculos_controlados = vehiculos.count()
 
     total_km_al_dia = len(
         alertas_km_al_dia
@@ -425,52 +453,505 @@ def obtener_resumen_mantenciones_km():
         alertas_km_sin_datos
     )
 
+    def calcular_porcentaje(cantidad):
+
+        if not total_vehiculos_controlados:
+
+            return 0
+
+        return round(
+            (cantidad / total_vehiculos_controlados) * 100,
+            1
+        )
+
     return {
+        'vehiculos_controlados': vehiculos,
+
         'alertas_km_todas': alertas_km_todas,
-        'alertas_km_al_dia': alertas_km_al_dia,
-        'alertas_km_proximas': alertas_km_proximas,
         'alertas_km_vencidas': alertas_km_vencidas,
+        'alertas_km_proximas': alertas_km_proximas,
+        'alertas_km_al_dia': alertas_km_al_dia,
         'alertas_km_sin_datos': alertas_km_sin_datos,
 
-        'total_vehiculos_controlados':
-        total_vehiculos_controlados,
+        'total_vehiculos_controlados': total_vehiculos_controlados,
 
-        'total_km_al_dia':
-        total_km_al_dia,
+        'total_km_al_dia': total_km_al_dia,
+        'total_km_proximas': total_km_proximas,
+        'total_km_vencidas': total_km_vencidas,
+        'total_km_sin_datos': total_km_sin_datos,
 
-        'total_km_proximas':
-        total_km_proximas,
-
-        'total_km_vencidas':
-        total_km_vencidas,
-
-        'total_km_sin_datos':
-        total_km_sin_datos,
-
-        'porcentaje_km_al_dia':
-        calcular_porcentaje(
-            total_km_al_dia,
-            total_vehiculos_controlados
+        'porcentaje_km_al_dia': calcular_porcentaje(
+            total_km_al_dia
         ),
 
-        'porcentaje_km_proximas':
-        calcular_porcentaje(
-            total_km_proximas,
-            total_vehiculos_controlados
+        'porcentaje_km_proximas': calcular_porcentaje(
+            total_km_proximas
         ),
 
-        'porcentaje_km_vencidas':
-        calcular_porcentaje(
-            total_km_vencidas,
-            total_vehiculos_controlados
+        'porcentaje_km_vencidas': calcular_porcentaje(
+            total_km_vencidas
         ),
 
-        'porcentaje_km_sin_datos':
-        calcular_porcentaje(
-            total_km_sin_datos,
-            total_vehiculos_controlados
+        'porcentaje_km_sin_datos': calcular_porcentaje(
+            total_km_sin_datos
         ),
     }
+
+@login_required
+@editor_required
+def iniciar_mantencion_vehiculo(request, id):
+
+    mantencion = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo'
+    ).get(
+        id=id
+    )
+
+    vehiculo = mantencion.vehiculo
+
+    if mantencion.estado == 'EN_CURSO':
+
+        messages.info(
+            request,
+            'Esta mantención ya se encuentra en curso.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'CERRADA':
+
+        messages.error(
+            request,
+            'No puedes iniciar una mantención que ya está cerrada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'CANCELADA':
+
+        messages.error(
+            request,
+            'No puedes iniciar una mantención cancelada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    mantencion_en_curso = obtener_mantencion_en_curso_vehiculo(
+        vehiculo
+    )
+
+    if mantencion_en_curso:
+
+        messages.error(
+            request,
+            (
+                f'No se puede iniciar esta mantención porque el vehículo '
+                f'{vehiculo.patente} ya tiene una mantención en curso. '
+                f'Debes cerrar la mantención activa antes de iniciar otra.'
+            )
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    estado_mantencion_anterior = (
+        f"Estado mantención: {mantencion.estado} | "
+        f"Fecha ingreso: {mantencion.fecha_ingreso} | "
+        f"Kilometraje ingreso: {mantencion.kilometraje_ingreso}"
+    )
+
+    estado_vehiculo_anterior = (
+        f"Estado operacional: {vehiculo.estado_operacional} | "
+        f"Subestado: {vehiculo.subestado_no_operativo}"
+    )
+
+    mantencion.estado = 'EN_CURSO'
+
+    if not mantencion.fecha_ingreso:
+
+        mantencion.fecha_ingreso = timezone.now().date()
+
+    if (
+        not mantencion.kilometraje_ingreso
+        and vehiculo.kilometraje_actual
+    ):
+
+        mantencion.kilometraje_ingreso = vehiculo.kilometraje_actual
+
+    mantencion.save()
+
+    vehiculo.estado_operacional = 'No operativo'
+
+    if mantencion.tipo_mantencion in [
+        'PROGRAMADA',
+        'KILOMETRAJE',
+    ]:
+
+        vehiculo.subestado_no_operativo = 'Mantencion'
+
+    elif mantencion.tipo_mantencion == 'SINIESTRO':
+
+        vehiculo.subestado_no_operativo = 'Reparacion'
+
+    vehiculo.save()
+
+    estado_mantencion_nuevo = (
+        f"Estado mantención: {mantencion.estado} | "
+        f"Fecha ingreso: {mantencion.fecha_ingreso} | "
+        f"Kilometraje ingreso: {mantencion.kilometraje_ingreso}"
+    )
+
+    estado_vehiculo_nuevo = (
+        f"Estado operacional: {vehiculo.estado_operacional} | "
+        f"Subestado: {vehiculo.subestado_no_operativo}"
+    )
+
+    registrar_bitacora(
+        request=request,
+        accion='CAMBIO_ESTADO',
+        modulo='Mantenciones',
+        modelo_afectado='MantencionVehiculo',
+        objeto_id=mantencion.id,
+        objeto_repr=(
+            f'{vehiculo.patente} - '
+            f'{mantencion.get_tipo_mantencion_display()}'
+        ),
+        descripcion=(
+            f'Mantención de vehículo {vehiculo.patente} iniciada.'
+        ),
+        valor_anterior=estado_mantencion_anterior,
+        valor_nuevo=estado_mantencion_nuevo
+    )
+
+    registrar_bitacora(
+        request=request,
+        accion='CAMBIO_ESTADO',
+        modulo='Vehículos',
+        modelo_afectado='Vehiculo',
+        objeto_id=vehiculo.id,
+        objeto_repr=vehiculo.patente,
+        descripcion=(
+            f'Vehículo {vehiculo.patente} actualizado automáticamente '
+            f'por inicio de mantención.'
+        ),
+        valor_anterior=estado_vehiculo_anterior,
+        valor_nuevo=estado_vehiculo_nuevo
+    )
+
+    if mantencion.tipo_mantencion == 'SINIESTRO':
+
+        messages.success(
+            request,
+            (
+                f'Mantención iniciada correctamente. '
+                f'El vehículo {vehiculo.patente} fue actualizado a '
+                f'No operativo / Reparación.'
+            )
+        )
+
+    else:
+
+        messages.success(
+            request,
+            (
+                f'Mantención iniciada correctamente. '
+                f'El vehículo {vehiculo.patente} fue actualizado a '
+                f'No operativo / Mantención.'
+            )
+        )
+
+    return redirect(
+        'detalle_vehiculo',
+        id=vehiculo.id
+    )
+
+@login_required
+@editor_required
+def cancelar_mantencion_vehiculo(request, id):
+
+    mantencion = get_object_or_404(
+        MantencionVehiculo.objects.select_related(
+            'vehiculo',
+            'vehiculo__centro_costo',
+            'usuario_registro',
+            'usuario_cierre'
+        ),
+        id=id
+    )
+
+    vehiculo = mantencion.vehiculo
+
+    if mantencion.estado == 'CERRADA':
+
+        messages.error(
+            request,
+            'No puedes cancelar una mantención que ya está cerrada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'CANCELADA':
+
+        messages.info(
+            request,
+            'Esta mantención ya se encuentra cancelada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'EN_CURSO':
+
+        messages.error(
+            request,
+            (
+                'No puedes cancelar una mantención que ya está en curso. '
+                'Si la mantención se ejecutó, debes cerrarla. '
+                'Si fue iniciada por error, revisa el estado del vehículo antes de continuar.'
+            )
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if request.method == 'POST':
+
+        form = CancelarMantencionVehiculoForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            estado_anterior = (
+                f"Estado: {mantencion.estado} | "
+                f"Fecha programada: {mantencion.fecha_programada} | "
+                f"Fecha cierre/cancelación: {mantencion.fecha_cierre} | "
+                f"Observación cierre/cancelación: {mantencion.observacion_cierre}"
+            )
+
+            observacion_cancelacion = form.cleaned_data[
+                'observacion_cancelacion'
+            ]
+
+            mantencion.estado = 'CANCELADA'
+            mantencion.fecha_cierre = timezone.now().date()
+            mantencion.observacion_cierre = observacion_cancelacion
+            mantencion.usuario_cierre = request.user
+
+            mantencion.save()
+
+            estado_nuevo = (
+                f"Estado: {mantencion.estado} | "
+                f"Fecha programada: {mantencion.fecha_programada} | "
+                f"Fecha cierre/cancelación: {mantencion.fecha_cierre} | "
+                f"Observación cierre/cancelación: {mantencion.observacion_cierre}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='EDITAR',
+                modulo='Mantenciones',
+                modelo_afectado='MantencionVehiculo',
+                objeto_id=mantencion.id,
+                objeto_repr=(
+                    f'{vehiculo.patente} - '
+                    f'{mantencion.get_tipo_mantencion_display()}'
+                ),
+                descripcion=(
+                    f'Mantención pendiente de vehículo {vehiculo.patente} cancelada.'
+                ),
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
+
+            messages.success(
+                request,
+                f'Mantención de {vehiculo.patente} cancelada correctamente.'
+            )
+
+            return redirect(
+                'detalle_vehiculo',
+                id=vehiculo.id
+            )
+
+    else:
+
+        form = CancelarMantencionVehiculoForm()
+
+    return render(
+        request,
+        'flota/cancelar_mantencion.html',
+        {
+            'form': form,
+            'mantencion': mantencion,
+            'vehiculo': vehiculo,
+        }
+    )
+
+@login_required
+@editor_required
+def reprogramar_mantencion_vehiculo(request, id):
+
+    mantencion = get_object_or_404(
+        MantencionVehiculo.objects.select_related(
+            'vehiculo',
+            'vehiculo__centro_costo',
+            'usuario_registro'
+        ),
+        id=id
+    )
+
+    vehiculo = mantencion.vehiculo
+
+    if mantencion.estado == 'CERRADA':
+
+        messages.error(
+            request,
+            'No puedes reprogramar una mantención cerrada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'CANCELADA':
+
+        messages.error(
+            request,
+            'No puedes reprogramar una mantención cancelada.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if mantencion.estado == 'EN_CURSO':
+
+        messages.error(
+            request,
+            'No puedes reprogramar una mantención que ya está en curso.'
+        )
+
+        return redirect(
+            'detalle_vehiculo',
+            id=vehiculo.id
+        )
+
+    if request.method == 'POST':
+
+        form = ReprogramarMantencionVehiculoForm(
+            request.POST,
+            mantencion=mantencion
+        )
+
+        if form.is_valid():
+
+            estado_anterior = (
+                f"Fecha programada: {mantencion.fecha_programada} | "
+                f"Motivo: {mantencion.motivo} | "
+                f"Observación: {mantencion.observacion}"
+            )
+
+            nueva_fecha_programada = form.cleaned_data[
+                'nueva_fecha_programada'
+            ]
+
+            motivo = form.cleaned_data[
+                'motivo'
+            ]
+
+            observacion = form.cleaned_data[
+                'observacion'
+            ]
+
+            mantencion.fecha_programada = nueva_fecha_programada
+            mantencion.motivo = motivo
+            mantencion.observacion = observacion
+
+            mantencion.save()
+
+            estado_nuevo = (
+                f"Fecha programada: {mantencion.fecha_programada} | "
+                f"Motivo: {mantencion.motivo} | "
+                f"Observación: {mantencion.observacion}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='EDITAR',
+                modulo='Mantenciones',
+                modelo_afectado='MantencionVehiculo',
+                objeto_id=mantencion.id,
+                objeto_repr=(
+                    f'{vehiculo.patente} - '
+                    f'{mantencion.get_tipo_mantencion_display()}'
+                ),
+                descripcion=(
+                    f'Mantención de vehículo {vehiculo.patente} reprogramada.'
+                ),
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
+
+            messages.success(
+                request,
+                f'Mantención de {vehiculo.patente} reprogramada correctamente.'
+            )
+
+            return redirect(
+                'detalle_vehiculo',
+                id=vehiculo.id
+            )
+
+    else:
+
+        form = ReprogramarMantencionVehiculoForm(
+            initial={
+                'nueva_fecha_programada':
+                mantencion.fecha_programada.isoformat()
+                if mantencion.fecha_programada
+                else timezone.now().date().isoformat(),
+
+                'motivo':
+                mantencion.motivo,
+
+                'observacion':
+                mantencion.observacion,
+            },
+            mantencion=mantencion
+        )
+
+    return render(
+        request,
+        'flota/reprogramar_mantencion.html',
+        {
+            'form': form,
+            'mantencion': mantencion,
+            'vehiculo': vehiculo,
+        }
+    )
+
 @login_required
 @editor_required
 def cerrar_mantencion_vehiculo(request, id):
@@ -3023,6 +3504,10 @@ def registrar_mantencion_vehiculo(request, id):
         vehiculo
     )
 
+    mantencion_en_curso = obtener_mantencion_en_curso_vehiculo(
+        vehiculo
+    )
+
     if request.method == 'POST':
 
         datos_post = request.POST.copy()
@@ -3042,6 +3527,36 @@ def registrar_mantencion_vehiculo(request, id):
         )
 
         if form.is_valid():
+
+            estado_solicitado = form.cleaned_data.get(
+                'estado'
+            )
+
+            if (
+                estado_solicitado == 'EN_CURSO'
+                and mantencion_en_curso
+            ):
+
+                messages.error(
+                    request,
+                    (
+                        f'No se puede registrar una nueva mantención en curso '
+                        f'para {vehiculo.patente}, porque ya existe una '
+                        f'mantención activa. Debes cerrar la mantención actual '
+                        f'antes de iniciar otra.'
+                    )
+                )
+
+                return render(
+                    request,
+                    'flota/registrar_mantencion.html',
+                    {
+                        'form': form,
+                        'vehiculo': vehiculo,
+                        'kilometraje_programado_sugerido': kilometraje_programado_sugerido,
+                        'mantencion_en_curso': mantencion_en_curso,
+                    }
+                )
 
             mantencion = form.save(
                 commit=False
@@ -3204,6 +3719,7 @@ def registrar_mantencion_vehiculo(request, id):
             'form': form,
             'vehiculo': vehiculo,
             'kilometraje_programado_sugerido': kilometraje_programado_sugerido,
+            'mantencion_en_curso': mantencion_en_curso,
         }
     )
  
@@ -3218,6 +3734,22 @@ def control_mantenciones(request):
     )
 
     resumen_mantenciones_km = obtener_resumen_mantenciones_km()
+
+    alertas_km_vencidas = resumen_mantenciones_km[
+        'alertas_km_vencidas'
+    ]
+
+    alertas_km_proximas = resumen_mantenciones_km[
+        'alertas_km_proximas'
+    ]
+
+    alertas_km_al_dia = resumen_mantenciones_km[
+        'alertas_km_al_dia'
+    ]
+
+    alertas_km_sin_datos = resumen_mantenciones_km[
+        'alertas_km_sin_datos'
+    ]
 
     mantenciones_programadas = MantencionVehiculo.objects.select_related(
         'vehiculo',
@@ -3252,11 +3784,24 @@ def control_mantenciones(request):
         vehiculo__estado_administrativo='Dado de Baja'
     ).order_by(
         'fecha_ingreso',
-        'fecha_programada'
+        'fecha_programada',
+        'vehiculo__patente'
     )
 
     contexto = {
         'hoy': hoy,
+
+        'alertas_km_vencidas':
+        alertas_km_vencidas,
+
+        'alertas_km_proximas':
+        alertas_km_proximas,
+
+        'alertas_km_al_dia':
+        alertas_km_al_dia,
+
+        'alertas_km_sin_datos':
+        alertas_km_sin_datos,
 
         'mantenciones_programadas_vencidas':
         mantenciones_programadas_vencidas,
@@ -3286,3 +3831,403 @@ def control_mantenciones(request):
         'flota/control_mantenciones.html',
         contexto
     )
+    
+@login_required
+def exportar_control_mantenciones_excel(request):
+
+    secciones_validas = [
+        'resumen',
+        'km_vencidas',
+        'km_proximas',
+        'sin_datos',
+        'al_dia',
+        'programadas_vencidas',
+        'programadas_proximas',
+        'en_curso',
+    ]
+
+    secciones_exportar = request.GET.getlist(
+        'secciones'
+    )
+
+    if not secciones_exportar:
+
+        secciones_exportar = secciones_validas
+
+    secciones_exportar = [
+        seccion for seccion in secciones_exportar
+        if seccion in secciones_validas
+    ]
+
+    if not secciones_exportar:
+
+        secciones_exportar = [
+            'resumen'
+        ]
+
+    hoy = timezone.now().date()
+
+    fecha_limite_proximas = hoy + timedelta(
+        days=15
+    )
+
+    resumen_mantenciones_km = obtener_resumen_mantenciones_km()
+
+    alertas_km_vencidas = resumen_mantenciones_km[
+        'alertas_km_vencidas'
+    ]
+
+    alertas_km_proximas = resumen_mantenciones_km[
+        'alertas_km_proximas'
+    ]
+
+    alertas_km_sin_datos = resumen_mantenciones_km[
+        'alertas_km_sin_datos'
+    ]
+
+    alertas_km_al_dia = resumen_mantenciones_km[
+        'alertas_km_al_dia'
+    ]
+
+    mantenciones_programadas = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo',
+        'usuario_registro'
+    ).filter(
+        estado='PENDIENTE',
+        tipo_mantencion='PROGRAMADA',
+        fecha_programada__isnull=False
+    ).exclude(
+        vehiculo__estado_administrativo='Dado de Baja'
+    ).order_by(
+        'fecha_programada'
+    )
+
+    mantenciones_programadas_vencidas = mantenciones_programadas.filter(
+        fecha_programada__lt=hoy
+    )
+
+    mantenciones_programadas_proximas = mantenciones_programadas.filter(
+        fecha_programada__gte=hoy,
+        fecha_programada__lte=fecha_limite_proximas
+    )
+
+    mantenciones_en_curso = MantencionVehiculo.objects.select_related(
+        'vehiculo',
+        'vehiculo__centro_costo',
+        'usuario_registro'
+    ).filter(
+        estado='EN_CURSO'
+    ).exclude(
+        vehiculo__estado_administrativo='Dado de Baja'
+    ).order_by(
+        'fecha_ingreso',
+        'fecha_programada',
+        'vehiculo__patente'
+    )
+
+    wb = Workbook()
+
+    hoja_inicial = wb.active
+    wb.remove(
+        hoja_inicial
+    )
+
+    def ajustar_columnas(hoja):
+
+        for columna in hoja.columns:
+
+            max_largo = 0
+            letra_columna = columna[0].column_letter
+
+            for celda in columna:
+
+                if celda.value is not None:
+
+                    max_largo = max(
+                        max_largo,
+                        len(
+                            str(
+                                celda.value
+                            )
+                        )
+                    )
+
+            hoja.column_dimensions[letra_columna].width = min(
+                max_largo + 2,
+                45
+            )
+
+    def agregar_hoja_resumen():
+
+        ws = wb.create_sheet(
+            title='Resumen'
+        )
+
+        ws.append([
+            'Indicador',
+            'Cantidad',
+            'Porcentaje'
+        ])
+
+        ws.append([
+            'Vehículos controlados',
+            resumen_mantenciones_km['total_vehiculos_controlados'],
+            '100%'
+        ])
+
+        ws.append([
+            'Al día',
+            resumen_mantenciones_km['total_km_al_dia'],
+            f"{resumen_mantenciones_km['porcentaje_km_al_dia']}%"
+        ])
+
+        ws.append([
+            'Próximas por KM',
+            resumen_mantenciones_km['total_km_proximas'],
+            f"{resumen_mantenciones_km['porcentaje_km_proximas']}%"
+        ])
+
+        ws.append([
+            'Vencidas por KM',
+            resumen_mantenciones_km['total_km_vencidas'],
+            f"{resumen_mantenciones_km['porcentaje_km_vencidas']}%"
+        ])
+
+        ws.append([
+            'Sin información',
+            resumen_mantenciones_km['total_km_sin_datos'],
+            f"{resumen_mantenciones_km['porcentaje_km_sin_datos']}%"
+        ])
+
+        ws.append([
+            'Programadas vencidas',
+            mantenciones_programadas_vencidas.count(),
+            ''
+        ])
+
+        ws.append([
+            'Programadas próximas',
+            mantenciones_programadas_proximas.count(),
+            ''
+        ])
+
+        ws.append([
+            'Mantenciones en curso',
+            mantenciones_en_curso.count(),
+            ''
+        ])
+
+        ajustar_columnas(
+            ws
+        )
+
+    def agregar_hoja_alertas_km(
+        nombre_hoja,
+        alertas
+    ):
+
+        ws = wb.create_sheet(
+            title=nombre_hoja
+        )
+
+        ws.append([
+            'Patente',
+            'Centro de costo',
+            'Kilometraje actual',
+            'Kilometraje mantención',
+            'Kilómetros restantes',
+            'Estado alerta'
+        ])
+
+        for alerta in alertas:
+
+            vehiculo = alerta['vehiculo']
+
+            ws.append([
+                vehiculo.patente,
+                str(
+                    vehiculo.centro_costo
+                ) if vehiculo.centro_costo else '',
+                alerta.get(
+                    'kilometraje_actual'
+                ),
+                alerta.get(
+                    'kilometraje_programado'
+                ),
+                alerta.get(
+                    'kilometros_restantes'
+                ),
+                alerta.get(
+                    'estado_alerta'
+                ),
+            ])
+
+        ajustar_columnas(
+            ws
+        )
+
+    def agregar_hoja_sin_datos(
+        nombre_hoja,
+        alertas
+    ):
+
+        ws = wb.create_sheet(
+            title=nombre_hoja
+        )
+
+        ws.append([
+            'Patente',
+            'Centro de costo',
+            'Kilometraje actual',
+            'Última mantención',
+            'Próxima mantención',
+            'Problemas detectados'
+        ])
+
+        for alerta in alertas:
+
+            vehiculo = alerta['vehiculo']
+
+            problemas = ', '.join(
+                alerta.get(
+                    'problemas',
+                    []
+                )
+            )
+
+            ws.append([
+                vehiculo.patente,
+                str(
+                    vehiculo.centro_costo
+                ) if vehiculo.centro_costo else '',
+                vehiculo.kilometraje_actual,
+                vehiculo.kilometraje_ultima_mantencion,
+                vehiculo.kilometraje_proxima_mantencion,
+                problemas,
+            ])
+
+        ajustar_columnas(
+            ws
+        )
+
+    def agregar_hoja_mantenciones(
+        nombre_hoja,
+        mantenciones
+    ):
+
+        ws = wb.create_sheet(
+            title=nombre_hoja
+        )
+
+        ws.append([
+            'Patente',
+            'Centro de costo',
+            'Tipo',
+            'Estado',
+            'Fecha programada',
+            'Fecha ingreso',
+            'Kilometraje programado',
+            'Kilometraje ingreso',
+            'Motivo',
+            'Usuario registro'
+        ])
+
+        for mantencion in mantenciones:
+
+            vehiculo = mantencion.vehiculo
+
+            ws.append([
+                vehiculo.patente,
+                str(
+                    vehiculo.centro_costo
+                ) if vehiculo.centro_costo else '',
+                mantencion.get_tipo_mantencion_display(),
+                mantencion.get_estado_display(),
+                mantencion.fecha_programada,
+                mantencion.fecha_ingreso,
+                mantencion.kilometraje_programado,
+                mantencion.kilometraje_ingreso,
+                mantencion.motivo,
+                mantencion.usuario_registro.username
+                if mantencion.usuario_registro
+                else '',
+            ])
+
+        ajustar_columnas(
+            ws
+        )
+
+    if 'resumen' in secciones_exportar:
+
+        agregar_hoja_resumen()
+
+    if 'km_vencidas' in secciones_exportar:
+
+        agregar_hoja_alertas_km(
+            'KM vencidas',
+            alertas_km_vencidas
+        )
+
+    if 'km_proximas' in secciones_exportar:
+
+        agregar_hoja_alertas_km(
+            'KM proximas',
+            alertas_km_proximas
+        )
+
+    if 'sin_datos' in secciones_exportar:
+
+        agregar_hoja_sin_datos(
+            'Sin informacion',
+            alertas_km_sin_datos
+        )
+
+    if 'al_dia' in secciones_exportar:
+
+        agregar_hoja_alertas_km(
+            'Al dia',
+            alertas_km_al_dia
+        )
+
+    if 'programadas_vencidas' in secciones_exportar:
+
+        agregar_hoja_mantenciones(
+            'Programadas vencidas',
+            mantenciones_programadas_vencidas
+        )
+
+    if 'programadas_proximas' in secciones_exportar:
+
+        agregar_hoja_mantenciones(
+            'Programadas proximas',
+            mantenciones_programadas_proximas
+        )
+
+    if 'en_curso' in secciones_exportar:
+
+        agregar_hoja_mantenciones(
+            'En curso',
+            mantenciones_en_curso
+        )
+
+    if not wb.worksheets:
+
+        agregar_hoja_resumen()
+
+    response = HttpResponse(
+        content_type=(
+            'application/vnd.openxmlformats-officedocument.'
+            'spreadsheetml.sheet'
+        )
+    )
+
+    response['Content-Disposition'] = (
+        'attachment; filename="control_mantenciones.xlsx"'
+    )
+
+    wb.save(
+        response
+    )
+
+    return response

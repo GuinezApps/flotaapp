@@ -19,6 +19,101 @@ Control de mantenciones
     margin:0;
 }
 
+.page-header-acciones{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+}
+
+.btn-exportar-mantenciones{
+    display:inline-block;
+    background:#16a34a;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:bold;
+    white-space:nowrap;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    cursor:pointer;
+}
+
+.btn-exportar-mantenciones:hover{
+    background:#15803d;
+}
+
+.exportar-dropdown{
+    position:relative;
+}
+
+.exportar-dropdown summary{
+    list-style:none;
+}
+
+.exportar-dropdown summary::-webkit-details-marker{
+    display:none;
+}
+
+.exportar-panel{
+    position:absolute;
+    right:0;
+    top:46px;
+    width:300px;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    box-shadow:0 8px 22px rgba(0,0,0,.14);
+    padding:14px;
+    z-index:20;
+}
+
+.exportar-panel h4{
+    margin:0 0 10px 0;
+    color:#1e293b;
+}
+
+.exportar-ayuda{
+    margin:0 0 12px 0;
+    color:#64748b;
+    font-size:13px;
+}
+
+.exportar-opciones{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.exportar-opciones label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#334155;
+    font-size:14px;
+}
+
+.exportar-opciones input{
+    accent-color:#16a34a;
+}
+
+.btn-exportar-submit{
+    width:100%;
+    background:#16a34a;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-exportar-submit:hover{
+    background:#15803d;
+}
+
+
 .kpi-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -375,6 +470,22 @@ Control de mantenciones
     color:#991b1b;
 }
 
+.badge-al-dia{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-sin-datos{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.badge-problema{
+    background:#f1f5f9;
+    color:#334155;
+    margin:2px 4px 2px 0;
+}
+
 .acciones-tabla{
     display:flex;
     gap:8px;
@@ -418,6 +529,24 @@ Control de mantenciones
     background:#15803d;
 }
 
+.btn-reprogramar{
+    background:#f59e0b;
+    color:white;
+}
+
+.btn-reprogramar:hover{
+    background:#d97706;
+}
+
+.btn-cancelar{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-cancelar:hover{
+    background:#b91c1c;
+}
+
 .estado-vacio,
 .sin-resultados-panel{
     background:#f8fafc;
@@ -455,6 +584,21 @@ Control de mantenciones
         grid-template-columns:1fr;
     }
 
+    .page-header-acciones{
+        flex-direction:column;
+    }
+
+    .exportar-dropdown{
+        width:100%;
+    }
+
+    .exportar-panel{
+        position:static;
+        width:auto;
+        margin-top:10px;
+    }
+
+
     .barra-item{
         grid-template-columns:1fr;
         gap:6px;
@@ -471,13 +615,127 @@ Control de mantenciones
 
 {% block content %}
 
-<div class="page-header">
+<div class="page-header page-header-acciones">
 
-    <h1>Control de mantenciones</h1>
+    <div>
+        <h1>Control de mantenciones</h1>
 
-    <p class="subtitulo-pagina">
-        Vista operativa para revisar mantenciones próximas, vencidas y en curso.
-    </p>
+        <p class="subtitulo-pagina">
+            Vista operativa para revisar mantenciones próximas, vencidas y en curso.
+        </p>
+    </div>
+
+    <details class="exportar-dropdown">
+
+        <summary class="btn-exportar-mantenciones">
+            Exportar Excel
+        </summary>
+
+        <form
+            method="get"
+            action="{% url 'exportar_control_mantenciones_excel' %}"
+            class="exportar-panel"
+        >
+
+            <h4>Seleccionar hojas</h4>
+
+            <p class="exportar-ayuda">
+                Marca las secciones que quieres incluir en el archivo.
+            </p>
+
+            <div class="exportar-opciones">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="resumen"
+                        checked
+                    >
+                    Resumen
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="km_vencidas"
+                        checked
+                    >
+                    KM vencidas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="km_proximas"
+                        checked
+                    >
+                    KM próximas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="sin_datos"
+                        checked
+                    >
+                    Vehículos sin información
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="al_dia"
+                    >
+                    Vehículos al día
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="programadas_vencidas"
+                        checked
+                    >
+                    Programadas vencidas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="programadas_proximas"
+                        checked
+                    >
+                    Programadas próximas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="en_curso"
+                        checked
+                    >
+                    Mantenciones en curso
+                </label>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-exportar-submit"
+            >
+                Descargar Excel
+            </button>
+
+        </form>
+
+    </details>
 
 </div>
 
@@ -511,6 +769,11 @@ Control de mantenciones
             <div class="kpi-mini-item">
                 <span>Programadas vencidas</span>
                 <strong>{{ total_programadas_vencidas }}</strong>
+            </div>
+
+            <div class="kpi-mini-item">
+                <span>Sin información</span>
+                <strong>{{ total_km_sin_datos }}</strong>
             </div>
         </div>
     </button>
@@ -684,6 +947,11 @@ Control de mantenciones
             </div>
 
             <div class="resumen-operativo-item">
+                <span>Vehículos sin información</span>
+                <strong>{{ total_km_sin_datos }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
                 <span>Programadas vencidas</span>
                 <strong>{{ total_programadas_vencidas }}</strong>
             </div>
@@ -726,6 +994,8 @@ Control de mantenciones
             <option value="PROGRAMADAS_VENCIDAS">Programadas vencidas</option>
             <option value="PROGRAMADAS_PROXIMAS">Programadas próximas</option>
             <option value="EN_CURSO">Mantenciones en curso</option>
+            <option value="SIN_DATOS">Vehículos sin información</option>
+            <option value="AL_DIA">Vehículos al día</option>
         </select>
     </div>
 
@@ -947,6 +1217,227 @@ Control de mantenciones
 
 </div>
 
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="SIN_DATOS"
+>
+
+    <h2>Vehículos sin información de mantención</h2>
+
+    <div class="texto-ayuda">
+        Vehículos vigentes que no tienen datos suficientes para calcular su próxima mantención por kilometraje.
+    </div>
+
+    {% if alertas_km_sin_datos %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>Última mantención</th>
+                        <th>Próxima mantención</th>
+                        <th>Problema detectado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_sin_datos %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} sin informacion sin información {{ alerta.problemas|join:' ' }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_ultima_mantencion|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_proxima_mantencion|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if alerta.problemas %}
+                                    {% for problema in alerta.problemas %}
+                                        <span class="badge badge-problema">
+                                            {{ problema }}
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="badge badge-sin-datos">
+                                        Sin datos suficientes
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-registrar"
+                                    >
+                                        Editar datos
+                                    </a>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay vehículos sin información de mantención.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones panel-oculto"
+    data-panel="AL_DIA"
+>
+
+    <h2>Vehículos al día</h2>
+
+    <div class="texto-ayuda">
+        Vehículos vigentes con datos suficientes y más de 1.500 km restantes para su próxima mantención. Esta tabla se usa principalmente para auditoría.
+    </div>
+
+    {% if alertas_km_al_dia %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_al_dia %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} al dia al día kilometraje km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-al-dia">
+                                    Al día
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    <a
+                                    href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-registrar"
+                                    >
+                                        Editar datos
+                                    </a>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay vehículos al día para mostrar.
+        </div>
+
+    {% endif %}
+
+</div>
+
 <div
     class="panel-card panel-tabla-mantenciones"
     data-panel="PROGRAMADAS_VENCIDAS"
@@ -1018,18 +1509,32 @@ Control de mantenciones
                                 <div class="acciones-tabla">
 
                                     <a
-                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
-                                    class="btn-tabla btn-ver"
-                                    >
-                                        Ver ficha
-                                    </a>
+									href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+									class="btn-tabla btn-ver"
+									>
+										Ver ficha
+									</a>
 
-                                    <a
-                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
-                                    class="btn-tabla btn-cerrar"
-                                    >
-                                        Cerrar
-                                    </a>
+									<a
+									href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-registrar"
+									>
+										Iniciar
+									</a>
+
+									<a
+									href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-reprogramar"
+									>
+										Reprogramar
+									</a>
+
+									<a
+									href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-cancelar"
+									>
+										Cancelar
+									</a>
 
                                 </div>
                             </td>
@@ -1128,18 +1633,32 @@ Control de mantenciones
                                 <div class="acciones-tabla">
 
                                     <a
-                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
-                                    class="btn-tabla btn-ver"
-                                    >
-                                        Ver ficha
-                                    </a>
+									href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+									class="btn-tabla btn-ver"
+									>
+										Ver ficha
+									</a>
 
-                                    <a
-                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
-                                    class="btn-tabla btn-cerrar"
-                                    >
-                                        Cerrar
-                                    </a>
+									<a
+									href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-registrar"
+									>
+										Iniciar
+									</a>
+
+									<a
+									href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-reprogramar"
+									>
+										Reprogramar
+									</a>
+
+									<a
+									href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+									class="btn-tabla btn-cancelar"
+									>
+										Cancelar
+									</a>
 
                                 </div>
                             </td>
@@ -1308,14 +1827,30 @@ Control de mantenciones
     const paneles = document.querySelectorAll('.panel-tabla-mantenciones');
 
     const gruposCategoria = {
-        TODAS: ['KM_VENCIDAS', 'KM_PROXIMAS', 'PROGRAMADAS_VENCIDAS', 'PROGRAMADAS_PROXIMAS', 'EN_CURSO'],
-        CRITICAS: ['KM_VENCIDAS', 'PROGRAMADAS_VENCIDAS'],
-        PROXIMAS: ['KM_PROXIMAS', 'PROGRAMADAS_PROXIMAS'],
+        TODAS: [
+            'KM_VENCIDAS',
+            'KM_PROXIMAS',
+            'SIN_DATOS',
+            'PROGRAMADAS_VENCIDAS',
+            'PROGRAMADAS_PROXIMAS',
+            'EN_CURSO'
+        ],
+        CRITICAS: [
+            'KM_VENCIDAS',
+            'PROGRAMADAS_VENCIDAS',
+            'SIN_DATOS'
+        ],
+        PROXIMAS: [
+            'KM_PROXIMAS',
+            'PROGRAMADAS_PROXIMAS'
+        ],
         KM_VENCIDAS: ['KM_VENCIDAS'],
         KM_PROXIMAS: ['KM_PROXIMAS'],
         PROGRAMADAS_VENCIDAS: ['PROGRAMADAS_VENCIDAS'],
         PROGRAMADAS_PROXIMAS: ['PROGRAMADAS_PROXIMAS'],
-        EN_CURSO: ['EN_CURSO']
+        EN_CURSO: ['EN_CURSO'],
+        SIN_DATOS: ['SIN_DATOS'],
+        AL_DIA: ['AL_DIA']
     };
 
     function normalizarTexto(texto){

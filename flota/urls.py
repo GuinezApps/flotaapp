@@ -24,6 +24,9 @@ urlpatterns = [
     path('vehiculos/transferencias-cc/',views.transferencias_cc,name='transferencias_cc'),
     path('vehiculo/<int:id>/mantencion/registrar/',views.registrar_mantencion_vehiculo,name='registrar_mantencion_vehiculo'),
     path('vehiculos/control-mantenciones/',views.control_mantenciones,name='control_mantenciones'),
-    path(
-    'mantencion/<int:id>/cerrar/',views.cerrar_mantencion_vehiculo,name='cerrar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/iniciar/',views.iniciar_mantencion_vehiculo,name='iniciar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/reprogramar/',views.reprogramar_mantencion_vehiculo,name='reprogramar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/cancelar/',views.cancelar_mantencion_vehiculo,name='cancelar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/cerrar/',views.cerrar_mantencion_vehiculo,name='cerrar_mantencion_vehiculo'),
+    path('vehiculos/control-mantenciones/exportar/',views.exportar_control_mantenciones_excel,name='exportar_control_mantenciones_excel'),
 ]

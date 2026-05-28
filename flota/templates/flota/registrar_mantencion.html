@@ -114,6 +114,7 @@ Registrar mantención {{ vehiculo.patente }}
     text-decoration:underline;
 }
 
+
 @media(max-width:800px){
 
     .form-grid{
@@ -287,5 +288,30 @@ Registrar mantención {{ vehiculo.patente }}
     </form>
 
 </div>
+
+{% if mantencion_en_curso %}
+
+    <div style="
+        background:#fef2f2;
+        border:1px solid #fecaca;
+        color:#991b1b;
+        padding:14px;
+        border-radius:10px;
+        margin-bottom:18px;
+        font-weight:bold;
+    ">
+        Este vehículo ya tiene una mantención en curso.
+        Debes cerrar la mantención activa antes de registrar otra mantención como En curso.
+
+        <br><br>
+
+        Mantención activa:
+        {{ mantencion_en_curso.get_tipo_mantencion_display }}
+        {% if mantencion_en_curso.fecha_ingreso %}
+            · Ingreso: {{ mantencion_en_curso.fecha_ingreso|date:"d-m-Y" }}
+        {% endif %}
+    </div>
+
+{% endif %}
 
 {% endblock %}
