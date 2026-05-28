@@ -3788,6 +3788,58 @@ def control_mantenciones(request):
         'vehiculo__patente'
     )
 
+    vehiculos_vigentes_operacionales = Vehiculo.objects.exclude(
+        estado_administrativo='Dado de Baja'
+    )
+
+    total_vehiculos_vigentes = vehiculos_vigentes_operacionales.count()
+
+    total_vehiculos_operativos = vehiculos_vigentes_operacionales.filter(
+        estado_operacional='Operativo'
+    ).count()
+
+    total_vehiculos_no_operativos = vehiculos_vigentes_operacionales.filter(
+        estado_operacional='No operativo'
+    ).count()
+
+    total_vehiculos_en_mantencion = vehiculos_vigentes_operacionales.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Mantencion'
+    ).count()
+
+    total_vehiculos_en_reparacion = vehiculos_vigentes_operacionales.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Reparacion'
+    ).count()
+
+    total_vehiculos_detenidos = vehiculos_vigentes_operacionales.filter(
+        estado_operacional='No operativo',
+        subestado_no_operativo='Detenido'
+    ).count()
+
+    if total_vehiculos_vigentes:
+
+        porcentaje_vehiculos_operativos = round(
+            (
+                total_vehiculos_operativos
+                / total_vehiculos_vigentes
+            ) * 100,
+            1
+        )
+
+        porcentaje_vehiculos_no_operativos = round(
+            (
+                total_vehiculos_no_operativos
+                / total_vehiculos_vigentes
+            ) * 100,
+            1
+        )
+
+    else:
+
+        porcentaje_vehiculos_operativos = 0
+        porcentaje_vehiculos_no_operativos = 0
+    
     contexto = {
         'hoy': hoy,
 
@@ -3820,6 +3872,30 @@ def control_mantenciones(request):
 
         'total_en_curso':
         mantenciones_en_curso.count(),
+
+        'total_vehiculos_vigentes':
+        total_vehiculos_vigentes,
+
+        'total_vehiculos_operativos':
+        total_vehiculos_operativos,
+
+        'total_vehiculos_no_operativos':
+        total_vehiculos_no_operativos,
+
+        'total_vehiculos_en_mantencion':
+        total_vehiculos_en_mantencion,
+
+        'total_vehiculos_en_reparacion':
+        total_vehiculos_en_reparacion,
+
+        'total_vehiculos_detenidos':
+        total_vehiculos_detenidos,
+
+        'porcentaje_vehiculos_operativos':
+        porcentaje_vehiculos_operativos,
+
+        'porcentaje_vehiculos_no_operativos':
+        porcentaje_vehiculos_no_operativos,
     }
 
     contexto.update(
@@ -3925,7 +4001,7 @@ def exportar_control_mantenciones_excel(request):
         'fecha_programada',
         'vehiculo__patente'
     )
-
+        
     wb = Workbook()
 
     hoja_inicial = wb.active

@@ -214,14 +214,19 @@ Control de mantenciones
 
 .panel-analitico{
     display:grid;
-    grid-template-columns:2fr 1.1fr;
+    grid-template-columns:minmax(0, 2fr) minmax(280px, 1fr);
     gap:22px;
     align-items:start;
+    margin-bottom:22px;
 }
 
-.grafico-mantenciones h2{
-    margin:0 0 8px 0;
-    color:#1e293b;
+.grafico-mantenciones{
+    min-width:0;
+}
+
+.grafico-mantenciones-card,
+.resumen-operativo-card{
+    margin-bottom:0;
 }
 
 .grafico-subtitulo{
@@ -229,99 +234,193 @@ Control de mantenciones
     margin-bottom:18px;
 }
 
-.grafico-barras{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-}
-
-.barra-item{
+.mantenciones-resumen-principal{
     display:grid;
-    grid-template-columns:180px 1fr 110px;
-    gap:14px;
-    align-items:center;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:18px;
 }
 
-.barra-label{
+.mantenciones-mini-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+}
+
+.mantenciones-mini-label{
+    color:#64748b;
+    font-size:12px;
     font-weight:bold;
-    color:#334155;
+    margin-bottom:4px;
 }
 
-.barra-fondo{
-    height:18px;
+.mantenciones-mini-numero{
+    color:#1e293b;
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+}
+
+.mantenciones-mini-subtexto{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.barra-apilada-contenedor{
+    margin:18px 0 16px 0;
+}
+
+.barra-apilada{
+    display:flex;
+    width:100%;
+    height:22px;
     background:#e5e7eb;
     border-radius:999px;
     overflow:hidden;
 }
 
-.barra{
+.segmento-barra{
     height:100%;
-    min-width:4px;
-    border-radius:999px;
+    min-width:3px;
 }
 
-.barra-ok{
+.segmento-ok{
     background:#16a34a;
 }
 
-.barra-proxima{
+.segmento-proxima{
     background:#f59e0b;
 }
 
-.barra-vencida{
+.segmento-vencida{
     background:#dc2626;
 }
 
-.barra-sin-datos{
+.segmento-sin-datos{
     background:#64748b;
 }
 
-.barra-metrica{
-    justify-self:end;
-    min-width:90px;
-    background:#f8fafc;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    padding:7px 10px;
-    text-align:right;
-}
-
-.barra-metrica-cantidad{
-    display:block;
-    color:#1e293b;
-    font-size:15px;
-    font-weight:800;
-    line-height:1.1;
-}
-
-.barra-metrica-porcentaje{
-    display:block;
-    color:#64748b;
-    font-size:12px;
-    font-weight:600;
-    margin-top:2px;
-}
-
-.grafico-leyenda{
-    margin-top:16px;
+.mantenciones-metricas{
     display:flex;
-    flex-wrap:wrap;
+    flex-direction:column;
+    gap:9px;
+    margin-top:6px;
+}
+
+.mantenciones-metrica{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
     gap:10px;
-    color:#64748b;
-    font-size:13px;
-}
-
-.leyenda-item{
-    display:flex;
     align-items:center;
-    gap:6px;
+    font-size:14px;
 }
 
-.leyenda-color{
-    width:12px;
-    height:12px;
+.metrica-dot{
+    width:10px;
+    height:10px;
     border-radius:999px;
     display:inline-block;
+}
+
+.metrica-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.metrica-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.mantenciones-alerta{
+    margin-top:14px;
+    padding:10px;
+    border-radius:10px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.estado-operacional-flota{
+    margin-top:16px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:14px;
+}
+
+.estado-operacional-flota h3{
+    margin:0 0 12px 0;
+    color:#1e293b;
+    font-size:16px;
+}
+
+.estado-operacional-grid{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:8px;
+}
+
+.estado-operacional-item{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:8px 10px;
+    min-width:0;
+}
+
+.estado-operacional-label{
+    display:block;
+    color:#64748b;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.estado-operacional-numero{
+    color:#0f172a;
+    font-size:20px;
+    font-weight:800;
+    line-height:1;
+}
+
+.estado-operacional-porcentaje{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-top:4px;
+}
+
+.estado-operacional-item.total{
+    border-left:4px solid #2563eb;
+}
+
+.estado-operacional-item.operativos{
+    border-left:4px solid #16a34a;
+}
+
+.estado-operacional-item.no-operativos{
+    border-left:4px solid #dc2626;
+}
+
+.estado-operacional-item.mantencion{
+    border-left:4px solid #f59e0b;
+}
+
+.estado-operacional-item.reparacion{
+    border-left:4px solid #7c3aed;
+}
+
+.estado-operacional-item.detenidos{
+    border-left:4px solid #64748b;
 }
 
 .resumen-operativo{
@@ -565,6 +664,7 @@ Control de mantenciones
     display:none;
 }
 
+
 @media(max-width:1200px){
 
     .kpi-grid{
@@ -598,16 +698,17 @@ Control de mantenciones
         margin-top:10px;
     }
 
-
-    .barra-item{
-        grid-template-columns:1fr;
-        gap:6px;
+    .mantenciones-metrica{
+        grid-template-columns:auto 1fr;
     }
 
-    .barra-metrica{
-		justify-self:start;
-		text-align:left;
-	}
+    .metrica-valor{
+        grid-column:2;
+    }
+	
+	.estado-operacional-grid{
+		grid-template-columns:1fr 1fr;
+    }
 
 }
 
@@ -810,9 +911,9 @@ Control de mantenciones
 
 </div>
 
-<div class="panel-card">
+<div class="panel-analitico">
 
-    <div class="panel-analitico">
+    <div class="panel-card grafico-mantenciones-card">
 
         <div class="grafico-mantenciones">
 
@@ -822,115 +923,181 @@ Control de mantenciones
                 Resumen calculado sobre vehículos vigentes. Regla actual: mantención cada 10.000 km.
             </div>
 
-            <div class="grafico-barras">
+            <div class="barra-apilada-contenedor">
 
-                <div class="barra-item">
-                    <div class="barra-label">Al día</div>
+                <div class="barra-apilada">
 
-                    <div class="barra-fondo">
-                        <div
-                            class="barra barra-ok"
-                            style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
-                        ></div>
-                    </div>
+                    <div
+                        class="segmento-barra segmento-ok"
+                        title="Al día"
+                        style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
+                    ></div>
 
-                    <div class="barra-metrica">
-						<span class="barra-metrica-cantidad">
-							{{ total_km_al_dia }}
+                    <div
+                        class="segmento-barra segmento-proxima"
+                        title="Próximas"
+                        style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                    <div
+                        class="segmento-barra segmento-vencida"
+                        title="Vencidas"
+                        style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                    <div
+                        class="segmento-barra segmento-sin-datos"
+                        title="Sin información"
+                        style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+            <div class="mantenciones-metricas">
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-ok"></span>
+
+                    <span class="metrica-label">
+                        Al día
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_al_dia|default:0 }}
+                        ·
+                        {{ porcentaje_km_al_dia|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-proxima"></span>
+
+                    <span class="metrica-label">
+                        Próximas
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_proximas|default:0 }}
+                        ·
+                        {{ porcentaje_km_proximas|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-vencida"></span>
+
+                    <span class="metrica-label">
+                        Vencidas
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_vencidas|default:0 }}
+                        ·
+                        {{ porcentaje_km_vencidas|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-sin-datos"></span>
+
+                    <span class="metrica-label">
+                        Sin información
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_sin_datos|default:0 }}
+                        ·
+                        {{ porcentaje_km_sin_datos|default:0 }}%
+                    </span>
+                </div>
+
+            </div>
+
+            {% if total_km_vencidas or total_km_sin_datos %}
+
+                <div class="mantenciones-alerta">
+                    Atención requerida:
+                    {{ total_km_vencidas|default:0 }}
+                    vencidas y
+                    {{ total_km_sin_datos|default:0 }}
+                    vehículos sin información.
+                </div>
+
+            {% endif %}
+			
+			<div class="estado-operacional-flota">
+
+				<h3>Estado operacional de la flota</h3>
+				<div class="estado-operacional-grid">
+					<div class="estado-operacional-item operativos">
+						<span class="estado-operacional-label">
+							Operativos
 						</span>
-						<span class="barra-metrica-porcentaje">
-							{{ porcentaje_km_al_dia }}%
-						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_operativos|default:0 }}
+						</div>
+
+						<div class="estado-operacional-porcentaje">
+							{{ porcentaje_vehiculos_operativos|default:0 }}%
+						</div>
 					</div>
-                </div>
 
-                <div class="barra-item">
-                    <div class="barra-label">Próximas</div>
+					<div class="estado-operacional-item no-operativos">
+						<span class="estado-operacional-label">
+							No operativos
+						</span>
 
-                    <div class="barra-fondo">
-                        <div
-                            class="barra barra-proxima"
-                            style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
-                        ></div>
-                    </div>
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_no_operativos|default:0 }}
+						</div>
 
-                    <div class="barra-metrica">
-                        <span class="barra-metrica-cantidad">
-                            {{ total_km_proximas }}
-                        </span>
-                        <span class="barra-metrica-porcentaje">
-                            {{ porcentaje_km_proximas|default:0 }}%
-                        </span>
-                    </div>
-                </div>
+						<div class="estado-operacional-porcentaje">
+							{{ porcentaje_vehiculos_no_operativos|default:0 }}%
+						</div>
+					</div>
 
-                <div class="barra-item">
-                    <div class="barra-label">Vencidas</div>
+					<div class="estado-operacional-item mantencion">
+						<span class="estado-operacional-label">
+							En mantención
+						</span>
 
-                    <div class="barra-fondo">
-                        <div
-                            class="barra barra-vencida"
-                            style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
-                        ></div>
-                    </div>
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_en_mantencion|default:0 }}
+						</div>
+					</div>
 
-                    <div class="barra-metrica">
-                        <span class="barra-metrica-cantidad">
-                            {{ total_km_vencidas }}
-                        </span>
-                        <span class="barra-metrica-porcentaje">
-                            {{ porcentaje_km_vencidas|default:0 }}%
-                        </span>
-                    </div>
-                </div>
+					<div class="estado-operacional-item reparacion">
+						<span class="estado-operacional-label">
+							En reparación
+						</span>
 
-                <div class="barra-item">
-                    <div class="barra-label">Sin información</div>
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_en_reparacion|default:0 }}
+						</div>
+					</div>
 
-                    <div class="barra-fondo">
-                        <div
-                            class="barra barra-sin-datos"
-                            style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
-                        ></div>
-                    </div>
+					<div class="estado-operacional-item detenidos">
+						<span class="estado-operacional-label">
+							Detenidos
+						</span>
 
-                    <div class="barra-metrica">
-                        <span class="barra-metrica-cantidad">
-                            {{ total_km_sin_datos }}
-                        </span>
-                        <span class="barra-metrica-porcentaje">
-                            {{ porcentaje_km_sin_datos|default:0 }}%
-                        </span>
-                    </div>
-                </div>
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_detenidos|default:0 }}
+						</div>
+					</div>
 
-            </div>
+				</div>
 
-            <div class="grafico-leyenda">
-
-                <div class="leyenda-item">
-                    <span class="leyenda-color barra-ok"></span>
-                    Al día: más de 1.500 km restantes.
-                </div>
-
-                <div class="leyenda-item">
-                    <span class="leyenda-color barra-proxima"></span>
-                    Próxima: 1.500 km o menos.
-                </div>
-
-                <div class="leyenda-item">
-                    <span class="leyenda-color barra-vencida"></span>
-                    Vencida: llegó o superó el kilometraje objetivo.
-                </div>
-
-                <div class="leyenda-item">
-                    <span class="leyenda-color barra-sin-datos"></span>
-                    Sin información: faltan datos de kilometraje.
-                </div>
-
-            </div>
+			</div>
 
         </div>
+
+    </div>
+
+    <div class="panel-card resumen-operativo-card">
 
         <div class="resumen-operativo">
 
