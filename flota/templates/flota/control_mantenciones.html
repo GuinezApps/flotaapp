@@ -1248,12 +1248,16 @@ Control de mantenciones
                                         Ver ficha
                                     </a>
 
-                                    <a
-                                    href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
-                                    class="btn-tabla btn-registrar"
-                                    >
-                                        Registrar mantención
-                                    </a>
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Registrar mantención
+                                        </a>
+
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -1351,13 +1355,17 @@ Control de mantenciones
                                     >
                                         Ver ficha
                                     </a>
+									
+                                    {% if puede_editar %}
 
-                                    <a
-                                    href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
-                                    class="btn-tabla btn-registrar"
-                                    >
-                                        Registrar mantención
-                                    </a>
+                                        <a
+                                        href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Registrar mantención
+                                        </a>
+
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
@@ -1466,12 +1474,16 @@ Control de mantenciones
                                         Ver ficha
                                     </a>
 
-                                    <a
-                                    href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
-                                    class="btn-tabla btn-registrar"
-                                    >
-                                        Editar datos
-                                    </a>
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Editar datos
+                                        </a>
+
+                                    {% endif %}
 
                                 </div>
                             </td>
@@ -1572,12 +1584,16 @@ Control de mantenciones
                                         Ver ficha
                                     </a>
 
-                                    <a
-                                    href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
-                                    class="btn-tabla btn-registrar"
-                                    >
-                                        Editar datos
-                                    </a>
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Editar datos
+                                        </a>
+
+                                    {% endif %}
 
                                 </div>
                             </td>
@@ -1682,26 +1698,30 @@ Control de mantenciones
 										Ver ficha
 									</a>
 
-									<a
-									href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-registrar"
-									>
-										Iniciar
-									</a>
+                                    {% if puede_editar %}
 
-									<a
-									href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-reprogramar"
-									>
-										Reprogramar
-									</a>
+                                        <a
+                                        href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Iniciar
+                                        </a>
 
-									<a
-									href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-cancelar"
-									>
-										Cancelar
-									</a>
+                                        <a
+                                        href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-reprogramar"
+                                        >
+                                            Reprogramar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cancelar"
+                                        >
+                                            Cancelar
+                                        </a>
+
+                                    {% endif %}
 
                                 </div>
                             </td>
@@ -1806,26 +1826,30 @@ Control de mantenciones
 										Ver ficha
 									</a>
 
-									<a
-									href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-registrar"
-									>
-										Iniciar
-									</a>
+                                    {% if puede_editar %}
 
-									<a
-									href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-reprogramar"
-									>
-										Reprogramar
-									</a>
+                                        <a
+                                        href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Iniciar
+                                        </a>
 
-									<a
-									href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
-									class="btn-tabla btn-cancelar"
-									>
-										Cancelar
-									</a>
+                                        <a
+                                        href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-reprogramar"
+                                        >
+                                            Reprogramar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cancelar"
+                                        >
+                                            Cancelar
+                                        </a>
+
+                                    {% endif %}
 
                                 </div>
                             </td>
@@ -1947,12 +1971,16 @@ Control de mantenciones
                                         Ver ficha
                                     </a>
 
-                                    <a
-                                    href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
-                                    class="btn-tabla btn-cerrar"
-                                    >
-                                        Cerrar
-                                    </a>
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cerrar"
+                                        >
+                                            Cerrar
+                                        </a>
+
+                                    {% endif %}
 
                                 </div>
                             </td>

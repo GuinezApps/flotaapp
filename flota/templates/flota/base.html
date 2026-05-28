@@ -445,6 +445,16 @@ class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_
 </a>
 </li>
 
+<li>
+<a
+href="{% url 'control_mantenciones' %}"
+class="{% if request.resolver_match.url_name == 'control_mantenciones' %}activo{% endif %}"
+>
+🔧
+<span class="texto-menu">Control mantenciones</span>
+</a>
+</li>
+
 {% if puede_editar %}
 <li class="menu-grupo {% if request.resolver_match.url_name == 'gestionar_estados' or request.resolver_match.url_name == 'transferencias_cc' %}abierto{% endif %}">
 
@@ -480,47 +490,13 @@ class="submenu"
     >
         <span class="texto-menu">Modificación de CCs</span>
     </a>
-	
-	<a
-	href="{% url 'control_mantenciones' %}"
-	class="{% if '/vehiculos/control-mantenciones/' in request.path %}activo{% endif %}"
-	>
-		<span class="texto-menu">Control de mantenciones</span>
-	</a>
+
 </div>
 
 </li>
 {% endif %}
 
-<hr style="border-color:#334155;margin:25px 0;">
 
-<li>
-<a href="#">
-📊
-<span class="texto-menu">Reportes</span>
-</a>
-</li>
-
-<li>
-<a href="#">
-🔧
-<span class="texto-menu">Mantenciones</span>
-</a>
-</li>
-
-<li>
-<a href="#">
-💰
-<span class="texto-menu">Costos</span>
-</a>
-</li>
-
-<li>
-<a href="#">
-⚠
-<span class="texto-menu">Alertas</span>
-</a>
-</li>
 
 {% if puede_gestionar_usuarios %}
 <hr style="border-color:#334155;margin:25px 0;">

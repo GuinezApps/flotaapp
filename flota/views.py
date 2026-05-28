@@ -3724,7 +3724,6 @@ def registrar_mantencion_vehiculo(request, id):
     )
  
 @login_required
-@editor_required
 def control_mantenciones(request):
 
     hoy = timezone.now().date()
@@ -3896,6 +3895,12 @@ def control_mantenciones(request):
 
         'porcentaje_vehiculos_no_operativos':
         porcentaje_vehiculos_no_operativos,
+        
+        'puede_editar': (
+            request.user.is_superuser
+            or request.user.groups.filter(name='Editor').exists()
+            or request.user.groups.filter(name='Master').exists()
+        ),
     }
 
     contexto.update(
