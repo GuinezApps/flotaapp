@@ -3037,7 +3037,7 @@ def configuracion(request):
         }
     )
 @login_required
-@master_required
+@editor_required
 def bitacora(request):
 
     busqueda = request.GET.get(

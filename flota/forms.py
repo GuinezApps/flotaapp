@@ -551,99 +551,86 @@ class CancelarMantencionVehiculoForm(forms.Form):
 class ReprogramarMantencionVehiculoForm(forms.Form):
 
     nueva_fecha_programada = forms.DateField(
+        required=True,
+        label='Nueva fecha programada',
         widget=forms.DateInput(
             attrs={
-                'type': 'date',
-                'class': 'form-control'
+                'type': 'date'
             }
-        ),
-        label='Nueva fecha programada'
+        )
     )
 
     motivo = forms.CharField(
-        required=False,
+        required=True,
+        label='Motivo',
+        max_length=255,
         widget=forms.TextInput(
             attrs={
-                'class': 'form-control',
-                'placeholder': 'Motivo de la mantención'
+                'placeholder': 'Motivo de la reprogramación'
             }
-        ),
-        label='Motivo'
+        )
     )
 
     observacion = forms.CharField(
         required=False,
+        label='Observación',
         widget=forms.Textarea(
             attrs={
-                'class': 'form-control',
                 'rows': 4,
-                'placeholder': 'Observación o detalle de la reprogramación...'
+                'placeholder': 'Observación de la reprogramación...'
             }
-        ),
-        label='Observación'
+        )
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
 
         self.mantencion = kwargs.pop(
             'mantencion',
             None
         )
 
-        super().__init__(*args, **kwargs)
-
-    def clean_nueva_fecha_programada(self):
-
-        nueva_fecha_programada = self.cleaned_data.get(
-            'nueva_fecha_programada'
+        super().__init__(
+            *args,
+            **kwargs
         )
-
-        if not nueva_fecha_programada:
-
-            return nueva_fecha_programada
-
-        if (
-            self.mantencion
-            and self.mantencion.estado in [
-                'CERRADA',
-                'CANCELADA',
-            ]
-        ):
-
-            raise forms.ValidationError(
-                'No puedes reprogramar una mantención cerrada o cancelada.'
-            )
-
-        return nueva_fecha_programada
-        
-
-
-    def __init__(self, *args, **kwargs):
-
-        self.mantencion = kwargs.pop(
-            'mantencion',
-            None
-        )
-
-        super().__init__(*args, **kwargs)
 
     def clean(self):
 
         cleaned_data = super().clean()
 
-        kilometraje_cierre = cleaned_data.get(
-            'kilometraje_cierre'
+        nueva_fecha_programada = cleaned_data.get(
+            'nueva_fecha_programada'
         )
 
-        if (
-            self.mantencion
-            and self.mantencion.tipo_mantencion == 'KILOMETRAJE'
-            and kilometraje_cierre is None
-        ):
+        if self.mantencion:
+
+            if self.mantencion.estado == 'CERRADA':
+
+                raise forms.ValidationError(
+                    'No puedes reprogramar una mantención cerrada.'
+                )
+
+            if self.mantencion.estado == 'CANCELADA':
+
+                raise forms.ValidationError(
+                    'No puedes reprogramar una mantención cancelada.'
+                )
+
+            if self.mantencion.estado == 'EN_CURSO':
+
+                raise forms.ValidationError(
+                    'No puedes reprogramar una mantención que ya está en curso.'
+                )
+
+        if not nueva_fecha_programada:
 
             self.add_error(
-                'kilometraje_cierre',
-                'Debes indicar el kilometraje de cierre para una mantención por kilometraje.'
+                'nueva_fecha_programada',
+                'Debes ingresar una nueva fecha programada.'
             )
 
         return cleaned_data

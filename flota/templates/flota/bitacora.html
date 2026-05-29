@@ -193,12 +193,16 @@ Bitácora
         </p>
     </div>
 
-    <a
-    href="{% url 'configuracion' %}"
-    class="boton-volver"
-    >
-        ← Volver a configuración
-    </a>
+    {% if puede_gestionar_usuarios %}
+
+		<a
+		href="{% url 'configuracion' %}"
+		class="boton-secundario"
+		>
+			Volver a configuración
+		</a>
+
+{% endif %}
 
 </div>
 

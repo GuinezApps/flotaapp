@@ -496,8 +496,20 @@ class="submenu"
 </li>
 {% endif %}
 
+{% if puede_editar and not puede_gestionar_usuarios %}
+<hr style="border-color:#334155;margin:25px 0;">
 
-
+<li>
+<a
+href="{% url 'bitacora' %}"
+class="{% if request.resolver_match.url_name == 'bitacora' %}activo{% endif %}"
+>
+📋
+<span class="texto-menu">Bitácora</span>
+</a>
+</li>
+{% endif %}
+ 
 {% if puede_gestionar_usuarios %}
 <hr style="border-color:#334155;margin:25px 0;">
 
