@@ -11,7 +11,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.decorators import login_required
 from datetime import timedelta
-
+from collections import defaultdict
 from openpyxl import Workbook
 from openpyxl import load_workbook
 
@@ -1206,6 +1206,140 @@ def obtener_metricas_estado(queryset):
             1
         ) if total_vehiculos else 0,
     }
+    
+def obtener_nombre_centro_costo_para_ranking(vehiculo):
+
+    centro_costo = vehiculo.centro_costo
+
+    if not centro_costo:
+
+        return 'Sin centro de costo'
+
+    codigo = getattr(
+        centro_costo,
+        'codigo',
+        ''
+    )
+
+    nombre = getattr(
+        centro_costo,
+        'nombre',
+        ''
+    )
+
+    if codigo and nombre:
+
+        return f'{codigo} - {nombre}'
+
+    if codigo:
+
+        return str(codigo)
+
+    if nombre:
+
+        return str(nombre)
+
+    return 'Sin centro de costo'
+
+
+def construir_ranking_cc(
+    contador,
+    limite=3
+):
+
+    elementos = sorted(
+        contador.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    ranking = []
+
+    for centro_costo, total in elementos:
+
+        if total <= 0:
+
+            continue
+
+        ranking.append({
+            'centro_costo': centro_costo,
+            'total': total,
+        })
+
+        if len(ranking) >= limite:
+
+            break
+
+    return ranking
+
+
+def obtener_focos_centro_costo_inicio(vehiculos_base):
+
+    contadores_no_operativos = defaultdict(int)
+    contadores_mantenciones_vencidas = defaultdict(int)
+    contadores_sin_informacion = defaultdict(int)
+    contadores_mantenciones_proximas = defaultdict(int)
+
+    vehiculos = vehiculos_base.select_related(
+        'centro_costo'
+    )
+
+    for vehiculo in vehiculos:
+
+        centro_costo = obtener_nombre_centro_costo_para_ranking(
+            vehiculo
+        )
+
+        if vehiculo.estado_operacional == 'No operativo':
+
+            contadores_no_operativos[centro_costo] += 1
+
+        kilometraje_actual = vehiculo.kilometraje_actual
+        kilometraje_proxima = vehiculo.kilometraje_proxima_mantencion
+
+        if (
+            kilometraje_actual is None
+            or kilometraje_proxima is None
+        ):
+
+            contadores_sin_informacion[centro_costo] += 1
+            continue
+
+        kilometros_restantes = (
+            kilometraje_proxima
+            - kilometraje_actual
+        )
+
+        if kilometros_restantes <= 0:
+
+            contadores_mantenciones_vencidas[centro_costo] += 1
+
+        elif kilometros_restantes <= 1500:
+
+            contadores_mantenciones_proximas[centro_costo] += 1
+
+    return {
+        'ranking_cc_no_operativos':
+        construir_ranking_cc(
+            contadores_no_operativos
+        ),
+
+        'ranking_cc_mantenciones_vencidas':
+        construir_ranking_cc(
+            contadores_mantenciones_vencidas
+        ),
+
+        'ranking_cc_sin_informacion':
+        construir_ranking_cc(
+            contadores_sin_informacion
+        ),
+
+        'ranking_cc_mantenciones_proximas':
+        construir_ranking_cc(
+            contadores_mantenciones_proximas
+        ),
+    }    
+    
 @login_required
 def inicio(request):
 
@@ -1221,6 +1355,44 @@ def inicio(request):
 
     metricas.update(
         metricas_mantenciones
+    )
+
+    focos_centro_costo = obtener_focos_centro_costo_inicio(
+        vehiculos_base
+    )
+
+    metricas.update(
+        focos_centro_costo
+    )
+
+    return render(
+        request,
+        'flota/inicio.html',
+        metricas
+    )@login_required
+    
+def inicio(request):
+
+    vehiculos_base = Vehiculo.objects.exclude(
+        estado_administrativo='Dado de Baja'
+    )
+
+    metricas = obtener_metricas_estado(
+        vehiculos_base
+    )
+
+    metricas_mantenciones = obtener_resumen_mantenciones_km()
+
+    metricas.update(
+        metricas_mantenciones
+    )
+
+    focos_centro_costo = obtener_focos_centro_costo_inicio(
+        vehiculos_base
+    )
+
+    metricas.update(
+        focos_centro_costo
     )
 
     return render(

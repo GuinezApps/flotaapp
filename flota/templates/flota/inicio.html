@@ -482,6 +482,117 @@ Inicio
     font-weight:bold;
 }
 
+.focos-dashboard-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    min-height:360px;
+    height:100%;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+}
+
+.focos-lista{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+}
+
+.foco-bloque{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-left:5px solid #64748b;
+    border-radius:10px;
+    padding:10px 11px;
+}
+
+.foco-bloque.no-operativos{
+    border-left-color:#dc2626;
+}
+
+.foco-bloque.vencidas{
+    border-left-color:#ef4444;
+}
+
+.foco-bloque.sin-informacion{
+    border-left-color:#64748b;
+}
+
+.foco-bloque.proximas{
+    border-left-color:#f59e0b;
+}
+
+.foco-bloque-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:7px;
+}
+
+.foco-titulo{
+    color:#1e293b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.foco-etiqueta{
+    color:#64748b;
+    font-size:11px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.foco-ranking{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.foco-item{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:center;
+    font-size:12px;
+}
+
+.foco-cc{
+    color:#334155;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.foco-total{
+    color:#0f172a;
+    font-weight:bold;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:999px;
+    padding:2px 8px;
+    min-width:24px;
+    text-align:center;
+    font-size:12px;
+}
+
+.foco-vacio{
+    color:#64748b;
+    font-size:12px;
+    font-style:italic;
+}
+
+.focos-footer{
+    margin-top:auto;
+    padding-top:12px;
+    color:#64748b;
+    font-size:12px;
+    border-top:1px solid #e5e7eb;
+}
+
+
 @media(max-width:1200px){
 
     .dashboard-grid{
@@ -796,17 +907,198 @@ class="dashboard-card-link"
 
 </a>
 
-    <div class="dashboard-placeholder">
+    <div class="focos-dashboard-card">
 
-        <div class="placeholder-title">
-            Próximo indicador
-        </div>
+		<div class="card-header">
 
-        <div class="placeholder-text">
-            Aquí se puede agregar costos, vencimientos, uso por centro de costo u otros KPIs solicitados por gerencia.
-        </div>
+			<div>
+				<h3 class="card-title">
+					Focos por centro de costo
+				</h3>
 
-    </div>
+				<div class="card-subtitle">
+					Centros de costo que requieren mayor revisión operativa.
+				</div>
+			</div>
+
+		</div>
+
+		<div class="focos-lista">
+
+			<div class="foco-bloque no-operativos">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más no operativos
+					</div>
+
+					<div class="foco-etiqueta">
+						vehículos
+					</div>
+				</div>
+
+				{% if ranking_cc_no_operativos %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_no_operativos %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin vehículos no operativos.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque vencidas">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más mantenciones vencidas
+					</div>
+
+					<div class="foco-etiqueta">
+						vencidas
+					</div>
+				</div>
+
+				{% if ranking_cc_mantenciones_vencidas %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_mantenciones_vencidas %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin mantenciones vencidas.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque sin-informacion">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más vehículos sin información
+					</div>
+
+					<div class="foco-etiqueta">
+						vehículos
+					</div>
+				</div>
+
+				{% if ranking_cc_sin_informacion %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_sin_informacion %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin vehículos con información faltante.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque proximas">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más vehículos con mantenciones próximas
+					</div>
+
+					<div class="foco-etiqueta">
+						próximas
+					</div>
+				</div>
+
+				{% if ranking_cc_mantenciones_proximas %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_mantenciones_proximas %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin mantenciones próximas.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+		</div>
+	
+		<div class="focos-footer">
+		 Rankings calculados sobre vehículos vigentes. Muestran focos de atención, no volumen total de flota.
+		</div>
+	</div>
 
 </div>
 
