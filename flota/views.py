@@ -32,6 +32,7 @@ from .forms import (
     CerrarMantencionVehiculoForm,
     CancelarMantencionVehiculoForm,
     ReprogramarMantencionVehiculoForm,
+    CentroCostoForm,
 )
 
 from .decorators import (
@@ -1369,36 +1370,6 @@ def inicio(request):
         request,
         'flota/inicio.html',
         metricas
-    )@login_required
-    
-def inicio(request):
-
-    vehiculos_base = Vehiculo.objects.exclude(
-        estado_administrativo='Dado de Baja'
-    )
-
-    metricas = obtener_metricas_estado(
-        vehiculos_base
-    )
-
-    metricas_mantenciones = obtener_resumen_mantenciones_km()
-
-    metricas.update(
-        metricas_mantenciones
-    )
-
-    focos_centro_costo = obtener_focos_centro_costo_inicio(
-        vehiculos_base
-    )
-
-    metricas.update(
-        focos_centro_costo
-    )
-
-    return render(
-        request,
-        'flota/inicio.html',
-        metricas
     )
 
 @login_required
@@ -1553,7 +1524,9 @@ def dashboard(request):
         'vehiculos': vehiculos,
 
         'centros_costo':
-        CentroCosto.objects.order_by(
+        CentroCosto.objects.filter(
+            activo=True
+        ).order_by(
             'codigo'
         ),
 
@@ -2373,7 +2346,9 @@ def gestionar_estados(request):
         'query_string': query_string,
 
         'centros_costo':
-        CentroCosto.objects.order_by(
+        CentroCosto.objects.filter(
+            activo=True
+        ).order_by(
             'codigo'
         ),
 
@@ -3194,6 +3169,83 @@ def crear_usuario(request):
         }
     )
 
+@login_required
+@editor_required
+def centros_costo(request):
+
+    busqueda = request.GET.get(
+        'q',
+        ''
+    ).strip()
+
+    estado = request.GET.get(
+        'estado',
+        ''
+    )
+
+    centros = CentroCosto.objects.all().order_by(
+        'codigo'
+    )
+
+    if busqueda:
+
+        centros = centros.filter(
+
+            Q(
+                codigo__icontains=busqueda
+            ) |
+
+            Q(
+                nombre__icontains=busqueda
+            )
+
+        )
+
+    if estado == 'activos':
+
+        centros = centros.filter(
+            activo=True
+        )
+
+    elif estado == 'inactivos':
+
+        centros = centros.filter(
+            activo=False
+        )
+
+    paginator = Paginator(
+        centros,
+        25
+    )
+
+    page_number = request.GET.get(
+        'page'
+    )
+
+    centros_pagina = paginator.get_page(
+        page_number
+    )
+
+    query_params = request.GET.copy()
+
+    if 'page' in query_params:
+        query_params.pop(
+            'page'
+        )
+
+    query_string = query_params.urlencode()
+
+    return render(
+        request,
+        'flota/centros_costo.html',
+        {
+            'centros': centros_pagina,
+            'busqueda': busqueda,
+            'estado_seleccionado': estado,
+            'query_string': query_string,
+        }
+    )
+
 
 @login_required
 @master_required
@@ -3504,7 +3556,9 @@ def editar_usuario(request, id):
         ]
     )
 
-    centros = CentroCosto.objects.order_by(
+    centros = CentroCosto.objects.filter(
+    activo=True
+    ).order_by(
         'codigo'
     )
 
@@ -4484,3 +4538,131 @@ def exportar_control_mantenciones_excel(request):
     )
 
     return response
+    
+@login_required
+@editor_required
+def crear_centro_costo(request):
+
+    if request.method == 'POST':
+
+        form = CentroCostoForm(
+            request.POST
+        )
+
+        if form.is_valid():
+
+            centro_costo = form.save()
+
+            registrar_bitacora(
+                request=request,
+                accion='CREAR',
+                modulo='Centros de costo',
+                modelo_afectado='CentroCosto',
+                objeto_id=centro_costo.id,
+                objeto_repr=str(centro_costo),
+                descripcion=(
+                    f'Centro de costo {centro_costo.codigo} creado.'
+                ),
+                valor_anterior=None,
+                valor_nuevo=(
+                    f"Código: {centro_costo.codigo} | "
+                    f"Nombre: {centro_costo.nombre} | "
+                    f"Activo: {centro_costo.activo}"
+                )
+            )
+
+            messages.success(
+                request,
+                f'Centro de costo {centro_costo.codigo} creado correctamente.'
+            )
+
+            return redirect(
+                'centros_costo'
+            )
+
+    else:
+
+        form = CentroCostoForm(
+            initial={
+                'activo': True
+            }
+        )
+
+    return render(
+        request,
+        'flota/centro_costo_form.html',
+        {
+            'form': form,
+            'titulo': 'Nuevo centro de costo'
+        }
+    )
+
+@login_required
+@editor_required
+def editar_centro_costo(request, id):
+
+    centro_costo = get_object_or_404(
+        CentroCosto,
+        id=id
+    )
+
+    if request.method == 'POST':
+
+        estado_anterior = (
+            f"Código: {centro_costo.codigo} | "
+            f"Nombre: {centro_costo.nombre} | "
+            f"Activo: {centro_costo.activo}"
+        )
+
+        form = CentroCostoForm(
+            request.POST,
+            instance=centro_costo
+        )
+
+        if form.is_valid():
+
+            centro_costo_actualizado = form.save()
+
+            estado_nuevo = (
+                f"Código: {centro_costo_actualizado.codigo} | "
+                f"Nombre: {centro_costo_actualizado.nombre} | "
+                f"Activo: {centro_costo_actualizado.activo}"
+            )
+
+            registrar_bitacora(
+                request=request,
+                accion='EDITAR',
+                modulo='Centros de costo',
+                modelo_afectado='CentroCosto',
+                objeto_id=centro_costo_actualizado.id,
+                objeto_repr=str(centro_costo_actualizado),
+                descripcion=(
+                    f'Centro de costo {centro_costo_actualizado.codigo} actualizado.'
+                ),
+                valor_anterior=estado_anterior,
+                valor_nuevo=estado_nuevo
+            )
+
+            messages.success(
+                request,
+                f'Centro de costo {centro_costo_actualizado.codigo} actualizado correctamente.'
+            )
+
+            return redirect(
+                'centros_costo'
+            )
+
+    else:
+
+        form = CentroCostoForm(
+            instance=centro_costo
+        )
+
+    return render(
+        request,
+        'flota/centro_costo_form.html',
+        {
+            'form': form,
+            'titulo': f'Editar centro de costo {centro_costo.codigo}'
+        }
+    )

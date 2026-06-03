@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 # ============================================================
 
 class CentroCosto(models.Model):
+
     codigo = models.CharField(
         max_length=100,
         unique=True
@@ -18,8 +19,14 @@ class CentroCosto(models.Model):
         null=True
     )
 
+    activo = models.BooleanField(
+        default=True
+    )
+
     def __str__(self):
+
         if self.nombre and self.nombre != self.codigo:
+
             return f"{self.codigo} - {self.nombre}"
 
         return self.codigo
