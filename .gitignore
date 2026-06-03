@@ -38,3 +38,29 @@ Thumbs.db
 
 # Static generados por collectstatic
 staticfiles/
+
+# Entorno local y secretos
+.env
+*.env
+
+# Base SQLite local
+db.sqlite3
+*.sqlite3
+
+# Respaldos locales
+backups/
+
+# Entorno virtual
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Runtime Passenger / cPanel
+tmp/
+
+# Sistema
+.DS_Store
