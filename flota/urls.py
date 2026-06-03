@@ -29,4 +29,7 @@ urlpatterns = [
     path('mantencion/<int:id>/cancelar/',views.cancelar_mantencion_vehiculo,name='cancelar_mantencion_vehiculo'),
     path('mantencion/<int:id>/cerrar/',views.cerrar_mantencion_vehiculo,name='cerrar_mantencion_vehiculo'),
     path('vehiculos/control-mantenciones/exportar/',views.exportar_control_mantenciones_excel,name='exportar_control_mantenciones_excel'),
+    path('centros-costo/',views.centros_costo,name='centros_costo'),
+    path('centros-costo/nuevo/',views.crear_centro_costo,name='crear_centro_costo'),
+    path('centros-costo/<int:id>/editar/',views.editar_centro_costo,name='editar_centro_costo'),
 ]

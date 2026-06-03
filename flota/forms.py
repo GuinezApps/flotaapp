@@ -10,7 +10,7 @@ import re
 # ============================================================
 
 class VehiculoForm(forms.ModelForm):
-    
+
     class Meta:
 
         model = Vehiculo
@@ -44,11 +44,28 @@ class VehiculoForm(forms.ModelForm):
             ),
 
         }
-        
+
         labels = {
             'anio': 'Año',
         }
-        
+
+    def __init__(
+        self,
+        *args,
+        **kwargs
+    ):
+
+        super().__init__(
+            *args,
+            **kwargs
+        )
+
+        self.fields['centro_costo'].queryset = CentroCosto.objects.filter(
+            activo=True
+        ).order_by(
+            'codigo'
+        )
+
     def clean_patente(self):
 
         patente = self.cleaned_data.get(
@@ -63,13 +80,6 @@ class VehiculoForm(forms.ModelForm):
         return patente
 
     def clean(self):
-        """
-        Valida coherencia entre estado operacional y subestado.
-
-        Reglas:
-        - No operativo requiere subestado.
-        - Operativo y No informado no deben conservar subestado.
-        """
 
         cleaned_data = super().clean()
 
@@ -152,7 +162,9 @@ class CrearUsuarioForm(UserCreationForm):
     )
 
     centro_costo = forms.ModelChoiceField(
-        queryset=CentroCosto.objects.order_by(
+        queryset=CentroCosto.objects.filter(
+            activo=True
+        ).order_by(
             'codigo'
         ),
         required=True,
@@ -634,3 +646,48 @@ class ReprogramarMantencionVehiculoForm(forms.Form):
             )
 
         return cleaned_data
+        
+class CentroCostoForm(forms.ModelForm):
+
+    class Meta:
+
+        model = CentroCosto
+
+        fields = [
+            'codigo',
+            'nombre',
+            'activo',
+        ]
+
+        labels = {
+            'codigo': 'Código',
+            'nombre': 'Nombre',
+            'activo': 'Activo',
+        }
+
+        widgets = {
+            'codigo': forms.TextInput(
+                attrs={
+                    'placeholder': 'Ej: 4209'
+                }
+            ),
+
+            'nombre': forms.TextInput(
+                attrs={
+                    'placeholder': 'Ej: Casa Matriz'
+                }
+            ),
+        }
+
+    def clean_codigo(self):
+
+        codigo = self.cleaned_data.get(
+            'codigo'
+        )
+
+        if not codigo:
+            return codigo
+
+        return str(
+            codigo
+        ).strip()

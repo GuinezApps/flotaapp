@@ -1,0 +1,356 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Centros de costo
+{% endblock %}
+
+{% block extra_css %}
+
+.centros-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+}
+
+.centros-header h1{
+    margin-bottom:6px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.barra-acciones{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:20px 0;
+    background:white;
+    padding:15px 20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    gap:15px;
+}
+
+.titulo-seccion{
+    font-size:18px;
+    font-weight:bold;
+    color:#334155;
+}
+
+.filtros-centros{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.filtros-centros input,
+.filtros-centros select{
+    padding:9px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    background:white;
+}
+
+.filtros-centros input{
+    min-width:260px;
+}
+
+.link-limpiar{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.link-limpiar:hover{
+    text-decoration:underline;
+}
+
+.tabla-contenedor{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    overflow-x:auto;
+}
+
+.tabla-centros{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-centros thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-centros th{
+    padding:14px;
+    text-align:left;
+}
+
+.tabla-centros td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.tabla-centros tbody tr:hover{
+    background:#f8fafc;
+}
+
+.badge-activo{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-inactivo{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:bold;
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.paginacion{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    align-items:center;
+}
+
+.paginacion a{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.paginacion a:hover{
+    text-decoration:underline;
+}
+
+.boton-editar{
+    background:#2563eb;
+    color:white;
+    padding:7px 12px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+    font-size:13px;
+    display:inline-block;
+}
+
+.boton-editar:hover{
+    background:#1d4ed8;
+    text-decoration:none;
+}
+@media(max-width:900px){
+
+    .barra-acciones{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .filtros-centros{
+        width:100%;
+    }
+
+    .filtros-centros input,
+    .filtros-centros select{
+        width:100%;
+    }
+	
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="centros-header">
+
+    <div>
+        <h1>Centros de costo</h1>
+
+        <p class="subtitulo-pagina">
+            Administración y consulta de centros de costo disponibles para la flota.
+        </p>
+    </div>
+
+    <a
+    href="{% url 'crear_centro_costo' %}"
+    class="boton-primario"
+    >
+        + Nuevo centro de costo
+    </a>
+
+</div>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="barra-acciones">
+
+    <div class="titulo-seccion">
+        Listado de centros de costo
+    </div>
+
+    <form
+    method="get"
+    class="filtros-centros"
+    >
+
+        <input
+            type="text"
+            name="q"
+            value="{{ busqueda|default:'' }}"
+            placeholder="Buscar código o nombre..."
+        >
+
+        <select name="estado">
+            <option value="">Todos</option>
+
+            <option
+                value="activos"
+                {% if estado_seleccionado == 'activos' %}
+                selected
+                {% endif %}
+            >
+                Activos
+            </option>
+
+            <option
+                value="inactivos"
+                {% if estado_seleccionado == 'inactivos' %}
+                selected
+                {% endif %}
+            >
+                Inactivos
+            </option>
+        </select>
+
+        <button
+            type="submit"
+            class="boton-primario"
+        >
+            Filtrar
+        </button>
+
+        <a
+            href="{% url 'centros_costo' %}"
+            class="link-limpiar"
+        >
+            Limpiar
+        </a>
+
+    </form>
+
+</div>
+
+<div class="tabla-contenedor">
+
+    <table class="tabla-centros">
+
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Estado</th>
+				<th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for centro in centros %}
+
+                <tr>
+                    <td>
+                        <strong>
+                            {{ centro.codigo }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ centro.nombre|default:"-" }}
+                    </td>
+
+                    <td>
+                        {% if centro.activo %}
+                            <span class="badge-activo">
+                                Activo
+                            </span>
+                        {% else %}
+                            <span class="badge-inactivo">
+                                Inactivo
+                            </span>
+                        {% endif %}
+                    </td>
+					<td>
+						<a
+						href="{% url 'editar_centro_costo' centro.id %}"
+						class="boton-editar"
+						>
+							Editar
+						</a>
+					</td>
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="3">
+                        No hay centros de costo para mostrar.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="paginacion">
+
+        {% if centros.has_previous %}
+
+            <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                ⏮ Primera
+            </a>
+
+            <a href="?page={{ centros.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                ◀ Anterior
+            </a>
+
+        {% endif %}
+
+        <strong>
+            Página {{ centros.number }} de {{ centros.paginator.num_pages }}
+        </strong>
+
+        {% if centros.has_next %}
+
+            <a href="?page={{ centros.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Siguiente ▶
+            </a>
+
+            <a href="?page={{ centros.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Última ⏭
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

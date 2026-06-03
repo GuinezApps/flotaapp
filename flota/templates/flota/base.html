@@ -490,6 +490,7 @@ class="submenu"
     >
         <span class="texto-menu">Modificación de CCs</span>
     </a>
+	
 
 </div>
 
@@ -510,8 +511,23 @@ class="{% if request.resolver_match.url_name == 'bitacora' %}activo{% endif %}"
 </li>
 {% endif %}
  
-{% if puede_gestionar_usuarios %}
 <hr style="border-color:#334155;margin:25px 0;">
+
+{% if puede_editar %}
+
+<li>
+<a
+href="{% url 'centros_costo' %}"
+class="{% if request.resolver_match.url_name == 'centros_costo' or request.resolver_match.url_name == 'crear_centro_costo' %}activo{% endif %}"
+>
+🏢
+<span class="texto-menu">Centros de costo</span>
+</a>
+</li>
+
+{% endif %}
+
+{% if puede_gestionar_usuarios %}
 
 <li>
 <a
@@ -522,6 +538,7 @@ class="{% if '/configuracion/' in request.path %}activo{% endif %}"
 <span class="texto-menu">Configuración</span>
 </a>
 </li>
+
 {% endif %}
 
 </ul>
