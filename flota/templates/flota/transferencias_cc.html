@@ -1,0 +1,533 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Modificación de CCs
+{% endblock %}
+
+{% block extra_css %}
+
+.panel-card{
+    background:white;
+    padding:24px;
+    border-radius:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    margin-bottom:20px;
+    border:1px solid #e5e7eb;
+}
+
+.panel-card h3{
+    margin:0 0 18px 0;
+    font-size:22px;
+    color:#1e293b;
+}
+
+.descripcion-pagina{
+    color:#475569;
+    margin-bottom:18px;
+}
+
+.grid-filtros{
+    display:grid;
+    grid-template-columns:1.2fr 1fr 1fr auto;
+    gap:16px;
+    align-items:end;
+}
+
+.campo-filtro{
+    display:flex;
+    flex-direction:column;
+}
+
+.campo-filtro label{
+    font-weight:700;
+    color:#334155;
+    margin-bottom:8px;
+    font-size:15px;
+}
+
+.campo-filtro input,
+.campo-filtro select,
+.campo-filtro textarea{
+    width:100%;
+    min-width:0;
+    height:44px;
+    padding:10px 14px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    background:#fff;
+    color:#0f172a;
+    font-size:14px;
+    box-sizing:border-box;
+    transition:border-color .2s, box-shadow .2s;
+}
+
+.campo-filtro textarea{
+    min-height:44px;
+    resize:vertical;
+    padding-top:11px;
+    line-height:1.4;
+}
+
+.campo-filtro input:focus,
+.campo-filtro select:focus,
+.campo-filtro textarea:focus{
+    outline:none;
+    border-color:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.15);
+}
+
+.acciones-filtro{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    height:44px;
+}
+
+.boton-primario,
+.boton-secundario,
+.boton-exito{
+    height:44px;
+    padding:0 16px;
+    border:none;
+    border-radius:10px;
+    font-weight:700;
+    font-size:14px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.2s;
+    white-space:nowrap;
+}
+
+.boton-primario{
+    background:#2563eb;
+    color:white;
+}
+
+.boton-primario:hover{
+    background:#1d4ed8;
+}
+
+.boton-secundario{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.boton-secundario:hover{
+    background:#cbd5e1;
+}
+
+.boton-exito{
+    background:#16a34a;
+    color:white;
+}
+
+.boton-exito:hover{
+    background:#15803d;
+}
+
+.transferencia-masiva{
+    display:grid;
+    grid-template-columns:1fr 2fr auto;
+    gap:16px;
+    align-items:end;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    font-size:13px;
+    margin-top:6px;
+}
+
+.tabla-contenedor{
+    overflow-x:auto;
+}
+
+.tabla-vehiculos{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-vehiculos thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-vehiculos th{
+    padding:14px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.tabla-vehiculos td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:middle;
+}
+
+.tabla-vehiculos tbody tr:hover{
+    background:#f8fafc;
+}
+
+.tabla-vehiculos input[type="checkbox"]{
+    width:16px;
+    height:16px;
+    cursor:pointer;
+}
+
+.paginacion{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    align-items:center;
+}
+
+.paginacion a{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.paginacion a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:1100px){
+
+    .grid-filtros{
+        grid-template-columns:1fr;
+    }
+
+    .transferencia-masiva{
+        grid-template-columns:1fr;
+    }
+
+    .acciones-filtro{
+        height:auto;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Modificación de CCs</h1>
+
+<p class="descripcion-pagina">
+    Selecciona uno o más vehículos para transferirlos a un nuevo centro de costo.
+</p>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="panel-card">
+
+    <h3>Filtros de búsqueda</h3>
+
+    <form method="get">
+
+        <div class="grid-filtros">
+
+            <div class="campo-filtro">
+
+                <label>Patente</label>
+
+                <input
+                    type="text"
+                    name="patente"
+                    value="{{ patente_buscada|default:'' }}"
+                    placeholder="Buscar patente..."
+                >
+
+            </div>
+
+            <div class="campo-filtro">
+
+                <label>Centro costo actual</label>
+
+                <select name="centro_costo">
+                    <option value="">Todos</option>
+
+                    {% for cc in centros_costo %}
+                        <option
+                            value="{{ cc.id }}"
+                            {% if centro_costo_id == cc.id|stringformat:"s" %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ cc }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <div class="campo-filtro">
+
+                <label>Marca</label>
+
+                <select name="marca">
+                    <option value="">Todas</option>
+
+                    {% for item in marcas %}
+                        <option
+                            value="{{ item }}"
+                            {% if marca_seleccionada == item %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <div class="acciones-filtro">
+
+                <button
+                    type="submit"
+                    class="boton-primario"
+                >
+                    Filtrar
+                </button>
+
+                <a
+                    href="{% url 'transferencias_cc' %}"
+                    class="boton-secundario"
+                >
+                    Limpiar
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="panel-card">
+
+        <h3>Transferencia masiva de Centro de Costo</h3>
+
+        <div class="transferencia-masiva">
+
+            <div class="campo-filtro">
+
+                <label>Centro costo destino</label>
+
+                <select
+                    name="centro_costo_destino"
+                    required
+                >
+                    <option value="">
+                        Selecciona destino
+                    </option>
+
+                    {% for cc in centros_costo %}
+                        <option value="{{ cc.id }}">
+                            {{ cc }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+
+            <div class="campo-filtro">
+
+                <label>Observación de transferencia</label>
+
+                <textarea
+                    name="observacion"
+                    placeholder="Ejemplo: Reasignación operacional, cambio de faena, solicitud administrativa..."
+                ></textarea>
+
+                <div class="texto-ayuda">
+                    Esta observación quedará registrada para todos los vehículos seleccionados.
+                </div>
+
+            </div>
+
+            <button
+                type="submit"
+                class="boton-exito"
+            >
+                Aplicar transferencia
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="panel-card">
+
+        <h3>Listado de vehículos</h3>
+
+        {% if vehiculos.paginator.count > 0 %}
+
+            <p>
+                Mostrando {{ vehiculos.start_index }}–{{ vehiculos.end_index }}
+                de {{ vehiculos.paginator.count }} vehículos.
+            </p>
+
+        {% else %}
+
+            <p>
+                No hay vehículos para mostrar.
+            </p>
+
+        {% endif %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-vehiculos">
+
+                <thead>
+                    <tr>
+                        <th>
+                            <input
+                                type="checkbox"
+                                id="seleccionar-todos"
+                            >
+                        </th>
+                        <th>Patente</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Año</th>
+                        <th>Centro costo actual</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for vehiculo in vehiculos %}
+
+                        <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    name="vehiculos"
+                                    value="{{ vehiculo.id }}"
+                                >
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ vehiculo.patente }}
+                                </strong>
+                            </td>
+
+                            <td>
+                                {{ vehiculo.marca|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ vehiculo.modelo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ vehiculo.anio|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ vehiculo.estado_operacional|default:"-" }}
+                            </td>
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="7">
+                                No hay vehículos para mostrar.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="paginacion">
+
+            {% if vehiculos.has_previous %}
+
+                <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                    ⏮ Primera
+                </a>
+
+                <a href="?page={{ vehiculos.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    ◀ Anterior
+                </a>
+
+            {% endif %}
+
+            <strong>
+                Página {{ vehiculos.number }} de {{ vehiculos.paginator.num_pages }}
+            </strong>
+
+            {% if vehiculos.has_next %}
+
+                <a href="?page={{ vehiculos.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    Siguiente ▶
+                </a>
+
+                <a href="?page={{ vehiculos.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                    Última ⏭
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</form>
+
+<script>
+
+const seleccionarTodos =
+document.getElementById(
+    'seleccionar-todos'
+);
+
+if(seleccionarTodos){
+
+    seleccionarTodos.addEventListener(
+        'change',
+        function(){
+
+            const checks =
+            document.querySelectorAll(
+                'input[name="vehiculos"]'
+            );
+
+            checks.forEach(
+                function(check){
+                    check.checked = seleccionarTodos.checked;
+                }
+            );
+
+        }
+    );
+
+}
+
+</script>
+
+{% endblock %}

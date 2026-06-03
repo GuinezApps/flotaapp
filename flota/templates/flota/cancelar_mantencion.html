@@ -1,0 +1,227 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Cancelar mantención {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.cancelar-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    max-width:850px;
+}
+
+.resumen-mantencion{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin:18px 0;
+}
+
+.resumen-mantencion h2{
+    margin:0 0 8px 0;
+    color:#1e293b;
+}
+
+.resumen-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 18px;
+    margin-top:12px;
+}
+
+.resumen-item{
+    color:#334155;
+}
+
+.resumen-label{
+    font-weight:bold;
+    color:#1e293b;
+}
+
+.alerta-cancelar{
+    background:#fef2f2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+    border-radius:10px;
+    padding:14px;
+    margin:16px 0;
+    font-weight:bold;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+    margin-top:16px;
+}
+
+.form-field label{
+    font-weight:bold;
+    margin-bottom:6px;
+    color:#334155;
+}
+
+.form-field textarea{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+    box-sizing:border-box;
+    width:100%;
+    resize:vertical;
+}
+
+.error-campo{
+    color:#dc2626;
+    font-size:13px;
+    margin-top:5px;
+    font-weight:bold;
+}
+
+.acciones-cancelar{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:22px;
+}
+
+.boton-cancelar{
+    background:#dc2626;
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-cancelar:hover{
+    background:#b91c1c;
+}
+
+.link-volver{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.link-volver:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:800px){
+
+    .resumen-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Cancelar mantención</h1>
+
+<div class="cancelar-card">
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <p>
+        Usa esta opción solo si la mantención fue programada, pero finalmente no se realizará.
+    </p>
+
+    <div class="alerta-cancelar">
+        Esta acción cambiará la mantención a estado Cancelada. No debe usarse para mantenciones que ya fueron ejecutadas.
+    </div>
+
+    <div class="resumen-mantencion">
+
+        <h2>
+            {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+        </h2>
+
+        <div class="resumen-grid">
+
+            <div class="resumen-item">
+                <span class="resumen-label">Tipo:</span>
+                {{ mantencion.get_tipo_mantencion_display }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Estado actual:</span>
+                {{ mantencion.get_estado_display }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Fecha programada:</span>
+                {{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Centro de costo:</span>
+                {{ vehiculo.centro_costo|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">KM programado:</span>
+                {{ mantencion.kilometraje_programado|default:"-" }}
+            </div>
+
+            <div class="resumen-item">
+                <span class="resumen-label">Usuario registro:</span>
+                {% if mantencion.usuario_registro %}
+                    {{ mantencion.usuario_registro.username }}
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-field">
+            <label for="{{ form.observacion_cancelacion.id_for_label }}">
+                Motivo de cancelación
+            </label>
+
+            {{ form.observacion_cancelacion }}
+
+            {% for error in form.observacion_cancelacion.errors %}
+                <div class="error-campo">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="acciones-cancelar">
+
+            <button
+                type="submit"
+                class="boton-cancelar"
+            >
+                Cancelar mantención
+            </button>
+
+            <a
+                href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                class="link-volver"
+            >
+                Volver
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

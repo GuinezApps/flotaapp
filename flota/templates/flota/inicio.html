@@ -1,0 +1,1167 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Inicio
+{% endblock %}
+
+{% block extra_css %}
+
+.page-header{
+    margin-bottom:22px;
+}
+
+.page-header h1{
+    margin-bottom:5px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    align-items:stretch;
+}
+
+.dashboard-card-link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+    height:100%;
+}
+
+.dashboard-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    transition:.2s;
+    min-height:360px;
+    height:100%;
+    box-sizing:border-box;
+}
+
+.dashboard-card-link:hover .dashboard-card{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+
+.card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.card-title{
+    margin:0;
+    color:#1e293b;
+    font-size:20px;
+}
+
+.card-subtitle{
+    color:#64748b;
+    font-size:14px;
+    margin-top:4px;
+}
+
+.card-action{
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.estado-card-contenido{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+}
+
+.dona-contenedor{
+    position:relative;
+    width:180px;
+    height:180px;
+    flex-shrink:0;
+}
+
+.dona-contenedor canvas{
+    width:180px !important;
+    height:180px !important;
+    display:block;
+}
+
+.total-dona{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+}
+
+.total-dona-numero{
+    font-size:32px;
+    font-weight:bold;
+    color:#1e293b;
+    line-height:1;
+}
+
+.total-dona-label{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.resumen-lista{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.resumen-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:14px;
+}
+
+.resumen-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.resumen-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.detalle-no-operativo{
+    width:100%;
+    margin-top:4px;
+    padding-top:14px;
+    border-top:1px solid #e5e7eb;
+}
+
+.detalle-no-operativo h4{
+    margin:0 0 10px 0;
+    color:#334155;
+    font-size:15px;
+}
+
+.detalle-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.detalle-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+}
+
+.detalle-card-label{
+    color:#64748b;
+    font-size:12px;
+    margin-bottom:4px;
+}
+
+.detalle-card-numero{
+    color:#1e293b;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.dashboard-placeholder{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    min-height:180px;
+    border:1px dashed #cbd5e1;
+}
+
+.placeholder-title{
+    color:#334155;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.placeholder-text{
+    color:#64748b;
+    font-size:14px;
+}
+
+.mantenciones-card{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.mantenciones-resumen-superior{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.mantencion-kpi{
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:12px;
+    background:#f8fafc;
+}
+
+.mantencion-kpi-label{
+    font-size:12px;
+    color:#64748b;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.mantencion-kpi-numero{
+    font-size:26px;
+    font-weight:bold;
+    color:#1e293b;
+    line-height:1;
+}
+
+.mantencion-kpi-subtexto{
+    font-size:12px;
+    color:#64748b;
+    margin-top:4px;
+}
+
+.estado-mantenciones-lista{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.estado-mantencion-item{
+    display:grid;
+    grid-template-columns:95px 1fr 72px;
+    align-items:center;
+    gap:10px;
+}
+
+.estado-mantencion-label{
+    color:#334155;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.estado-mantencion-barra-fondo{
+    height:12px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.estado-mantencion-barra{
+    height:100%;
+    min-width:4px;
+    border-radius:999px;
+}
+
+.estado-mantencion-dato{
+    text-align:right;
+    color:#1e293b;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.estado-mantencion-dato span{
+    color:#64748b;
+    font-weight:600;
+}
+
+.barra-ok{
+    background:#16a34a;
+}
+
+.barra-proxima{
+    background:#f59e0b;
+}
+
+.barra-vencida{
+    background:#dc2626;
+}
+
+.barra-sin-datos{
+    background:#64748b;
+}
+
+.mantenciones-alertas{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:2px;
+}
+
+.alerta-mini{
+    border-radius:10px;
+    padding:10px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+}
+
+.alerta-mini-label{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.alerta-mini-numero{
+    color:#1e293b;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.alerta-mini.roja{
+    border-left:5px solid #dc2626;
+}
+
+.alerta-mini.amarilla{
+    border-left:5px solid #f59e0b;
+}
+
+.alerta-mini.azul{
+    border-left:5px solid #2563eb;
+}
+
+.mantenciones-nota{
+    border-top:1px solid #e5e7eb;
+    padding-top:12px;
+    color:#64748b;
+    font-size:13px;
+}
+
+.mantenciones-dashboard-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    transition:.2s;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+}
+
+.dashboard-card-link:hover .mantenciones-dashboard-card{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+
+.mantenciones-resumen-principal{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.mantenciones-mini-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+}
+
+.mantenciones-mini-label{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.mantenciones-mini-numero{
+    color:#1e293b;
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+}
+
+.mantenciones-mini-subtexto{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.barra-apilada-contenedor{
+    margin:14px 0 16px 0;
+}
+
+.barra-apilada{
+    display:flex;
+    width:100%;
+    height:22px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.segmento-barra{
+    height:100%;
+    min-width:3px;
+}
+
+.segmento-ok{
+    background:#16a34a;
+}
+
+.segmento-proxima{
+    background:#f59e0b;
+}
+
+.segmento-vencida{
+    background:#dc2626;
+}
+
+.segmento-sin-datos{
+    background:#64748b;
+}
+
+.mantenciones-metricas{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    margin-top:6px;
+}
+
+.mantenciones-metrica{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:10px;
+    align-items:center;
+    font-size:14px;
+}
+
+.metrica-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+}
+
+.metrica-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.metrica-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.mantenciones-alerta{
+    margin-top:14px;
+    padding:10px;
+    border-radius:10px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.mantenciones-footer{
+    margin-top:auto;
+    padding-top:14px;
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.focos-dashboard-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    min-height:360px;
+    height:100%;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+}
+
+.focos-lista{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+}
+
+.foco-bloque{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-left:5px solid #64748b;
+    border-radius:10px;
+    padding:10px 11px;
+}
+
+.foco-bloque.no-operativos{
+    border-left-color:#dc2626;
+}
+
+.foco-bloque.vencidas{
+    border-left-color:#ef4444;
+}
+
+.foco-bloque.sin-informacion{
+    border-left-color:#64748b;
+}
+
+.foco-bloque.proximas{
+    border-left-color:#f59e0b;
+}
+
+.foco-bloque-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:7px;
+}
+
+.foco-titulo{
+    color:#1e293b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.foco-etiqueta{
+    color:#64748b;
+    font-size:11px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.foco-ranking{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.foco-item{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:center;
+    font-size:12px;
+}
+
+.foco-cc{
+    color:#334155;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.foco-total{
+    color:#0f172a;
+    font-weight:bold;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:999px;
+    padding:2px 8px;
+    min-width:24px;
+    text-align:center;
+    font-size:12px;
+}
+
+.foco-vacio{
+    color:#64748b;
+    font-size:12px;
+    font-style:italic;
+}
+
+.focos-footer{
+    margin-top:auto;
+    padding-top:12px;
+    color:#64748b;
+    font-size:12px;
+    border-top:1px solid #e5e7eb;
+}
+
+
+@media(max-width:1200px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:800px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .estado-mantencion-item{
+        grid-template-columns:1fr;
+        gap:6px;
+    }
+
+    .estado-mantencion-dato{
+        text-align:left;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <h1>Inicio</h1>
+
+    <p class="subtitulo-pagina">
+        Resumen general e indicadores principales de la flota.
+    </p>
+
+</div>
+
+<div class="dashboard-grid">
+
+    <a
+    href="{% url 'dashboard' %}"
+    class="dashboard-card-link"
+    >
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+                    <h3 class="card-title">
+                        Estado general de flota
+                    </h3>
+
+                    <div class="card-subtitle">
+                        Vehículos vigentes según estado operacional.
+                    </div>
+                </div>
+
+                <div class="card-action">
+                    Ver vehículos →
+                </div>
+
+            </div>
+
+            <div class="estado-card-contenido">
+
+                <div class="dona-contenedor">
+
+                    <canvas id="graficoInicio"></canvas>
+
+                    <div class="total-dona">
+
+                        <div class="total-dona-numero">
+                            {{ total_vehiculos }}
+                        </div>
+
+                        <div class="total-dona-label">
+                            vehículos
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen-lista">
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">Operativos</span>
+                        <span class="resumen-valor">
+                            {{ operativos|default:0 }}
+                            ({{ porcentaje_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No operativos</span>
+                        <span class="resumen-valor">
+                            {{ no_operativos|default:0 }}
+                            ({{ porcentaje_no_operativos|default:0 }}%)
+                        </span>
+                    </div>
+
+                    <div class="resumen-item">
+                        <span class="resumen-label">No informados</span>
+                        <span class="resumen-valor">
+                            {{ no_informados|default:0 }}
+                            ({{ porcentaje_no_informado|default:0 }}%)
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="detalle-no-operativo">
+
+                    <h4>Detalle no operativo</h4>
+
+                    <div class="detalle-grid">
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Mantención</div>
+                            <div class="detalle-card-numero">{{ en_mantencion|default:0 }}</div>
+                        </div>
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Reparación</div>
+                            <div class="detalle-card-numero">{{ en_reparacion|default:0 }}</div>
+                        </div>
+
+                        <div class="detalle-card">
+                            <div class="detalle-card-label">Detenido</div>
+                            <div class="detalle-card-numero">{{ detenidos|default:0 }}</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </a>
+
+    <a
+href="{% url 'control_mantenciones' %}"
+class="dashboard-card-link"
+>
+
+    <div class="mantenciones-dashboard-card">
+
+        <div class="card-header">
+
+            <div>
+                <h3 class="card-title">
+                    Estado de mantenciones
+                </h3>
+
+                <div class="card-subtitle">
+                    Resumen preventivo por kilometraje.
+                </div>
+            </div>
+
+            <div class="card-action">
+                Ver control →
+            </div>
+
+        </div>
+
+        <div class="mantenciones-resumen-principal">
+
+            <div class="mantenciones-mini-card">
+                <div class="mantenciones-mini-label">
+                    Vehículos controlados
+                </div>
+
+                <div class="mantenciones-mini-numero">
+                    {{ total_vehiculos_controlados|default:0 }}
+                </div>
+
+                <div class="mantenciones-mini-subtexto">
+                    Vigentes evaluados
+                </div>
+            </div>
+
+            <div class="mantenciones-mini-card">
+                <div class="mantenciones-mini-label">
+                    Alertas críticas
+                </div>
+
+                <div class="mantenciones-mini-numero">
+                    {{ total_km_vencidas|default:0 }}
+                </div>
+
+                <div class="mantenciones-mini-subtexto">
+                    KM vencidas
+                </div>
+            </div>
+
+        </div>
+
+        <div class="barra-apilada-contenedor">
+
+            <div class="barra-apilada">
+
+                <div
+                    class="segmento-barra segmento-ok"
+                    title="Al día"
+                    style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-proxima"
+                    title="Próximas"
+                    style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-vencida"
+                    title="Vencidas"
+                    style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
+                ></div>
+
+                <div
+                    class="segmento-barra segmento-sin-datos"
+                    title="Sin información"
+                    style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
+                ></div>
+
+            </div>
+
+        </div>
+
+        <div class="mantenciones-metricas">
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-ok"></span>
+
+                <span class="metrica-label">
+                    Al día
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_al_dia|default:0 }}
+                    ·
+                    {{ porcentaje_km_al_dia|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-proxima"></span>
+
+                <span class="metrica-label">
+                    Próximas
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_proximas|default:0 }}
+                    ·
+                    {{ porcentaje_km_proximas|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-vencida"></span>
+
+                <span class="metrica-label">
+                    Vencidas
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_vencidas|default:0 }}
+                    ·
+                    {{ porcentaje_km_vencidas|default:0 }}%
+                </span>
+            </div>
+
+            <div class="mantenciones-metrica">
+                <span class="metrica-dot segmento-sin-datos"></span>
+
+                <span class="metrica-label">
+                    Sin información
+                </span>
+
+                <span class="metrica-valor">
+                    {{ total_km_sin_datos|default:0 }}
+                    ·
+                    {{ porcentaje_km_sin_datos|default:0 }}%
+                </span>
+            </div>
+
+        </div>
+
+        {% if total_km_vencidas or total_km_sin_datos %}
+
+            <div class="mantenciones-alerta">
+                Atención requerida:
+                {{ total_km_vencidas|default:0 }}
+                vencidas y
+                {{ total_km_sin_datos|default:0 }}
+                sin información.
+            </div>
+
+        {% endif %}
+
+        <div class="mantenciones-footer">
+            Abrir módulo de mantenciones →
+        </div>
+
+    </div>
+
+</a>
+
+    <div class="focos-dashboard-card">
+
+		<div class="card-header">
+
+			<div>
+				<h3 class="card-title">
+					Focos por centro de costo
+				</h3>
+
+				<div class="card-subtitle">
+					Centros de costo que requieren mayor revisión operativa.
+				</div>
+			</div>
+
+		</div>
+
+		<div class="focos-lista">
+
+			<div class="foco-bloque no-operativos">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más no operativos
+					</div>
+
+					<div class="foco-etiqueta">
+						vehículos
+					</div>
+				</div>
+
+				{% if ranking_cc_no_operativos %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_no_operativos %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin vehículos no operativos.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque vencidas">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más mantenciones vencidas
+					</div>
+
+					<div class="foco-etiqueta">
+						vencidas
+					</div>
+				</div>
+
+				{% if ranking_cc_mantenciones_vencidas %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_mantenciones_vencidas %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin mantenciones vencidas.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque sin-informacion">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más vehículos sin información
+					</div>
+
+					<div class="foco-etiqueta">
+						vehículos
+					</div>
+				</div>
+
+				{% if ranking_cc_sin_informacion %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_sin_informacion %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin vehículos con información faltante.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+			<div class="foco-bloque proximas">
+
+				<div class="foco-bloque-header">
+					<div class="foco-titulo">
+						Más vehículos con mantenciones próximas
+					</div>
+
+					<div class="foco-etiqueta">
+						próximas
+					</div>
+				</div>
+
+				{% if ranking_cc_mantenciones_proximas %}
+
+					<div class="foco-ranking">
+
+						{% for item in ranking_cc_mantenciones_proximas %}
+
+							<div class="foco-item">
+								<span class="foco-cc">
+									{{ item.centro_costo }}
+								</span>
+
+								<span class="foco-total">
+									{{ item.total }}
+								</span>
+							</div>
+
+						{% endfor %}
+
+					</div>
+
+				{% else %}
+
+					<div class="foco-vacio">
+						Sin mantenciones próximas.
+					</div>
+
+				{% endif %}
+
+			</div>
+
+		</div>
+	
+		<div class="focos-footer">
+		 Rankings calculados sobre vehículos vigentes. Muestran focos de atención, no volumen total de flota.
+		</div>
+	</div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctxInicio =
+document.getElementById(
+    'graficoInicio'
+);
+
+if(ctxInicio){
+
+    new Chart(
+        ctxInicio,
+        {
+            type:'doughnut',
+
+            data:{
+                labels:[
+                    'Operativos',
+                    'No operativos',
+                    'No informados'
+                ],
+
+                datasets:[{
+                    data:[
+                        {{ operativos|default:0 }},
+                        {{ no_operativos|default:0 }},
+                        {{ no_informados|default:0 }}
+                    ],
+
+                    backgroundColor:[
+                        '#22c55e',
+                        '#ef4444',
+                        '#9ca3af'
+                    ],
+
+                    borderWidth:2
+                }]
+            },
+
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                cutout:'68%',
+
+                plugins:{
+                    legend:{
+                        display:false
+                    }
+                }
+            }
+        }
+    );
+
+}
+
+</script>
+
+{% endblock %}

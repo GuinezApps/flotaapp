@@ -1,0 +1,317 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Registrar mantención {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.mantencion-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    max-width:850px;
+}
+
+.vehiculo-resumen{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin:18px 0;
+}
+
+.vehiculo-resumen h2{
+    margin:0 0 6px 0;
+    color:#1e293b;
+}
+
+.vehiculo-meta{
+    color:#64748b;
+    margin:0;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:20px;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-field.full{
+    grid-column:1 / -1;
+}
+
+.form-field label{
+    font-weight:bold;
+    margin-bottom:6px;
+    color:#334155;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+    box-sizing:border-box;
+    width:100%;
+}
+
+.form-field textarea{
+    resize:vertical;
+}
+
+.error-campo{
+    color:#dc2626;
+    font-size:13px;
+    margin-top:5px;
+    font-weight:bold;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.acciones-mantencion{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:22px;
+}
+
+.boton-guardar{
+    background:#2563eb;
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-guardar:hover{
+    background:#1d4ed8;
+}
+
+.link-cancelar{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.link-cancelar:hover{
+    text-decoration:underline;
+}
+
+
+@media(max-width:800px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Registrar mantención</h1>
+
+<div class="mantencion-card">
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <p>
+        Registra una mantención asociada al siguiente vehículo.
+    </p>
+
+    <div class="vehiculo-resumen">
+
+        <h2>
+            {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+        </h2>
+
+        <p class="vehiculo-meta">
+            Centro de costo:
+            {{ vehiculo.centro_costo|default:"-" }}
+        </p>
+
+        <p class="vehiculo-meta">
+            Kilometraje actual:
+            {{ vehiculo.kilometraje_actual|default:"-" }}
+        </p>
+
+    </div>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                <label for="{{ form.tipo_mantencion.id_for_label }}">
+                    Tipo de mantención
+                </label>
+
+                {{ form.tipo_mantencion }}
+
+                {% for error in form.tipo_mantencion.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.estado.id_for_label }}">
+                    Estado
+                </label>
+
+                {{ form.estado }}
+
+                {% for error in form.estado.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.fecha_programada.id_for_label }}">
+                    Fecha programada
+                </label>
+
+                {{ form.fecha_programada }}
+
+                {% for error in form.fecha_programada.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+
+                <div class="texto-ayuda">
+                    Obligatoria para mantenciones programadas.
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.kilometraje_programado.id_for_label }}">
+                    Kilometraje programado
+                </label>
+
+                {{ form.kilometraje_programado }}
+
+                {% for error in form.kilometraje_programado.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+
+                <div class="texto-ayuda">
+                    Obligatorio para mantenciones por kilometraje.
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.fecha_ingreso.id_for_label }}">
+                    Fecha de ingreso
+                </label>
+
+                {{ form.fecha_ingreso }}
+
+                {% for error in form.fecha_ingreso.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.kilometraje_ingreso.id_for_label }}">
+                    Kilometraje de ingreso
+                </label>
+
+                {{ form.kilometraje_ingreso }}
+
+                {% for error in form.kilometraje_ingreso.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field full">
+                <label for="{{ form.motivo.id_for_label }}">
+                    Motivo
+                </label>
+
+                {{ form.motivo }}
+
+                {% for error in form.motivo.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-field full">
+                <label for="{{ form.observacion.id_for_label }}">
+                    Observación
+                </label>
+
+                {{ form.observacion }}
+
+                {% for error in form.observacion.errors %}
+                    <div class="error-campo">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <div class="acciones-mantencion">
+
+            <button
+                type="submit"
+                class="boton-guardar"
+            >
+                Guardar mantención
+            </button>
+
+            <a
+                href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                class="link-cancelar"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% if mantencion_en_curso %}
+
+    <div style="
+        background:#fef2f2;
+        border:1px solid #fecaca;
+        color:#991b1b;
+        padding:14px;
+        border-radius:10px;
+        margin-bottom:18px;
+        font-weight:bold;
+    ">
+        Este vehículo ya tiene una mantención en curso.
+        Debes cerrar la mantención activa antes de registrar otra mantención como En curso.
+
+        <br><br>
+
+        Mantención activa:
+        {{ mantencion_en_curso.get_tipo_mantencion_display }}
+        {% if mantencion_en_curso.fecha_ingreso %}
+            · Ingreso: {{ mantencion_en_curso.fecha_ingreso|date:"d-m-Y" }}
+        {% endif %}
+    </div>
+
+{% endif %}
+
+{% endblock %}

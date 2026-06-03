@@ -1,0 +1,213 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Transferir {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.transferencia-card{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    max-width:760px;
+}
+
+.vehiculo-resumen{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin:18px 0;
+}
+
+.vehiculo-resumen h2{
+    margin:0 0 6px 0;
+    color:#1e293b;
+}
+
+.vehiculo-meta{
+    color:#64748b;
+    margin:0;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-top:20px;
+}
+
+.form-field{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-field label{
+    font-weight:bold;
+    margin-bottom:6px;
+    color:#334155;
+}
+
+.form-field select,
+.form-field textarea{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+}
+
+.form-field textarea{
+    min-height:110px;
+    resize:vertical;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    font-size:13px;
+    margin-top:5px;
+}
+
+.acciones-transferencia{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:22px;
+}
+
+.boton-transferir{
+    background:#2563eb;
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.boton-transferir:hover{
+    background:#1d4ed8;
+}
+
+.link-cancelar{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.link-cancelar:hover{
+    text-decoration:underline;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Transferir vehículo</h1>
+
+<div class="transferencia-card">
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <p>
+        Esta acción cambiará el centro de costo actual del vehículo y dejará
+        un registro histórico de la transferencia.
+    </p>
+
+    <div class="vehiculo-resumen">
+
+        <h2>
+            {{ vehiculo.patente }} - {{ vehiculo.marca }} {{ vehiculo.modelo }}
+        </h2>
+
+        <p class="vehiculo-meta">
+            Centro de costo actual:
+            <strong>{{ vehiculo.centro_costo|default:"Sin centro de costo" }}</strong>
+        </p>
+
+    </div>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-field">
+
+                <label for="centro_costo_destino">
+                    Nuevo centro de costo
+                </label>
+
+                <select
+                    name="centro_costo_destino"
+                    id="centro_costo_destino"
+                    required
+                >
+                    <option value="">
+                        Selecciona un centro de costo
+                    </option>
+
+                    {% for cc in centros_costo %}
+                        <option
+                            value="{{ cc.id }}"
+                            {% if centro_destino_id == cc.id|stringformat:"s" %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ cc }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <div class="texto-ayuda">
+                    El centro de costo seleccionado reemplazará al centro de costo actual del vehículo.
+                </div>
+
+            </div>
+
+            <div class="form-field">
+
+                <label for="observacion">
+                    Observación de transferencia
+                </label>
+
+                <textarea
+                    name="observacion"
+                    id="observacion"
+                    placeholder="Ejemplo: Transferido por reasignación operacional, cambio de faena, solicitud administrativa, etc."
+                >{{ observacion|default:'' }}</textarea>
+
+                <div class="texto-ayuda">
+                    Esta observación quedará visible en el historial de transferencias del vehículo.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="acciones-transferencia">
+
+            <button
+                type="submit"
+                class="boton-transferir"
+            >
+                Confirmar transferencia
+            </button>
+
+            <a
+                href="{% url 'detalle_vehiculo' vehiculo.id %}"
+                class="link-cancelar"
+            >
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

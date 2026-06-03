@@ -1,0 +1,2160 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Control de mantenciones
+{% endblock %}
+
+{% block extra_css %}
+
+.page-header{
+    margin-bottom:22px;
+}
+
+.page-header h1{
+    margin-bottom:5px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.page-header-acciones{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+}
+
+.btn-exportar-mantenciones{
+    display:inline-block;
+    background:#16a34a;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:bold;
+    white-space:nowrap;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    cursor:pointer;
+}
+
+.btn-exportar-mantenciones:hover{
+    background:#15803d;
+}
+
+.exportar-dropdown{
+    position:relative;
+}
+
+.exportar-dropdown summary{
+    list-style:none;
+}
+
+.exportar-dropdown summary::-webkit-details-marker{
+    display:none;
+}
+
+.exportar-panel{
+    position:absolute;
+    right:0;
+    top:46px;
+    width:300px;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    box-shadow:0 8px 22px rgba(0,0,0,.14);
+    padding:14px;
+    z-index:20;
+}
+
+.exportar-panel h4{
+    margin:0 0 10px 0;
+    color:#1e293b;
+}
+
+.exportar-ayuda{
+    margin:0 0 12px 0;
+    color:#64748b;
+    font-size:13px;
+}
+
+.exportar-opciones{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:12px;
+}
+
+.exportar-opciones label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#334155;
+    font-size:14px;
+}
+
+.exportar-opciones input{
+    accent-color:#16a34a;
+}
+
+.btn-exportar-submit{
+    width:100%;
+    background:#16a34a;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-exportar-submit:hover{
+    background:#15803d;
+}
+
+
+.kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:22px;
+}
+
+.kpi-card{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-left:5px solid #2563eb;
+    border-radius:12px;
+    padding:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    text-align:left;
+    width:100%;
+    cursor:pointer;
+    transition:.2s;
+    font-family:inherit;
+}
+
+.kpi-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 14px rgba(0,0,0,.12);
+}
+
+.kpi-card.todas{
+    border-left-color:#2563eb;
+}
+
+.kpi-card.criticas{
+    border-left-color:#dc2626;
+}
+
+.kpi-card.proximas{
+    border-left-color:#f59e0b;
+}
+
+.kpi-card.en-curso{
+    border-left-color:#7c3aed;
+}
+
+.kpi-label{
+    color:#475569;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+}
+
+.kpi-numero{
+    font-size:30px;
+    font-weight:bold;
+    color:#0f172a;
+    line-height:1;
+    margin-bottom:8px;
+}
+
+.kpi-texto{
+    color:#64748b;
+    font-size:13px;
+}
+
+.kpi-mini-lista{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-top:10px;
+}
+
+.kpi-mini-item{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    color:#334155;
+    font-size:13px;
+}
+
+.kpi-mini-item strong{
+    color:#0f172a;
+}
+
+.panel-card{
+    background:white;
+    padding:22px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    border:1px solid #e5e7eb;
+    margin-bottom:22px;
+}
+
+.panel-card h2{
+    margin:0 0 14px 0;
+    color:#1e293b;
+    font-size:22px;
+}
+
+.panel-analitico{
+    display:grid;
+    grid-template-columns:minmax(0, 2fr) minmax(280px, 1fr);
+    gap:22px;
+    align-items:start;
+    margin-bottom:22px;
+}
+
+.grafico-mantenciones{
+    min-width:0;
+}
+
+.grafico-mantenciones-card,
+.resumen-operativo-card{
+    margin-bottom:0;
+}
+
+.grafico-subtitulo{
+    color:#64748b;
+    margin-bottom:18px;
+}
+
+.mantenciones-resumen-principal{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:18px;
+}
+
+.mantenciones-mini-card{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+}
+
+.mantenciones-mini-label{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.mantenciones-mini-numero{
+    color:#1e293b;
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+}
+
+.mantenciones-mini-subtexto{
+    color:#64748b;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.barra-apilada-contenedor{
+    margin:18px 0 16px 0;
+}
+
+.barra-apilada{
+    display:flex;
+    width:100%;
+    height:22px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+}
+
+.segmento-barra{
+    height:100%;
+    min-width:3px;
+}
+
+.segmento-ok{
+    background:#16a34a;
+}
+
+.segmento-proxima{
+    background:#f59e0b;
+}
+
+.segmento-vencida{
+    background:#dc2626;
+}
+
+.segmento-sin-datos{
+    background:#64748b;
+}
+
+.mantenciones-metricas{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    margin-top:6px;
+}
+
+.mantenciones-metrica{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:10px;
+    align-items:center;
+    font-size:14px;
+}
+
+.metrica-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    display:inline-block;
+}
+
+.metrica-label{
+    color:#334155;
+    font-weight:600;
+}
+
+.metrica-valor{
+    color:#1e293b;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.mantenciones-alerta{
+    margin-top:14px;
+    padding:10px;
+    border-radius:10px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.estado-operacional-flota{
+    margin-top:16px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:14px;
+}
+
+.estado-operacional-flota h3{
+    margin:0 0 12px 0;
+    color:#1e293b;
+    font-size:16px;
+}
+
+.estado-operacional-grid{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:8px;
+}
+
+.estado-operacional-item{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:8px 10px;
+    min-width:0;
+}
+
+.estado-operacional-label{
+    display:block;
+    color:#64748b;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.estado-operacional-numero{
+    color:#0f172a;
+    font-size:20px;
+    font-weight:800;
+    line-height:1;
+}
+
+.estado-operacional-porcentaje{
+    color:#64748b;
+    font-size:12px;
+    font-weight:bold;
+    margin-top:4px;
+}
+
+.estado-operacional-item.total{
+    border-left:4px solid #2563eb;
+}
+
+.estado-operacional-item.operativos{
+    border-left:4px solid #16a34a;
+}
+
+.estado-operacional-item.no-operativos{
+    border-left:4px solid #dc2626;
+}
+
+.estado-operacional-item.mantencion{
+    border-left:4px solid #f59e0b;
+}
+
+.estado-operacional-item.reparacion{
+    border-left:4px solid #7c3aed;
+}
+
+.estado-operacional-item.detenidos{
+    border-left:4px solid #64748b;
+}
+
+.resumen-operativo{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    padding:16px;
+}
+
+.resumen-operativo h3{
+    margin:0 0 12px 0;
+    color:#1e293b;
+}
+
+.resumen-operativo-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px;
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    margin-bottom:8px;
+    color:#334155;
+    font-weight:bold;
+}
+
+.resumen-operativo-item:last-child{
+    margin-bottom:0;
+}
+
+.filtros-card{
+    display:grid;
+    grid-template-columns:1.5fr 1fr auto;
+    gap:14px;
+    align-items:end;
+}
+
+.filtro-grupo{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.filtro-grupo label{
+    color:#334155;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.filtro-grupo input,
+.filtro-grupo select{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:14px;
+}
+
+.btn-limpiar{
+    background:#1e293b;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:10px 14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-limpiar:hover{
+    background:#0f172a;
+}
+
+.texto-ayuda{
+    color:#64748b;
+    margin-bottom:16px;
+}
+
+.tabla-contenedor{
+    overflow-x:auto;
+}
+
+.tabla-control{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+.tabla-control thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-control th{
+    padding:12px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.tabla-control td{
+    padding:11px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:middle;
+}
+
+.tabla-control tbody tr:hover{
+    background:#f8fafc;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.badge-vencida{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.badge-proxima{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.badge-curso{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-programada{
+    background:#e0f2fe;
+    color:#075985;
+}
+
+.badge-km{
+    background:#ede9fe;
+    color:#5b21b6;
+}
+
+.badge-siniestro{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.badge-al-dia{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-sin-datos{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.badge-problema{
+    background:#f1f5f9;
+    color:#334155;
+    margin:2px 4px 2px 0;
+}
+
+.acciones-tabla{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.btn-tabla{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.btn-ver{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.btn-ver:hover{
+    background:#cbd5e1;
+}
+
+.btn-registrar{
+    background:#0891b2;
+    color:white;
+}
+
+.btn-registrar:hover{
+    background:#0e7490;
+}
+
+.btn-cerrar{
+    background:#16a34a;
+    color:white;
+}
+
+.btn-cerrar:hover{
+    background:#15803d;
+}
+
+.btn-reprogramar{
+    background:#f59e0b;
+    color:white;
+}
+
+.btn-reprogramar:hover{
+    background:#d97706;
+}
+
+.btn-cancelar{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-cancelar:hover{
+    background:#b91c1c;
+}
+
+.estado-vacio,
+.sin-resultados-panel{
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:10px;
+    padding:14px;
+    color:#64748b;
+}
+
+.sin-resultados-panel{
+    display:none;
+    margin-top:12px;
+}
+
+.panel-oculto{
+    display:none;
+}
+
+
+@media(max-width:1200px){
+
+    .kpi-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .panel-analitico{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:800px){
+
+    .kpi-grid,
+    .filtros-card{
+        grid-template-columns:1fr;
+    }
+
+    .page-header-acciones{
+        flex-direction:column;
+    }
+
+    .exportar-dropdown{
+        width:100%;
+    }
+
+    .exportar-panel{
+        position:static;
+        width:auto;
+        margin-top:10px;
+    }
+
+    .mantenciones-metrica{
+        grid-template-columns:auto 1fr;
+    }
+
+    .metrica-valor{
+        grid-column:2;
+    }
+	
+	.estado-operacional-grid{
+		grid-template-columns:1fr 1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header page-header-acciones">
+
+    <div>
+        <h1>Control de mantenciones</h1>
+
+        <p class="subtitulo-pagina">
+            Vista operativa para revisar mantenciones próximas, vencidas y en curso.
+        </p>
+    </div>
+
+    <details class="exportar-dropdown">
+
+        <summary class="btn-exportar-mantenciones">
+            Exportar Excel
+        </summary>
+
+        <form
+            method="get"
+            action="{% url 'exportar_control_mantenciones_excel' %}"
+            class="exportar-panel"
+        >
+
+            <h4>Seleccionar hojas</h4>
+
+            <p class="exportar-ayuda">
+                Marca las secciones que quieres incluir en el archivo.
+            </p>
+
+            <div class="exportar-opciones">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="resumen"
+                        checked
+                    >
+                    Resumen
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="km_vencidas"
+                        checked
+                    >
+                    KM vencidas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="km_proximas"
+                        checked
+                    >
+                    KM próximas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="sin_datos"
+                        checked
+                    >
+                    Vehículos sin información
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="al_dia"
+                    >
+                    Vehículos al día
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="programadas_vencidas"
+                        checked
+                    >
+                    Programadas vencidas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="programadas_proximas"
+                        checked
+                    >
+                    Programadas próximas
+                </label>
+
+                <label>
+                    <input
+                        type="checkbox"
+                        name="secciones"
+                        value="en_curso"
+                        checked
+                    >
+                    Mantenciones en curso
+                </label>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-exportar-submit"
+            >
+                Descargar Excel
+            </button>
+
+        </form>
+
+    </details>
+
+</div>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="kpi-grid">
+
+    <button
+        type="button"
+        class="kpi-card todas"
+        data-filtro-rapido="TODAS"
+    >
+        <div class="kpi-label">Vehículos controlados</div>
+        <div class="kpi-numero">{{ total_vehiculos_controlados }}</div>
+        <div class="kpi-texto">Vehículos vigentes evaluados por kilometraje.</div>
+    </button>
+
+    <button
+        type="button"
+        class="kpi-card criticas"
+        data-filtro-rapido="CRITICAS"
+    >
+        <div class="kpi-label">Alertas críticas</div>
+
+        <div class="kpi-mini-lista">
+            <div class="kpi-mini-item">
+                <span>KM vencidas</span>
+                <strong>{{ total_km_vencidas }}</strong>
+            </div>
+
+            <div class="kpi-mini-item">
+                <span>Programadas vencidas</span>
+                <strong>{{ total_programadas_vencidas }}</strong>
+            </div>
+
+            <div class="kpi-mini-item">
+                <span>Sin información</span>
+                <strong>{{ total_km_sin_datos }}</strong>
+            </div>
+        </div>
+    </button>
+
+    <button
+        type="button"
+        class="kpi-card proximas"
+        data-filtro-rapido="PROXIMAS"
+    >
+        <div class="kpi-label">Próximas acciones</div>
+
+        <div class="kpi-mini-lista">
+            <div class="kpi-mini-item">
+                <span>KM próximas</span>
+                <strong>{{ total_km_proximas }}</strong>
+            </div>
+
+            <div class="kpi-mini-item">
+                <span>Programadas próximas</span>
+                <strong>{{ total_programadas_proximas }}</strong>
+            </div>
+        </div>
+    </button>
+
+    <button
+        type="button"
+        class="kpi-card en-curso"
+        data-filtro-rapido="EN_CURSO"
+    >
+        <div class="kpi-label">Mantenciones en curso</div>
+        <div class="kpi-numero">{{ total_en_curso }}</div>
+        <div class="kpi-texto">Mantenciones abiertas actualmente.</div>
+    </button>
+
+</div>
+
+<div class="panel-analitico">
+
+    <div class="panel-card grafico-mantenciones-card">
+
+        <div class="grafico-mantenciones">
+
+            <h2>Estado preventivo por kilometraje</h2>
+
+            <div class="grafico-subtitulo">
+                Resumen calculado sobre vehículos vigentes. Regla actual: mantención cada 10.000 km.
+            </div>
+
+            <div class="barra-apilada-contenedor">
+
+                <div class="barra-apilada">
+
+                    <div
+                        class="segmento-barra segmento-ok"
+                        title="Al día"
+                        style="width:{% widthratio total_km_al_dia total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                    <div
+                        class="segmento-barra segmento-proxima"
+                        title="Próximas"
+                        style="width:{% widthratio total_km_proximas total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                    <div
+                        class="segmento-barra segmento-vencida"
+                        title="Vencidas"
+                        style="width:{% widthratio total_km_vencidas total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                    <div
+                        class="segmento-barra segmento-sin-datos"
+                        title="Sin información"
+                        style="width:{% widthratio total_km_sin_datos total_vehiculos_controlados 100 %}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+            <div class="mantenciones-metricas">
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-ok"></span>
+
+                    <span class="metrica-label">
+                        Al día
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_al_dia|default:0 }}
+                        ·
+                        {{ porcentaje_km_al_dia|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-proxima"></span>
+
+                    <span class="metrica-label">
+                        Próximas
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_proximas|default:0 }}
+                        ·
+                        {{ porcentaje_km_proximas|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-vencida"></span>
+
+                    <span class="metrica-label">
+                        Vencidas
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_vencidas|default:0 }}
+                        ·
+                        {{ porcentaje_km_vencidas|default:0 }}%
+                    </span>
+                </div>
+
+                <div class="mantenciones-metrica">
+                    <span class="metrica-dot segmento-sin-datos"></span>
+
+                    <span class="metrica-label">
+                        Sin información
+                    </span>
+
+                    <span class="metrica-valor">
+                        {{ total_km_sin_datos|default:0 }}
+                        ·
+                        {{ porcentaje_km_sin_datos|default:0 }}%
+                    </span>
+                </div>
+
+            </div>
+
+            {% if total_km_vencidas or total_km_sin_datos %}
+
+                <div class="mantenciones-alerta">
+                    Atención requerida:
+                    {{ total_km_vencidas|default:0 }}
+                    vencidas y
+                    {{ total_km_sin_datos|default:0 }}
+                    vehículos sin información.
+                </div>
+
+            {% endif %}
+			
+			<div class="estado-operacional-flota">
+
+				<h3>Estado operacional de la flota</h3>
+				<div class="estado-operacional-grid">
+					<div class="estado-operacional-item operativos">
+						<span class="estado-operacional-label">
+							Operativos
+						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_operativos|default:0 }}
+						</div>
+
+						<div class="estado-operacional-porcentaje">
+							{{ porcentaje_vehiculos_operativos|default:0 }}%
+						</div>
+					</div>
+
+					<div class="estado-operacional-item no-operativos">
+						<span class="estado-operacional-label">
+							No operativos
+						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_no_operativos|default:0 }}
+						</div>
+
+						<div class="estado-operacional-porcentaje">
+							{{ porcentaje_vehiculos_no_operativos|default:0 }}%
+						</div>
+					</div>
+
+					<div class="estado-operacional-item mantencion">
+						<span class="estado-operacional-label">
+							En mantención
+						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_en_mantencion|default:0 }}
+						</div>
+					</div>
+
+					<div class="estado-operacional-item reparacion">
+						<span class="estado-operacional-label">
+							En reparación
+						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_en_reparacion|default:0 }}
+						</div>
+					</div>
+
+					<div class="estado-operacional-item detenidos">
+						<span class="estado-operacional-label">
+							Detenidos
+						</span>
+
+						<div class="estado-operacional-numero">
+							{{ total_vehiculos_detenidos|default:0 }}
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+        </div>
+
+    </div>
+
+    <div class="panel-card resumen-operativo-card">
+
+        <div class="resumen-operativo">
+
+            <h3>Resumen operativo</h3>
+
+            <div class="resumen-operativo-item">
+                <span>KM vencidas</span>
+                <strong>{{ total_km_vencidas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>KM próximas</span>
+                <strong>{{ total_km_proximas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Vehículos sin información</span>
+                <strong>{{ total_km_sin_datos }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Programadas vencidas</span>
+                <strong>{{ total_programadas_vencidas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Programadas próximas</span>
+                <strong>{{ total_programadas_proximas }}</strong>
+            </div>
+
+            <div class="resumen-operativo-item">
+                <span>Mantenciones en curso</span>
+                <strong>{{ total_en_curso }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="panel-card filtros-card">
+
+    <div class="filtro-grupo">
+        <label for="filtroTextoMantenciones">Buscar en tablas</label>
+        <input
+            type="text"
+            id="filtroTextoMantenciones"
+            placeholder="Buscar patente, centro de costo, motivo, usuario o tipo..."
+        >
+    </div>
+
+    <div class="filtro-grupo">
+        <label for="filtroCategoriaMantenciones">Categoría</label>
+        <select id="filtroCategoriaMantenciones">
+            <option value="TODAS">Todas las tablas</option>
+            <option value="CRITICAS">Alertas críticas</option>
+            <option value="PROXIMAS">Próximas acciones</option>
+            <option value="KM_VENCIDAS">KM vencidas</option>
+            <option value="KM_PROXIMAS">KM próximas</option>
+            <option value="PROGRAMADAS_VENCIDAS">Programadas vencidas</option>
+            <option value="PROGRAMADAS_PROXIMAS">Programadas próximas</option>
+            <option value="EN_CURSO">Mantenciones en curso</option>
+            <option value="SIN_DATOS">Vehículos sin información</option>
+            <option value="AL_DIA">Vehículos al día</option>
+        </select>
+    </div>
+
+    <button
+        type="button"
+        id="limpiarFiltrosMantenciones"
+        class="btn-limpiar"
+    >
+        Limpiar filtros
+    </button>
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="KM_VENCIDAS"
+>
+
+    <h2>Mantenciones por kilometraje vencidas</h2>
+
+    <div class="texto-ayuda">
+        Vehículos que ya superaron el kilometraje objetivo de mantención. Regla actual: cada 10.000 km.
+    </div>
+
+    {% if alertas_km_vencidas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_vencidas %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} kilometraje vencida km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-vencida">
+                                    Vencida
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Registrar mantención
+                                        </a>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones por kilometraje vencidas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="KM_PROXIMAS"
+>
+
+    <h2>Mantenciones por kilometraje próximas</h2>
+
+    <div class="texto-ayuda">
+        Vehículos a 1.500 km o menos de su próxima mantención.
+    </div>
+
+    {% if alertas_km_proximas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_proximas %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} kilometraje proxima próxima km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-proxima">
+                                    Próxima
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+									
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'registrar_mantencion_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Registrar mantención
+                                        </a>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones por kilometraje próximas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="SIN_DATOS"
+>
+
+    <h2>Vehículos sin información de mantención</h2>
+
+    <div class="texto-ayuda">
+        Vehículos vigentes que no tienen datos suficientes para calcular su próxima mantención por kilometraje.
+    </div>
+
+    {% if alertas_km_sin_datos %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>Última mantención</th>
+                        <th>Próxima mantención</th>
+                        <th>Problema detectado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_sin_datos %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} sin informacion sin información {{ alerta.problemas|join:' ' }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_ultima_mantencion|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.kilometraje_proxima_mantencion|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if alerta.problemas %}
+                                    {% for problema in alerta.problemas %}
+                                        <span class="badge badge-problema">
+                                            {{ problema }}
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="badge badge-sin-datos">
+                                        Sin datos suficientes
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Editar datos
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay vehículos sin información de mantención.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones panel-oculto"
+    data-panel="AL_DIA"
+>
+
+    <h2>Vehículos al día</h2>
+
+    <div class="texto-ayuda">
+        Vehículos vigentes con datos suficientes y más de 1.500 km restantes para su próxima mantención. Esta tabla se usa principalmente para auditoría.
+    </div>
+
+    {% if alertas_km_al_dia %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>KM actual</th>
+                        <th>KM mantención</th>
+                        <th>KM restantes</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for alerta in alertas_km_al_dia %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ alerta.vehiculo.patente }} {{ alerta.vehiculo.centro_costo }} al dia al día kilometraje km {{ alerta.kilometraje_actual }} {{ alerta.kilometraje_programado }}"
+                        >
+                            <td>
+                                <strong>{{ alerta.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ alerta.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_actual|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometraje_programado|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ alerta.kilometros_restantes|default:"-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-al-dia">
+                                    Al día
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' alerta.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'editar_vehiculo' alerta.vehiculo.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Editar datos
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay vehículos al día para mostrar.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="PROGRAMADAS_VENCIDAS"
+>
+
+    <h2>Mantenciones programadas vencidas</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones programadas por fecha que ya superaron su fecha programada.
+    </div>
+
+    {% if mantenciones_programadas_vencidas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Fecha programada</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_programadas_vencidas %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} programada vencida {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_programada|date:"d-m-Y" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-vencida">
+                                    Vencida
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+									href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+									class="btn-tabla btn-ver"
+									>
+										Ver ficha
+									</a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Iniciar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-reprogramar"
+                                        >
+                                            Reprogramar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cancelar"
+                                        >
+                                            Cancelar
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones programadas vencidas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="PROGRAMADAS_PROXIMAS"
+>
+
+    <h2>Mantenciones programadas próximas</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones programadas con fecha dentro de los próximos 15 días.
+    </div>
+
+    {% if mantenciones_programadas_proximas %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Fecha programada</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_programadas_proximas %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} programada proxima próxima {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_programada|date:"d-m-Y" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-proxima">
+                                    Próxima
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+									href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+									class="btn-tabla btn-ver"
+									>
+										Ver ficha
+									</a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-registrar"
+                                        >
+                                            Iniciar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-reprogramar"
+                                        >
+                                            Reprogramar
+                                        </a>
+
+                                        <a
+                                        href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cancelar"
+                                        >
+                                            Cancelar
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones programadas próximas.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<div
+    class="panel-card panel-tabla-mantenciones"
+    data-panel="EN_CURSO"
+>
+
+    <h2>Mantenciones en curso</h2>
+
+    <div class="texto-ayuda">
+        Mantenciones actualmente abiertas o en ejecución.
+    </div>
+
+    {% if mantenciones_en_curso %}
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-control tabla-filtrable">
+
+                <thead>
+                    <tr>
+                        <th>Patente</th>
+                        <th>Centro costo</th>
+                        <th>Tipo</th>
+                        <th>Fecha ingreso</th>
+                        <th>KM ingreso</th>
+                        <th>Motivo</th>
+                        <th>Usuario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for mantencion in mantenciones_en_curso %}
+
+                        <tr
+                            class="fila-filtrable"
+                            data-search="{{ mantencion.vehiculo.patente }} {{ mantencion.vehiculo.centro_costo }} {{ mantencion.get_tipo_mantencion_display }} en curso {{ mantencion.motivo }} {{ mantencion.usuario_registro }}"
+                        >
+                            <td>
+                                <strong>{{ mantencion.vehiculo.patente }}</strong>
+                            </td>
+
+                            <td>
+                                {{ mantencion.vehiculo.centro_costo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.tipo_mantencion == 'PROGRAMADA' %}
+                                    <span class="badge badge-programada">
+                                        Programada
+                                    </span>
+                                {% elif mantencion.tipo_mantencion == 'KILOMETRAJE' %}
+                                    <span class="badge badge-km">
+                                        Por kilometraje
+                                    </span>
+                                {% elif mantencion.tipo_mantencion == 'SINIESTRO' %}
+                                    <span class="badge badge-siniestro">
+                                        Por siniestro
+                                    </span>
+                                {% else %}
+                                    {{ mantencion.get_tipo_mantencion_display }}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.kilometraje_ingreso|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ mantencion.motivo|default:"-" }}
+                            </td>
+
+                            <td>
+                                {% if mantencion.usuario_registro %}
+                                    {{ mantencion.usuario_registro.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="acciones-tabla">
+
+                                    <a
+                                    href="{% url 'detalle_vehiculo' mantencion.vehiculo.id %}"
+                                    class="btn-tabla btn-ver"
+                                    >
+                                        Ver ficha
+                                    </a>
+
+                                    {% if puede_editar %}
+
+                                        <a
+                                        href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+                                        class="btn-tabla btn-cerrar"
+                                        >
+                                            Cerrar
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="sin-resultados-panel">
+            No hay resultados para los filtros actuales en esta tabla.
+        </div>
+
+    {% else %}
+
+        <div class="estado-vacio">
+            No hay mantenciones en curso.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+(function(){
+
+    const inputBusqueda = document.getElementById('filtroTextoMantenciones');
+    const selectCategoria = document.getElementById('filtroCategoriaMantenciones');
+    const botonLimpiar = document.getElementById('limpiarFiltrosMantenciones');
+    const botonesRapidos = document.querySelectorAll('[data-filtro-rapido]');
+    const paneles = document.querySelectorAll('.panel-tabla-mantenciones');
+
+    const gruposCategoria = {
+        TODAS: [
+            'KM_VENCIDAS',
+            'KM_PROXIMAS',
+            'SIN_DATOS',
+            'PROGRAMADAS_VENCIDAS',
+            'PROGRAMADAS_PROXIMAS',
+            'EN_CURSO'
+        ],
+        CRITICAS: [
+            'KM_VENCIDAS',
+            'PROGRAMADAS_VENCIDAS',
+            'SIN_DATOS'
+        ],
+        PROXIMAS: [
+            'KM_PROXIMAS',
+            'PROGRAMADAS_PROXIMAS'
+        ],
+        KM_VENCIDAS: ['KM_VENCIDAS'],
+        KM_PROXIMAS: ['KM_PROXIMAS'],
+        PROGRAMADAS_VENCIDAS: ['PROGRAMADAS_VENCIDAS'],
+        PROGRAMADAS_PROXIMAS: ['PROGRAMADAS_PROXIMAS'],
+        EN_CURSO: ['EN_CURSO'],
+        SIN_DATOS: ['SIN_DATOS'],
+        AL_DIA: ['AL_DIA']
+    };
+
+    function normalizarTexto(texto){
+        return (texto || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
+    function aplicarFiltros(){
+
+        const texto = normalizarTexto(inputBusqueda ? inputBusqueda.value : '');
+        const categoria = selectCategoria ? selectCategoria.value : 'TODAS';
+        const categoriasVisibles = gruposCategoria[categoria] || gruposCategoria.TODAS;
+
+        paneles.forEach(function(panel){
+
+            const categoriaPanel = panel.dataset.panel;
+            const categoriaVisible = categoriasVisibles.includes(categoriaPanel);
+
+            if(!categoriaVisible){
+                panel.classList.add('panel-oculto');
+                return;
+            }
+
+            panel.classList.remove('panel-oculto');
+
+            const filas = panel.querySelectorAll('.fila-filtrable');
+            const tablaContenedor = panel.querySelector('.tabla-contenedor');
+            const mensajeSinResultados = panel.querySelector('.sin-resultados-panel');
+
+            if(!filas.length){
+                return;
+            }
+
+            let filasVisibles = 0;
+
+            filas.forEach(function(fila){
+
+                const textoFila = normalizarTexto(fila.dataset.search || fila.textContent);
+                const coincide = !texto || textoFila.includes(texto);
+
+                fila.style.display = coincide ? '' : 'none';
+
+                if(coincide){
+                    filasVisibles += 1;
+                }
+
+            });
+
+            if(tablaContenedor){
+                tablaContenedor.style.display = filasVisibles > 0 ? '' : 'none';
+            }
+
+            if(mensajeSinResultados){
+                mensajeSinResultados.style.display = filasVisibles > 0 ? 'none' : 'block';
+            }
+
+        });
+    }
+
+    if(inputBusqueda){
+        inputBusqueda.addEventListener('input', aplicarFiltros);
+    }
+
+    if(selectCategoria){
+        selectCategoria.addEventListener('change', aplicarFiltros);
+    }
+
+    if(botonLimpiar){
+        botonLimpiar.addEventListener('click', function(){
+            if(inputBusqueda){
+                inputBusqueda.value = '';
+            }
+
+            if(selectCategoria){
+                selectCategoria.value = 'TODAS';
+            }
+
+            aplicarFiltros();
+        });
+    }
+
+    botonesRapidos.forEach(function(boton){
+        boton.addEventListener('click', function(){
+            const filtro = boton.dataset.filtroRapido || 'TODAS';
+
+            if(selectCategoria){
+                selectCategoria.value = filtro;
+            }
+
+            aplicarFiltros();
+
+            const filtros = document.querySelector('.filtros-card');
+
+            if(filtros){
+                filtros.scrollIntoView({
+                    behavior:'smooth',
+                    block:'start'
+                });
+            }
+        });
+    });
+
+    aplicarFiltros();
+
+})();
+</script>
+
+{% endblock %}

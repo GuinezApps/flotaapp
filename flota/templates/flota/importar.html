@@ -1,0 +1,335 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Importar datos
+{% endblock %}
+
+{% block extra_css %}
+
+.mensaje {
+    background: #dbeafe;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.alerta-importacion {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.tabla-contenedor {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: white;
+    margin-bottom: 20px;
+}
+
+.tabla-contenedor th {
+    background: #1e293b;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.tabla-contenedor th,
+.tabla-contenedor td {
+    border: 1px solid #d1d5db;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.fila-nuevo {
+    background: #dcfce7;
+}
+
+.fila-actualizar {
+    background: #fef3c7;
+}
+
+.fila-sin-cambios {
+    background: #f3f4f6;
+}
+
+.formulario {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.confirmacion-importacion {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff7ed;
+    border: 1px solid #fb923c;
+    border-radius: 8px;
+}
+
+.filtros-importacion {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Importar base de vehículos</h1>
+
+{% if mensaje %}
+    <div class="mensaje">
+        {{ mensaje|safe }}
+    </div>
+{% endif %}
+
+
+{% if total_alertas > 0 %}
+<div class="alerta-importacion">
+    ⚠ Existen cambios sospechosos.
+    Use el filtro <strong>Con alertas</strong>
+    antes de confirmar la importación.
+</div>
+{% endif %}
+
+
+{% if detalle_importacion %}
+
+<h2>Detalle importación</h2>
+
+<div class="filtros-importacion">
+
+    <div>
+        <label>Ver:</label>
+
+        <select id="filtroAccion">
+            <option value="">Todos</option>
+            <option value="Nuevo">Nuevos</option>
+            <option value="Actualizar">Actualizados</option>
+            <option value="Sin cambios">Sin cambios</option>
+            <option value="alertas">⚠ Con alertas</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Centro costo:</label>
+
+        <select id="filtroCC">
+            <option value="">Todos</option>
+
+            {% for item in detalle_importacion %}
+                <option value="{{ item.centro_costo }}">
+                    {{ item.centro_costo }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+</div>
+
+
+<div class="tabla-contenedor">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Centro costo</th>
+                <th>Patente</th>
+                <th>Acción</th>
+                <th>Cambios</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in detalle_importacion %}
+
+                {% if item.accion == 'Nuevo' %}
+                    <tr
+                        class="fila-nuevo fila-detalle"
+                        data-accion="Nuevo"
+                        data-cc="{{ item.centro_costo }}"
+                        data-alerta="{{ item.tiene_alerta }}"
+                    >
+                {% elif item.accion == 'Actualizar' %}
+                    <tr
+                        class="fila-actualizar fila-detalle"
+                        data-accion="Actualizar"
+                        data-cc="{{ item.centro_costo }}"
+                        data-alerta="{{ item.tiene_alerta }}"
+                    >
+                {% else %}
+                    <tr
+                        class="fila-sin-cambios fila-detalle"
+                        data-accion="Sin cambios"
+                        data-cc="{{ item.centro_costo }}"
+                        data-alerta="{{ item.tiene_alerta }}"
+                    >
+                {% endif %}
+
+                    <td>{{ item.centro_costo }}</td>
+                    <td>{{ item.patente }}</td>
+
+                    <td>
+                        {% if item.accion == 'Nuevo' %}
+                            🟢 {{ item.accion }}
+                        {% elif item.accion == 'Actualizar' %}
+                            🟡 {{ item.accion }}
+                        {% else %}
+                            ⚪ {{ item.accion }}
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item.cambios|safe }}</td>
+
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endif %}
+
+
+{% if detalle_importacion %}
+
+<div class="confirmacion-importacion">
+
+    <strong>¿Desea continuar?</strong>
+
+    <br><br>
+
+    Registros evaluados: {{ detalle_importacion|length }}
+
+    {% if total_alertas > 0 %}
+        <br>
+        ⚠ Alertas detectadas: {{ total_alertas }}
+    {% endif %}
+
+    <br><br>
+
+    <form method="post" action="/confirmar-importacion/">
+
+        {% csrf_token %}
+
+        <input
+            type="hidden"
+            name="archivo_temporal"
+            value="{{ archivo_temporal }}"
+        >
+
+        <button
+            type="submit"
+            onclick="return confirm('¿Está seguro de importar los cambios?')"
+        >
+            Confirmar importación
+        </button>
+
+    </form>
+
+</div>
+
+{% endif %}
+
+
+<div class="formulario">
+
+    <p>Seleccione un Excel para validar.</p>
+
+    <form method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <input type="file" name="archivo_excel" accept=".xlsx">
+
+        <br><br>
+
+        <button type="submit">
+            Validar archivo
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+const filtroAccion = document.getElementById('filtroAccion');
+const filtroCC = document.getElementById('filtroCC');
+
+function filtrarTabla(){
+
+    if (!filtroAccion || !filtroCC) {
+        return;
+    }
+
+    const accion = filtroAccion.value;
+    const cc = filtroCC.value;
+
+    const filas = document.querySelectorAll('.fila-detalle');
+
+    filas.forEach(function(fila){
+
+        const accionFila = fila.dataset.accion;
+        const ccFila = fila.dataset.cc;
+        const alertaFila = fila.dataset.alerta;
+
+        let mostrar = true;
+
+        if (
+            accion &&
+            accion !== "alertas" &&
+            accion !== accionFila
+        ) {
+            mostrar = false;
+        }
+
+        if (
+            accion === "alertas" &&
+            alertaFila !== "True"
+        ) {
+            mostrar = false;
+        }
+
+        if (
+            cc &&
+            cc !== ccFila
+        ) {
+            mostrar = false;
+        }
+
+        fila.style.display = mostrar ? '' : 'none';
+    });
+}
+
+if (filtroAccion) {
+    filtroAccion.addEventListener('change', filtrarTabla);
+}
+
+if (filtroCC) {
+    filtroCC.addEventListener('change', filtrarTabla);
+}
+
+</script>
+
+{% endblock %}

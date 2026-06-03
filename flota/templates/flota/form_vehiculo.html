@@ -1,0 +1,463 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+{{ titulo }}
+{% endblock %}
+
+{% block extra_css %}
+
+.form-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    max-width: 1100px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section summary {
+    font-weight: bold;
+    font-size: 18px;
+    color: #1e293b;
+    cursor: pointer;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field label {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #334155;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    padding: 9px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+.form-field small {
+    color: #64748b;
+    margin-top: 5px;
+}
+
+.errorlist {
+    color: #991b1b;
+    background: #fee2e2;
+    padding: 8px;
+    border-radius: 6px;
+    list-style: none;
+    margin: 6px 0 0 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.subestado-wrapper.oculto {
+    display: none;
+}
+
+.alerta-formulario {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 6px solid #ef4444;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    font-weight: bold;
+}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>{{ titulo }}</h1>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="form-card">
+
+    {% if form.non_field_errors %}
+        <div class="alerta-formulario">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <details class="form-section" open>
+        <summary>Información técnica</summary>
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                {{ form.patente.label_tag }}
+                {{ form.patente }}
+                {{ form.patente.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.marca.label_tag }}
+                {{ form.marca }}
+                {{ form.marca.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.modelo.label_tag }}
+                {{ form.modelo }}
+                {{ form.modelo.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.anio.label_tag }}
+                {{ form.anio }}
+                {{ form.anio.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.tipo_vehiculo.label_tag }}
+                {{ form.tipo_vehiculo }}
+                {{ form.tipo_vehiculo.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.color.label_tag }}
+                {{ form.color }}
+                {{ form.color.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.combustible.label_tag }}
+                {{ form.combustible }}
+                {{ form.combustible.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.traccion.label_tag }}
+                {{ form.traccion }}
+                {{ form.traccion.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.numero_asientos.label_tag }}
+                {{ form.numero_asientos }}
+                {{ form.numero_asientos.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.numero_motor.label_tag }}
+                {{ form.numero_motor }}
+                {{ form.numero_motor.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.numero_chasis_vin.label_tag }}
+                {{ form.numero_chasis_vin }}
+                {{ form.numero_chasis_vin.errors }}
+            </div>
+
+        </div>
+    </details>
+
+    <details class="form-section" open>
+        <summary>Estado y operación</summary>
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                {{ form.estado_administrativo.label_tag }}
+                {{ form.estado_administrativo }}
+                {{ form.estado_administrativo.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.estado_operacional.label_tag }}
+                {{ form.estado_operacional }}
+                {{ form.estado_operacional.errors }}
+                <small>
+                    Estado principal para reportes: Operativo, No operativo o No informado.
+                </small>
+            </div>
+
+            <div
+                class="form-field subestado-wrapper"
+                id="subestadoNoOperativoWrapper"
+            >
+                {{ form.subestado_no_operativo.label_tag }}
+                {{ form.subestado_no_operativo }}
+                {{ form.subestado_no_operativo.errors }}
+                <small>
+                    Obligatorio solo cuando el estado sea No operativo.
+                </small>
+            </div>
+
+            <div class="form-field">
+                {{ form.estado_mantencion.label_tag }}
+                {{ form.estado_mantencion }}
+                {{ form.estado_mantencion.errors }}
+                <small>
+                    Dato externo de mantención. No reemplaza el estado operacional.
+                </small>
+            </div>
+
+            <div class="form-field">
+                {{ form.kilometraje_actual.label_tag }}
+                {{ form.kilometraje_actual }}
+                {{ form.kilometraje_actual.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.kilometraje_ultima_mantencion.label_tag }}
+                {{ form.kilometraje_ultima_mantencion }}
+                {{ form.kilometraje_ultima_mantencion.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.kilometraje_proxima_mantencion.label_tag }}
+                {{ form.kilometraje_proxima_mantencion }}
+                {{ form.kilometraje_proxima_mantencion.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.limite_kilometraje.label_tag }}
+                {{ form.limite_kilometraje }}
+                {{ form.limite_kilometraje.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.alerta_mantencion.label_tag }}
+                {{ form.alerta_mantencion }}
+                {{ form.alerta_mantencion.errors }}
+            </div>
+
+        </div>
+    </details>
+
+    <details class="form-section">
+        <summary>Contrato y arriendo</summary>
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                {{ form.empresa_arrendadora.label_tag }}
+                {{ form.empresa_arrendadora }}
+                {{ form.empresa_arrendadora.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.razon_social.label_tag }}
+                {{ form.razon_social }}
+                {{ form.razon_social.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.rut_empresa.label_tag }}
+                {{ form.rut_empresa }}
+                {{ form.rut_empresa.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.tarifa_mensual.label_tag }}
+                {{ form.tarifa_mensual }}
+                {{ form.tarifa_mensual.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.fecha_inicio_contrato.label_tag }}
+                {{ form.fecha_inicio_contrato }}
+                {{ form.fecha_inicio_contrato.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.fecha_termino_contrato.label_tag }}
+                {{ form.fecha_termino_contrato }}
+                {{ form.fecha_termino_contrato.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.periodo_meses.label_tag }}
+                {{ form.periodo_meses }}
+                {{ form.periodo_meses.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.tipo_estandar.label_tag }}
+                {{ form.tipo_estandar }}
+                {{ form.tipo_estandar.errors }}
+            </div>
+
+        </div>
+    </details>
+
+    <details class="form-section">
+        <summary>Ubicación y asignación</summary>
+
+        <div class="form-grid">
+
+            <div class="form-field">
+                {{ form.centro_costo.label_tag }}
+                {{ form.centro_costo }}
+                {{ form.centro_costo.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.gerencia.label_tag }}
+                {{ form.gerencia }}
+                {{ form.gerencia.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.faena.label_tag }}
+                {{ form.faena }}
+                {{ form.faena.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.ciudad.label_tag }}
+                {{ form.ciudad }}
+                {{ form.ciudad.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.sucursal.label_tag }}
+                {{ form.sucursal }}
+                {{ form.sucursal.errors }}
+            </div>
+
+            <div class="form-field">
+                {{ form.fecha_baja.label_tag }}
+                {{ form.fecha_baja }}
+                {{ form.fecha_baja.errors }}
+            </div>
+
+        </div>
+    </details>
+
+    <div class="form-section">
+        <h3>Observaciones</h3>
+
+        <div class="form-field">
+            {{ form.observaciones.label_tag }}
+            {{ form.observaciones }}
+            {{ form.observaciones.errors }}
+        </div>
+    </div>
+
+    <div class="form-actions">
+
+        <button type="submit" class="boton-primario">
+            Guardar
+        </button>
+
+        <a
+            href="{% url 'dashboard' %}"
+            class="boton-primario"
+            style="background:#64748b;"
+        >
+            Cancelar
+        </a>
+
+    </div>
+
+</div>
+
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+function actualizarSubestadoFormulario(){
+
+    const estado = document.getElementById(
+        "id_estado_operacional"
+    );
+
+    const subestadoWrapper = document.getElementById(
+        "subestadoNoOperativoWrapper"
+    );
+
+    const subestado = document.getElementById(
+        "id_subestado_no_operativo"
+    );
+
+    if(
+        !estado
+        || !subestadoWrapper
+        || !subestado
+    ){
+        return;
+    }
+
+    if(
+        estado.value === "No operativo"
+    ){
+
+        subestadoWrapper.classList.remove(
+            "oculto"
+        );
+
+        subestado.disabled = false;
+
+    }else{
+
+        subestadoWrapper.classList.add(
+            "oculto"
+        );
+
+        subestado.value = "";
+        subestado.disabled = true;
+
+    }
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        actualizarSubestadoFormulario();
+
+        const estado = document.getElementById(
+            "id_estado_operacional"
+        );
+
+        if(estado){
+
+            estado.addEventListener(
+                "change",
+                actualizarSubestadoFormulario
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

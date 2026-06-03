@@ -1,0 +1,421 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Bitácora
+{% endblock %}
+
+{% block extra_css %}
+
+.bitacora-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+}
+
+.bitacora-header h1{
+    margin-bottom:6px;
+}
+
+.subtitulo-pagina{
+    color:#64748b;
+    margin:0;
+}
+
+.boton-volver{
+    background:#1e293b;
+    color:white;
+    padding:8px 14px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:20px;
+}
+
+.grid-filtros{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr auto auto;
+    gap:12px;
+    align-items:end;
+}
+
+.campo-filtro{
+    display:flex;
+    flex-direction:column;
+}
+
+.campo-filtro label{
+    font-weight:bold;
+    color:#334155;
+    margin-bottom:6px;
+}
+
+.campo-filtro input,
+.campo-filtro select{
+    padding:10px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    background:white;
+}
+
+.link-limpiar{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:bold;
+    padding:10px 0;
+}
+
+.link-limpiar:hover{
+    text-decoration:underline;
+}
+
+.tabla-contenedor{
+    overflow-x:auto;
+}
+
+.tabla-bitacora{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-bitacora thead{
+    background:#1e293b;
+    color:white;
+}
+
+.tabla-bitacora th{
+    padding:14px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.tabla-bitacora td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:top;
+}
+
+.tabla-bitacora tbody tr:hover{
+    background:#f8fafc;
+}
+
+.badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+    background:#e5e7eb;
+    color:#374151;
+    white-space:nowrap;
+}
+
+.descripcion{
+    max-width:320px;
+}
+
+.valor-cambio{
+    color:#475569;
+    font-size:13px;
+    max-width:360px;
+    white-space:normal;
+}
+
+.valor-titulo{
+    font-weight:bold;
+    color:#334155;
+    display:block;
+    margin-bottom:3px;
+}
+
+.texto-secundario{
+    color:#64748b;
+    font-size:13px;
+}
+
+.paginacion{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    align-items:center;
+}
+
+.paginacion a{
+    color:#2563eb;
+    font-weight:bold;
+    text-decoration:none;
+}
+
+.paginacion a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:1100px){
+
+    .grid-filtros{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:700px){
+
+    .grid-filtros{
+        grid-template-columns:1fr;
+    }
+
+    .bitacora-header{
+        flex-direction:column;
+        gap:12px;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="bitacora-header">
+
+    <div>
+        <h1>Bitácora de acciones</h1>
+
+        <p class="subtitulo-pagina">
+            Registro de acciones relevantes realizadas dentro del sistema.
+        </p>
+    </div>
+
+    {% if puede_gestionar_usuarios %}
+
+		<a
+		href="{% url 'configuracion' %}"
+		class="boton-secundario"
+		>
+			Volver a configuración
+		</a>
+
+{% endif %}
+
+</div>
+
+{% include 'flota/includes/mensajes.html' %}
+
+<div class="card">
+
+    <form method="get">
+
+        <div class="grid-filtros">
+
+            <div class="campo-filtro">
+                <label>Buscar</label>
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ busqueda|default:'' }}"
+                    placeholder="Usuario, patente, descripción, cambio..."
+                >
+            </div>
+
+            <div class="campo-filtro">
+                <label>Acción</label>
+
+                <select name="accion">
+                    <option value="">Todas</option>
+
+                    {% for valor,nombre in acciones %}
+                        <option
+                            value="{{ valor }}"
+                            {% if accion_seleccionada == valor %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo-filtro">
+                <label>Módulo</label>
+
+                <select name="modulo">
+                    <option value="">Todos</option>
+
+                    {% for item in modulos %}
+                        <option
+                            value="{{ item }}"
+                            {% if modulo_seleccionado == item %}
+                            selected
+                            {% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                class="boton-primario"
+            >
+                Filtrar
+            </button>
+
+            <a
+                href="{% url 'bitacora' %}"
+                class="link-limpiar"
+            >
+                Limpiar filtros
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<div class="card">
+
+    <div class="tabla-contenedor">
+
+        <table class="tabla-bitacora">
+
+            <thead>
+                <tr>
+                    <th>Fecha / hora</th>
+                    <th>Usuario</th>
+                    <th>Acción</th>
+                    <th>Módulo</th>
+                    <th>Objeto</th>
+                    <th>Descripción</th>
+                    <th>Valores</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for registro in registros %}
+
+                    <tr>
+                        <td>
+                            {{ registro.fecha_hora|date:"d-m-Y H:i" }}
+                        </td>
+
+                        <td>
+                            {{ registro.usuario_texto|default:"Sistema" }}
+                        </td>
+
+                        <td>
+                            <span class="badge">
+                                {{ registro.get_accion_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ registro.modulo }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ registro.objeto_repr|default:"-" }}
+                            </strong>
+
+                            {% if registro.modelo_afectado %}
+                                <div class="texto-secundario">
+                                    {{ registro.modelo_afectado }}
+                                    {% if registro.objeto_id %}
+                                        #{{ registro.objeto_id }}
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="descripcion">
+                            {{ registro.descripcion }}
+                        </td>
+
+                        <td class="valor-cambio">
+
+                            {% if registro.valor_anterior %}
+                                <span class="valor-titulo">Antes:</span>
+                                {{ registro.valor_anterior }}
+                                <br><br>
+                            {% endif %}
+
+                            {% if registro.valor_nuevo %}
+                                <span class="valor-titulo">Después:</span>
+                                {{ registro.valor_nuevo }}
+                            {% endif %}
+
+                            {% if not registro.valor_anterior and not registro.valor_nuevo %}
+                                -
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ registro.ip_origen|default:"-" }}
+                        </td>
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="8">
+                            No hay registros de bitácora para mostrar.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="paginacion">
+
+        {% if registros.has_previous %}
+
+            <a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">
+                ⏮ Primera
+            </a>
+
+            <a href="?page={{ registros.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                ◀ Anterior
+            </a>
+
+        {% endif %}
+
+        <strong>
+            Página {{ registros.number }} de {{ registros.paginator.num_pages }}
+        </strong>
+
+        {% if registros.has_next %}
+
+            <a href="?page={{ registros.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Siguiente ▶
+            </a>
+
+            <a href="?page={{ registros.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">
+                Última ⏭
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

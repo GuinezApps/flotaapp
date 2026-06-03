@@ -1,0 +1,32 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('',views.inicio,name='inicio'),
+    path('vehiculos/',views.dashboard,name='dashboard'),
+    path('exportar-excel/', views.exportar_vehiculos_excel, name='exportar_vehiculos_excel'),
+    path('importar/',views.importar_datos,name='importar_datos'),
+    path('confirmar-importacion/',views.confirmar_importacion,name='confirmar_importacion'),
+    path('estados/',views.gestionar_estados,name='gestionar_estados'),
+    path('vehiculo/<int:id>/',views.detalle_vehiculo,name='detalle_vehiculo'),
+    path('vehiculo/nuevo/',views.crear_vehiculo,name='crear_vehiculo'),
+    path('vehiculo/<int:id>/editar/',views.editar_vehiculo,name='editar_vehiculo'),
+    path('vehiculo/<int:id>/baja/',views.dar_baja_vehiculo,name='dar_baja_vehiculo'),
+    path('vehiculo/<int:id>/reactivar/',views.reactivar_vehiculo,name='reactivar_vehiculo'),
+    path('usuarios/nuevo/',views.crear_usuario,name='crear_usuario'),
+    path('configuracion/',views.configuracion,name='configuracion'),
+    path('configuracion/usuarios/',views.usuarios,name='usuarios'),
+    path('configuracion/usuarios/<int:id>/editar/',views.editar_usuario,name='editar_usuario'),
+    path('configuracion/usuarios/<int:id>/eliminar/',views.eliminar_usuario,name='eliminar_usuario'),
+    path('configuracion/usuarios/<int:id>/resetear-password/',views.resetear_password_usuario,name='resetear_password_usuario'),
+    path('configuracion/bitacora/',views.bitacora,name='bitacora'),
+    path('vehiculos/<int:id>/transferir/',views.transferir_vehiculo,name='transferir_vehiculo'),
+    path('vehiculos/transferencias-cc/',views.transferencias_cc,name='transferencias_cc'),
+    path('vehiculo/<int:id>/mantencion/registrar/',views.registrar_mantencion_vehiculo,name='registrar_mantencion_vehiculo'),
+    path('vehiculos/control-mantenciones/',views.control_mantenciones,name='control_mantenciones'),
+    path('mantencion/<int:id>/iniciar/',views.iniciar_mantencion_vehiculo,name='iniciar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/reprogramar/',views.reprogramar_mantencion_vehiculo,name='reprogramar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/cancelar/',views.cancelar_mantencion_vehiculo,name='cancelar_mantencion_vehiculo'),
+    path('mantencion/<int:id>/cerrar/',views.cerrar_mantencion_vehiculo,name='cerrar_mantencion_vehiculo'),
+    path('vehiculos/control-mantenciones/exportar/',views.exportar_control_mantenciones_excel,name='exportar_control_mantenciones_excel'),
+]

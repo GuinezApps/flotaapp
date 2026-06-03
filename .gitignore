@@ -1,0 +1,40 @@
+# Entorno virtual
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django / Base local
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
+*.log
+local_settings.py
+
+# Importaciones y respaldos
+importaciones/
+media/importaciones/
+*.xlsx
+*.xls
+respaldo_*.json
+backup_*.json
+
+# Archivos temporales
+nuevo1.txt
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Archivos comprimidos / respaldos
+*.zip
+
+# Static generados por collectstatic
+staticfiles/

@@ -1,0 +1,225 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Editar usuario
+{% endblock %}
+
+{% block content %}
+
+<h1>Editar usuario</h1>
+
+<div class="tarjeta">
+
+<form method="post">
+
+{% csrf_token %}
+
+<div class="form-grid">
+
+<div>
+
+<label>Usuario</label>
+
+<input
+type="text"
+value="{{ usuario_obj.username }}"
+disabled
+>
+
+</div>
+
+<div>
+
+<label>Correo</label>
+
+<input
+type="email"
+name="email"
+value="{{ usuario_obj.email }}"
+>
+
+</div>
+
+<div>
+
+<label>Rut</label>
+
+<input
+type="text"
+name="rut"
+value="{{ perfil.rut|default:'' }}"
+>
+
+</div>
+
+<div>
+
+<label>Nombre</label>
+
+<input
+type="text"
+name="nombre"
+value="{{ perfil.nombre|default:'' }}"
+>
+
+</div>
+
+<div>
+
+<label>Teléfono</label>
+
+<input
+type="text"
+name="telefono"
+value="{{ perfil.telefono|default:'' }}"
+>
+
+</div>
+
+<div>
+
+<label>Cargo</label>
+
+<input
+type="text"
+name="cargo"
+value="{{ perfil.cargo|default:'' }}"
+>
+
+</div>
+
+<div>
+
+<label>Sucursal</label>
+
+<input
+type="text"
+name="sucursal"
+value="{{ perfil.sucursal|default:'' }}"
+>
+
+</div>
+
+
+<div>
+
+<label>Centro costo</label>
+
+<select name="centro_costo">
+
+<option value="">
+--------- 
+</option>
+
+{% for centro in centros %}
+
+<option
+value="{{ centro.id }}"
+
+{% if perfil.centro_costo.id == centro.id %}
+selected
+{% endif %}
+
+>
+
+{{ centro.codigo }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div>
+
+<label>Permisos</label>
+
+<select name="rol">
+
+{% for grupo in grupos %}
+
+<option
+value="{{ grupo.id }}"
+
+{% if grupo in usuario_obj.groups.all %}
+selected
+{% endif %}
+>
+
+{{ grupo.name }}
+
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+<br>
+
+<button
+type="submit"
+class="boton-primario"
+>
+
+Guardar cambios
+
+</button>
+
+<a
+href="{% url 'usuarios' %}"
+style="margin-left:10px;"
+>
+
+Cancelar
+
+</a>
+
+</form>
+
+</div>
+
+<style>
+
+.form-grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(2,1fr);
+
+gap:18px;
+
+}
+
+.form-grid input,
+.form-grid select{
+
+width:100%;
+
+padding:10px;
+
+border:1px solid #d1d5db;
+
+border-radius:8px;
+
+}
+
+.form-grid label{
+
+font-weight:bold;
+
+display:block;
+
+margin-bottom:6px;
+
+}
+
+</style>
+
+{% endblock %}

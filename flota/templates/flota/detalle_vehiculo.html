@@ -1,0 +1,1220 @@
+{% extends 'flota/base.html' %}
+
+{% block title %}
+Ficha {{ vehiculo.patente }}
+{% endblock %}
+
+{% block extra_css %}
+
+.contenedor-ficha {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.acciones-ficha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-ficha {
+    display: inline-block;
+    color: white;
+    padding: 8px 14px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.btn-volver {
+    background: #1e293b;
+}
+
+.btn-editar {
+    background: #2563eb;
+}
+
+.btn-transferir {
+    background: #7c3aed;
+}
+
+.btn-mantencion {
+    background: #0891b2;
+}
+
+.btn-mantencion:hover {
+    background: #0e7490;
+}
+
+.btn-baja {
+    background: #dc2626;
+}
+
+.btn-reactivar {
+    background: #16a34a;
+}
+
+.badge-baja {
+    padding: 10px;
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.ficha-tarjeta {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    gap: 20px;
+}
+
+.patente {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.subtitulo {
+    color: #475569;
+    margin-top: 5px;
+}
+
+.badge {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: bold;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.badge-operativo {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-no-operativo {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-no {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.estado-subtexto {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 14px;
+    text-align: right;
+}
+
+.grid-secciones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.seccion {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+    background: #f8fafc;
+}
+
+.seccion h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.campo {
+    margin-bottom: 10px;
+}
+
+.label {
+    font-weight: bold;
+    color: #334155;
+}
+
+.valor {
+    color: #111827;
+}
+
+.observaciones {
+    margin-top: 25px;
+}
+
+.observacion-baja-texto,
+.observacion-transferencia-texto {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 6px;
+    white-space: pre-line;
+    color: #111827;
+}
+
+.historial-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.historial-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.historial-header {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #334155;
+}
+
+.historial-observacion {
+    margin-top: 10px;
+    color: #334155;
+}
+
+.historial-footer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    color: #334155;
+}
+
+.texto-alerta {
+    color: #991b1b;
+    font-weight: bold;
+}
+
+.historiales-contenedor{
+    margin-top:25px;
+}
+
+.historiales-contenedor h3{
+    margin-top:0;
+    margin-bottom:14px;
+}
+
+.historial-acordeon{
+    background:#ffffff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    margin-bottom:12px;
+    overflow:hidden;
+}
+
+.historial-acordeon summary{
+    cursor:pointer;
+    padding:14px 16px;
+    font-weight:bold;
+    color:#1e293b;
+    background:#f8fafc;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.historial-acordeon summary:hover{
+    background:#eef2f7;
+}
+
+.historial-contenido{
+    padding:14px;
+}
+
+.historial-tabla-contenedor{
+    overflow-x:auto;
+}
+
+.historial-tabla{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
+
+.historial-tabla th{
+    background:#1e293b;
+    color:white;
+    padding:10px;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.historial-tabla td{
+    padding:10px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:top;
+}
+
+.historial-tabla tbody tr:hover{
+    background:#f8fafc;
+}
+
+.historial-vacio{
+    color:#64748b;
+    padding:10px;
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:8px;
+}
+
+.detalle-observacion{
+    margin-top:6px;
+}
+
+.detalle-observacion summary{
+    background:transparent;
+    padding:0;
+    color:#2563eb;
+    font-size:13px;
+    font-weight:bold;
+    display:inline-block;
+}
+
+.detalle-observacion summary:hover{
+    background:transparent;
+    text-decoration:underline;
+}
+
+.observacion-compacta{
+    margin-top:8px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+    white-space:pre-line;
+    color:#111827;
+}
+
+.texto-corto{
+    max-width:260px;
+    display:inline-block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    vertical-align:bottom;
+}
+
+.badge-tabla{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:bold;
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.badge-pendiente{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.badge-en-curso{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-cerrada{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.badge-cancelada{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+
+.btn-tabla{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.btn-registrar{
+    background:#0891b2;
+    color:white;
+}
+
+.btn-registrar:hover{
+    background:#0e7490;
+}
+
+.btn-cerrar{
+    background:#16a34a;
+    color:white;
+}
+
+.btn-cerrar:hover{
+    background:#15803d;
+}
+
+.btn-reprogramar{
+    background:#f59e0b;
+    color:white;
+}
+
+.btn-reprogramar:hover{
+    background:#d97706;
+}
+
+.btn-cancelar{
+    background:#dc2626;
+    color:white;
+}
+
+.btn-cancelar:hover{
+    background:#b91c1c;
+}
+
+.acciones-detalle-mantencion{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.btn-detalle{
+    background:#e2e8f0;
+    color:#334155;
+    border:none;
+    cursor:pointer;
+}
+
+.btn-detalle:hover{
+    background:#cbd5e1;
+}
+
+.detalle-row{
+    display:none;
+    background:#f8fafc;
+}
+
+.detalle-row.abierta{
+    display:table-row;
+}
+
+.detalle-panel{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:14px;
+    color:#111827;
+    white-space:normal;
+}
+
+.detalle-panel-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+
+.detalle-panel-item{
+    background:white;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:10px;
+}
+
+.detalle-panel-label{
+    display:block;
+    font-weight:bold;
+    color:#334155;
+    margin-bottom:6px;
+}
+
+@media(max-width:900px){
+
+    .detalle-panel-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:900px){
+
+    .texto-corto{
+        max-width:180px;
+    }
+
+}
+@media(max-width:900px) {
+
+    .grid-secciones {
+        grid-template-columns: 1fr;
+    }
+
+    .encabezado {
+        flex-direction: column;
+    }
+
+    .estado-subtexto {
+        text-align: left;
+    }
+
+    .historial-header,
+    .historial-footer {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="contenedor-ficha">
+
+    <div class="acciones-ficha">
+
+        <a
+        href="{% url 'dashboard' %}"
+        class="btn-ficha btn-volver"
+        >
+            ← Volver a vehículos
+        </a>
+
+        {% if puede_editar %}
+
+            {% if vehiculo.estado_administrativo == 'Dado de Baja' %}
+
+                <span class="badge-baja">
+                    🚫 Vehículo dado de baja
+                </span>
+
+                <a
+                href="{% url 'reactivar_vehiculo' vehiculo.id %}"
+                class="btn-ficha btn-reactivar"
+                >
+                    ♻ Reactivar
+                </a>
+
+            {% else %}
+
+                <a
+                href="{% url 'editar_vehiculo' vehiculo.id %}"
+                class="btn-ficha btn-editar"
+                >
+                    ✏ Editar vehículo
+                </a>
+
+                <a
+				href="{% url 'transferir_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-transferir"
+				>
+					🔁 Transferir CC
+				</a>
+
+				<a
+				href="{% url 'registrar_mantencion_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-mantencion"
+				>
+					🔧 Registrar mantención
+				</a>
+
+				<a
+				href="{% url 'dar_baja_vehiculo' vehiculo.id %}"
+				class="btn-ficha btn-baja"
+				>
+					🛑 Dar de baja
+				</a>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    {% include 'flota/includes/mensajes.html' %}
+
+    <div class="ficha-tarjeta">
+
+        <div class="encabezado">
+
+            <div>
+                <div class="patente">
+                    {{ vehiculo.patente }}
+                </div>
+
+                <div class="subtitulo">
+                    {{ vehiculo.marca }} {{ vehiculo.modelo }} · {{ vehiculo.anio }}
+                </div>
+
+                <div class="subtitulo">
+                    {{ vehiculo.tipo_vehiculo }} · {{ vehiculo.color }}
+                </div>
+            </div>
+
+            <div>
+                {% if vehiculo.estado_operacional == 'Operativo' %}
+                    <span class="badge badge-operativo">Operativo</span>
+                {% elif vehiculo.estado_operacional == 'No operativo' %}
+                    <span class="badge badge-no-operativo">No operativo</span>
+
+                    {% if vehiculo.subestado_no_operativo %}
+                        <div class="estado-subtexto">
+                            {{ vehiculo.get_subestado_no_operativo_display }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-no">No informado</span>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="grid-secciones">
+
+            <div class="seccion">
+                <h3>Información técnica</h3>
+
+                <div class="campo">
+                    <span class="label">Marca:</span>
+                    <span class="valor">{{ vehiculo.marca|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Modelo:</span>
+                    <span class="valor">{{ vehiculo.modelo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Año:</span>
+                    <span class="valor">{{ vehiculo.anio|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Combustible:</span>
+                    <span class="valor">{{ vehiculo.combustible|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Tracción:</span>
+                    <span class="valor">{{ vehiculo.traccion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">N° motor:</span>
+                    <span class="valor">{{ vehiculo.numero_motor|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">VIN / Chasis:</span>
+                    <span class="valor">{{ vehiculo.numero_chasis_vin|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Asientos:</span>
+                    <span class="valor">{{ vehiculo.numero_asientos|default:"-" }}</span>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Estado y operación</h3>
+
+                <div class="campo">
+                    <span class="label">Estado operacional:</span>
+                    <span class="valor">{{ vehiculo.estado_operacional|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Motivo no operativo:</span>
+                    <span class="valor">
+                        {% if vehiculo.estado_operacional == 'No operativo' and vehiculo.subestado_no_operativo %}
+                            {{ vehiculo.get_subestado_no_operativo_display }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Estado administrativo:</span>
+                    <span class="valor">{{ vehiculo.estado_administrativo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Estado mantención fuente externa:</span>
+                    <span class="valor">{{ vehiculo.estado_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Kilometraje actual:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_actual|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Última mantención:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_ultima_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Próxima mantención:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_proxima_mantencion|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Km restantes:</span>
+                    <span class="valor">{{ vehiculo.kilometraje_restante|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Alerta mantención:</span>
+                    <span class="valor">{{ vehiculo.alerta_mantencion|default:"-" }}</span>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Contrato y arriendo</h3>
+
+                <div class="campo">
+                    <span class="label">Empresa arrendadora:</span>
+                    <span class="valor">{{ vehiculo.empresa_arrendadora|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Razón social:</span>
+                    <span class="valor">{{ vehiculo.razon_social|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">RUT empresa:</span>
+                    <span class="valor">{{ vehiculo.rut_empresa|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Tarifa mensual:</span>
+                    <span class="valor">{{ vehiculo.tarifa_mensual|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Inicio contrato:</span>
+                    <span class="valor">{{ vehiculo.fecha_inicio_contrato|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Término contrato:</span>
+                    <span class="valor">{{ vehiculo.fecha_termino_contrato|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Período meses:</span>
+                    <span class="valor">{{ vehiculo.periodo_meses|default:"-" }}</span>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Ubicación y asignación</h3>
+
+                <div class="campo">
+                    <span class="label">Centro de costo:</span>
+                    <span class="valor">{{ vehiculo.centro_costo|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Gerencia:</span>
+                    <span class="valor">{{ vehiculo.gerencia|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Faena:</span>
+                    <span class="valor">{{ vehiculo.faena|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Ciudad:</span>
+                    <span class="valor">{{ vehiculo.ciudad|default:"-" }}</span>
+                </div>
+
+                <div class="campo">
+                    <span class="label">Sucursal:</span>
+                    <span class="valor">{{ vehiculo.sucursal|default:"-" }}</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="seccion observaciones">
+    <h3>Observaciones</h3>
+    <p>{{ vehiculo.observaciones|default:"Sin observaciones registradas." }}</p>
+</div>
+
+{% if vehiculo.estado_administrativo == 'Dado de Baja' or vehiculo.motivo_baja or vehiculo.observacion_baja %}
+
+    <div class="seccion observaciones">
+        <h3>Información de baja actual</h3>
+
+        <div class="campo">
+            <span class="label">Fecha de baja:</span>
+            <span class="valor">
+                {{ vehiculo.fecha_baja|date:"d-m-Y"|default:"-" }}
+            </span>
+        </div>
+
+        <div class="campo">
+            <span class="label">Motivo de baja:</span>
+            <span class="valor">
+                {% if vehiculo.motivo_baja %}
+                    {{ vehiculo.get_motivo_baja_display }}
+                {% else %}
+                    -
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="campo">
+            <span class="label">Observación de baja:</span>
+            <div class="valor observacion-baja-texto">
+                {{ vehiculo.observacion_baja|default:"-" }}
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+<div class="seccion historiales-contenedor">
+
+    <h3>Historiales del vehículo</h3>
+
+    <details class="historial-acordeon">
+
+        <summary>
+            <span>Historial de bajas</span>
+            <span>{{ historial_bajas|length }} registros</span>
+        </summary>
+
+        <div class="historial-contenido">
+
+            {% if historial_bajas %}
+
+                <div class="historial-tabla-contenedor">
+
+                    <table class="historial-tabla">
+
+                        <thead>
+                            <tr>
+                                <th>Fecha baja</th>
+                                <th>Motivo</th>
+                                <th>Usuario baja</th>
+                                <th>Fecha reactivación</th>
+                                <th>Usuario reactivación</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for baja in historial_bajas %}
+
+                                <tr>
+                                    <td>{{ baja.fecha_baja|date:"d-m-Y" }}</td>
+
+                                    <td>{{ baja.get_motivo_baja_display }}</td>
+
+                                    <td>
+                                        {% if baja.usuario_baja %}
+                                            {{ baja.usuario_baja.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if baja.fecha_reactivacion %}
+                                            {{ baja.fecha_reactivacion|date:"d-m-Y" }}
+                                        {% else %}
+                                            <span class="badge-tabla">
+                                                Actualmente de baja
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if baja.usuario_reactivacion %}
+                                            {{ baja.usuario_reactivacion.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <details class="detalle-observacion">
+                                            <summary>Ver</summary>
+
+                                            <div class="observacion-compacta">
+                                                {{ baja.observacion_baja|default:"Sin observación registrada." }}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay bajas registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+    <details class="historial-acordeon">
+
+        <summary>
+            <span>Historial de transferencias de Centro de Costo</span>
+            <span>{{ historial_transferencias|length }} registros</span>
+        </summary>
+
+        <div class="historial-contenido">
+
+            {% if historial_transferencias %}
+
+                <div class="historial-tabla-contenedor">
+
+                    <table class="historial-tabla">
+
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Origen</th>
+                                <th>Destino</th>
+                                <th>Usuario</th>
+                                <th>Observación</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for transferencia in historial_transferencias %}
+
+                                <tr>
+                                    <td>{{ transferencia.fecha_transferencia|date:"d-m-Y" }}</td>
+
+                                    <td>
+                                        <span
+                                            class="texto-corto"
+                                            title="{{ transferencia.centro_costo_origen|default:'-' }}"
+                                        >
+                                            {{ transferencia.centro_costo_origen|default:"-" }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span
+                                            class="texto-corto"
+                                            title="{{ transferencia.centro_costo_destino|default:'-' }}"
+                                        >
+                                            {{ transferencia.centro_costo_destino|default:"-" }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        {% if transferencia.usuario_transferencia %}
+                                            {{ transferencia.usuario_transferencia.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <details class="detalle-observacion">
+                                            <summary>Ver</summary>
+
+                                            <div class="observacion-compacta">
+                                                {{ transferencia.observacion|default:"Sin observación registrada." }}
+                                            </div>
+                                        </details>
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay transferencias de centro de costo registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+    <details class="historial-acordeon" open>
+
+        <summary>
+            <span>Historial de mantenciones</span>
+            <span>{{ historial_mantenciones|length }} registros</span>
+        </summary>
+
+        <div class="historial-contenido">
+
+            {% if historial_mantenciones %}
+
+                <div class="historial-tabla-contenedor">
+
+                    <table class="historial-tabla">
+
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Fecha programada</th>
+                                <th>KM programado</th>
+                                <th>Fecha ingreso</th>
+                                <th>Fecha cierre</th>
+                                <th>Usuario registro</th>
+                                <th>Usuario cierre</th>
+                                <th>Acciónes</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for mantencion in historial_mantenciones %}
+
+                                <tr>
+                                    <td>
+                                        {{ mantencion.get_tipo_mantencion_display }}
+                                    </td>
+
+                                    <td>
+                                        {% if mantencion.estado == 'PENDIENTE' %}
+                                            <span class="badge-tabla badge-pendiente">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'EN_CURSO' %}
+                                            <span class="badge-tabla badge-en-curso">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'CERRADA' %}
+                                            <span class="badge-tabla badge-cerrada">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% elif mantencion.estado == 'CANCELADA' %}
+                                            <span class="badge-tabla badge-cancelada">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-tabla">
+                                                {{ mantencion.get_estado_display }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ mantencion.fecha_programada|date:"d-m-Y"|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ mantencion.kilometraje_programado|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ mantencion.fecha_ingreso|date:"d-m-Y"|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {% if mantencion.usuario_registro %}
+                                            {{ mantencion.usuario_registro.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if mantencion.usuario_cierre %}
+                                            {{ mantencion.usuario_cierre.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+										<div class="acciones-detalle-mantencion">
+
+											<button
+												type="button"
+												class="btn-tabla btn-detalle"
+												onclick="toggleDetalleMantencion('detalle-mantencion-{{ mantencion.id }}')"
+											>
+												Ver detalle
+											</button>
+
+											{% if mantencion.estado == 'PENDIENTE' %}
+
+												<a
+												href="{% url 'iniciar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-registrar"
+												>
+													Iniciar
+												</a>
+
+												<a
+												href="{% url 'reprogramar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-reprogramar"
+												>
+													Reprogramar
+												</a>
+
+												<a
+												href="{% url 'cancelar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-cancelar"
+												>
+													Cancelar
+												</a>
+
+											{% elif mantencion.estado == 'EN_CURSO' %}
+
+												<a
+												href="{% url 'cerrar_mantencion_vehiculo' mantencion.id %}"
+												class="btn-tabla btn-cerrar"
+												>
+													Cerrar
+												</a>
+
+											{% endif %}
+
+										</div>
+									</td>
+                                </tr>
+								<tr
+									id="detalle-mantencion-{{ mantencion.id }}"
+									class="detalle-row"
+								>
+									<td colspan="9">
+
+										<div class="detalle-panel">
+
+											<div class="detalle-panel-grid">
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Motivo</span>
+													{{ mantencion.motivo|default:"Sin motivo registrado." }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Observación inicial</span>
+													{{ mantencion.observacion|default:"Sin observación registrada." }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Fecha cierre</span>
+													{{ mantencion.fecha_cierre|date:"d-m-Y"|default:"-" }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Kilometraje cierre</span>
+													{{ mantencion.kilometraje_cierre|default:"-" }}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Usuario cierre</span>
+													{% if mantencion.usuario_cierre %}
+														{{ mantencion.usuario_cierre.username }}
+													{% else %}
+														-
+													{% endif %}
+												</div>
+
+												<div class="detalle-panel-item">
+													<span class="detalle-panel-label">Observación cierre</span>
+													{{ mantencion.observacion_cierre|default:"-" }}
+												</div>
+
+											</div>
+
+										</div>
+
+									</td>
+								</tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="historial-vacio">
+                    No hay mantenciones registradas para este vehículo.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </details>
+
+</div>
+
+    </div>
+
+</div>
+
+<script>
+function toggleDetalleMantencion(id){
+
+    const fila = document.getElementById(id);
+
+    if(fila){
+        fila.classList.toggle('abierta');
+    }
+
+}
+</script>
+
+{% endblock %}
